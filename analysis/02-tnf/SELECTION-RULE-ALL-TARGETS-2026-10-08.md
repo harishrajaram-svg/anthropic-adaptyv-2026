@@ -104,3 +104,67 @@ truth.
 | `bin/validate_selection_rule.py` | the instrument; `--sweep --rounds --composition --holdout` |
 | `reference/anthropic-campaign/all_cofold.tsv` | 113,550 rows, all 16 targets (gitignored, refetchable) |
 | `reference/anthropic-campaign/all_designs.tsv` | 1,440 designs with labels and `n_optimization_rounds` |
+
+---
+
+## Addendum — depth helps OUR configuration specifically, and it is a leveller
+
+The question left open above was whether depth transfers to the pipeline we actually run, or only
+to theirs. Deep (>=4 rounds) against shallow (<=1), split by generator:
+
+| generator | deep | shallow | Fisher p |
+|---|---|---|---|
+| **Genie 3** | **17/44 = 38.6%** | **16/132 = 12.1%** | **0.0003** |
+| RFdiffusion3 | 32/86 = 37.2% | 19/144 = 13.2% | <0.0001 |
+| PXDesign | 36/108 = 33.3% | 29/192 = 15.1% | 0.0004 |
+| RFdiffusion | 10/27 = 37.0% | 10/65 = 15.4% | 0.029 |
+| FreeBindCraft | 14/24 = 58.3% | 26/75 = 34.7% | 0.056 |
+| Proteina-Complexa | 11/24 = 45.8% | 14/57 = 24.6% | 0.070 |
+| BoltzGen | 17/47 = 36.2% | 17/76 = 22.4% | 0.103 |
+
+And by sequence-design method, where ours is the first row:
+
+| method | deep | shallow | Fisher p |
+|---|---|---|---|
+| **SolubleMPNN** | **124/339 = 36.6%** | **111/601 = 18.5%** | **<0.0001** |
+| Caliby / SolubleCaliby | 8/21 = 38.1% | 9/78 = 11.5% | 0.008 |
+| native co-design | 5/5 = 100% | 11/56 = 19.6% | 0.0007 |
+
+**Genie 3 + SolubleMPNN is our pipeline, and depth lifts it 3.2×.** This is the single most
+decision-relevant number for the depth arm and it was not available from the TNF-α slice, where
+Genie 3 deep-versus-shallow is 8/10 against 0/13 on ten designs.
+
+**Depth is a leveller.** Deep rates converge into 33-46% across every generator while shallow
+rates scatter from 12% to 35%. Which generator you chose matters much less than whether you
+iterated. Genie 3's own median in their campaign was **1 round**, maximum 10 — most Genie 3
+designs were shallow, and their eight winners were the deep ones.
+
+## What to do with 1,440 designs and 354 binders
+
+**1. Replace the ranker overstatement in the submitted record with a measured number.** ROADMAP
+item 17e already flags three places that overstate the ranker (METHODS §4.5, limitation 51, the
+methodology box). Until tonight there was no defensible replacement figure. There is now:
+**out-of-sample within-target AUC 0.67-0.70** for the best selectable in-silico metric, against
+the 0.901 and 0.951 the record currently carries from the TNF-α slice. This is the highest-value
+writing change available, because it swaps an overstatement for a correction measured on 30× the
+positives.
+
+**2. Make this the standing validation set, by rule.** No instrument in this project gets trusted
+on 12 binders again. Any new gate, filter or ranker runs through within-target evaluation on the
+354 before it is believed, and reports its out-of-sample number. Three of tonight's four headline
+findings would have been caught by that rule before they were written down.
+
+**3. Report the depth arm on the depth warrant, not the filter warrant.** The arm is justified by
+Genie 3 + SolubleMPNN at 38.6% against 12.1%. It is **not** justified by the compositional filter,
+which enriches 1.18× across the release. Both go in the write-up; only one of them is load-bearing.
+
+**4. Re-derive the composition filter properly, after the deadline.** It should cut on composition
+rather than two scalars — `D% >= 4` and `E% <= 18` are the obvious additions — fit on 8 targets and
+tested on the held-out 8. That is the design that would make it credible, and it is $0. Not before
+Sunday, and not tuned on designs whose outcome is already known.
+
+**5. Stop spending on better scoring.** The out-of-sample ceiling is ~0.70 and the spread between
+our best and worst *usable* metric is narrower than the gap between the TNF-α estimate and the
+truth. Three weeks of this project went into choosing between `ipsae_min` and `pae_interface_min`.
+That choice was worth almost nothing. The same compute spent on optimization rounds buys a
+measured 2-3× on hit rate across sixteen targets.
