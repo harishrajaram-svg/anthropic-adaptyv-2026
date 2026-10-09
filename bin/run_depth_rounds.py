@@ -217,6 +217,37 @@ def main():
     parents, best, folds = seed, [max(float(r["ca_sc_dockq"]) for r in seed)], 0
     start = 1
 
+    # --parents <round> <id:lin,id:lin,...>  explicit parent set for the next round.
+    # A DEVIATION HOOK, and deliberately explicit rather than a hand-edited state file: every
+    # retirement or reseed it performs is visible in the shell history and in this log line.
+    # Used 2026-10-09 to retire L3 (backbone 9) after three rounds with 0 of 8 children inside
+    # the pose gate, and to reseed its slot as L4 from backbone 3's second-best round-3 child,
+    # backbone 3 being the only lineage still advancing.
+    if "--parents" in sys.argv:
+        i = sys.argv.index("--parents")
+        rn = int(sys.argv[i + 1])
+        spec = [x.split(":") for x in sys.argv[i + 2].split(",")]
+        prev = {r["id"]: r for r in csv.DictReader(
+            open(f"{STATE}/round{rn}.tsv"), delimiter="\t")}
+        chosen = []
+        for did, lg in spec:
+            if did not in prev:
+                sys.exit(f"REFUSED: {did} is not in round{rn}.tsv")
+            r = dict(prev[did]); r["lin"] = lg
+            sub = f"depthB{rn}{RUN_TAG}" if rn > 1 else "depthB1"
+            r["cif"] = cif_of(f"runs/depthB-r{rn}-out/{sub}/{did}")
+            chosen.append(r)
+        if len({r["lin"] for r in chosen}) != len(chosen):
+            sys.exit("REFUSED: duplicate lineage labels in --parents")
+        best.append(max(float(r["ca_sc_dockq"]) for r in prev.values()))
+        folds = 32 * rn
+        log(f"EXPLICIT PARENTS for round {rn+1} (deviation, recorded):")
+        for r in chosen:
+            log(f"  L{r['lin']} = {r['id']} (backbone {r['backbone']}, "
+                f"dockq {float(r['ca_sc_dockq']):.4f}, lrms {r['lrms']} A)")
+        log(f"  backbones carried: {sorted({r['backbone'] for r in chosen})}")
+        parents, start = chosen, rn + 1
+
     if "--resume-after" in sys.argv:
         rn = int(sys.argv[sys.argv.index("--resume-after") + 1])
         prev = list(csv.DictReader(open(f"{STATE}/round{rn}.tsv"), delimiter="\t"))
