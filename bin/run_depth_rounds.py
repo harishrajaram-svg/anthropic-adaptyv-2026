@@ -180,8 +180,16 @@ def run_round(n, parents, folds_used):
 
     run = f"depthB{n}{RUN_TAG}"
     env = dict(os.environ, SEEDS="42", OUT_DIR=f"runs/depthB-r{n}-out", MODAL_TIMEOUT="90")
-    subprocess.run(["bash", "bin/score-esmfold2.sh", ind, run], env=env,
-                   capture_output=True, text=True)
+    # Write the fold log to its own file instead of discarding it. Without this, the only
+    # observable signal was the Volume file count, so on 2026-10-09 round 4's slowdown could not
+    # be attributed to a cold start, a slower GPU allocation, or contention -- the per-fold
+    # timings existed and were being thrown away.
+    os.makedirs("runs/depth_logs", exist_ok=True)
+    logp = f"runs/depth_logs/round{n}{RUN_TAG}.log"
+    with open(logp, "w") as lf:
+        subprocess.run(["bash", "bin/score-esmfold2.sh", ind, run], env=env,
+                       stdout=lf, stderr=subprocess.STDOUT, text=True)
+    log(f"round {n}: fold log at {logp}")
     # never trust the local write -- recover from the Volume
     out = f"runs/depthB-r{n}-out"
     shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
