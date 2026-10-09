@@ -168,3 +168,56 @@ our best and worst *usable* metric is narrower than the gap between the TNF-α e
 truth. Three weeks of this project went into choosing between `ipsae_min` and `pae_interface_min`.
 That choice was worth almost nothing. The same compute spent on optimization rounds buys a
 measured 2-3× on hit rate across sixteen targets.
+
+---
+
+## Addendum 2 — depth buys more binders, not better ones; and the labels disagree 35% of the time
+
+### Depth does not improve affinity
+
+All 354 binders carry a measured K_D, spanning 0.03 nM to 6,191 nM — a 200,000-fold range.
+
+| rounds | n | median K_D |
+|---|---|---|
+| ≤1 | 131 | **41.5 nM** |
+| 2–3 | 86 | 65.1 nM |
+| 4–7 | 92 | 103.1 nM |
+| 8–12 | 45 | **124.7 nM** |
+
+The pooled trend runs the **wrong way** — deep designs are 3× weaker — but that is the same
+Simpson trap as before: deep rounds were spent on hard targets, whose binders are weaker. Within
+target, Spearman(rounds, log K_D) among binders averages **−0.092** across the 12 targets with
+enough binders, with scatter from −0.44 to +0.66.
+
+So the honest statement, and it sharpens what depth is for: **optimization depth raises the
+probability that a design binds at all and has no detectable effect on how tightly it binds.** It
+converts non-binders into weak binders. If the goal is a tight binder, depth is not the lever. If
+the goal is any binder, it is the best lever in this dataset.
+
+### The labels themselves disagree, and this bounds every AUC in this file
+
+Two vendors assayed most designs. Of **1,235** tested by both:
+
+- they disagreed on **136 = 11.0%** of all both-tested designs
+- of the **389** where *at least one* vendor saw binding, they disagreed on **136 = 35.0%**
+- **101 of the 354 published binders — 28.5% — rest on a single vendor**, either because the other
+  vendor called it a non-binder (85) or because only one tested it (16)
+
+A 35% disagreement rate among positives means no ranker can reach AUC 1.0 against these labels,
+and an out-of-sample 0.70 is being measured against a target that is itself ~1/3 uncertain on the
+positive side. This is not a reason to distrust the dataset — it is the normal state of binding
+assays, and the organisers were right to publish both vendors. It **is** a reason to stop treating
+small AUC differences as meaningful, and it echoes this project's own problem-1 lesson, where a
+novelty check returned opposite verdicts on identical sequences a day apart.
+
+### The depth finding survives the strict label, which matters
+
+Re-run with `both_bind` only — requiring *both* vendors to see binding:
+
+| label | deep (≥4 rounds) | shallow (≤1) |
+|---|---|---|
+| as published (`binder_final`) | 137/365 = **37.5%** | 131/753 = **17.4%** |
+| strict (`both_bind` only) | 106/365 = **29.0%** | 94/753 = **12.5%** |
+
+The lift goes from 2.2× to 2.3×. **The one finding that generalizes is also the one robust to the
+label noise**, which is the best thing that can be said for it.
