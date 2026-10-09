@@ -1311,6 +1311,135 @@ may have carried values the release dropped; what can be checked is the release.
 
 ---
 
+#### 6.10h The depth arm: five rounds of predict-then-redesign, and the first designs that clear the margin bar
+
+**This is the one arm in this work that produced designs clearing a pre-registered bar.** The bar,
+the stop rules and the selection rule were committed at `5002b49` and `2241a54` before any design
+in this section existed.
+
+**Why it was run.** The released campaign, re-analysed across all sixteen targets rather than
+TNF-alpha alone (§6.11), shows optimisation depth as the only factor that generalises: hit rate
+rises monotonically 16.2 / 20.5 / 26.7 / 32.9 / 52.9 per cent across 0, 1, 2-3, 4-7 and 8-12
+rounds, trend *p* = 1.1e-16, and within target 37.5 against 17.4 per cent, Fisher *p* = 2.1e-12.
+For **Genie 3** it is 38.6 against 12.1 per cent (*p* = 0.0003) and for **SolubleMPNN** 36.6
+against 18.5 (*p* < 0.0001) — this work's exact pipeline. The protocol being calibrated against
+mandates at least two rounds, five on hard targets. **This work had run zero.**
+
+**The procedure, which is the organisers' own.** Take a design whose predicted complex clears a
+pose gate; feed that **predicted** complex — not the designed structure — back into SolubleMPNN
+with the three target chains fixed; co-fold the new sequences; keep what improved; repeat. Eight
+sequences per parent, four parents, one seed, 32 folds per round.
+
+**The entry gate.** Stage A co-folded 32 pre-constraint seed sequences and scored CA sc_DockQ
+against each design's own Genie 3 backbone. Four cleared the pre-registered 10 A ligand-RMSD bar,
+against this work's previous best of 15.034 A across 40 designs.
+
+**The oracle rule.** Frozen decision C1 forbids a design objective that uses the ranking
+instrument, and predict-then-redesign makes a co-folder the design oracle by construction. So
+**selection reads one statistic: CA sc_DockQ against the designed backbone** — agreement with a
+reference the predictor never sees. ipSAE is computed every round and never read, surviving as a
+held-out ranker. `bin/depth_loop.py:select_parent` raises if handed any confidence column, and a
+mutation test confirms that guard is not vacuous. Residual leakage is disclosed: ESMFold2 geometry
+and confidence are correlated, so the claim is that ipSAE was never read, not that it is clean.
+
+**Per-round best CA sc_DockQ:** 0.6057 (stage A) → 0.6249 → 0.6484 → 0.6148 → 0.6343 → 0.6400.
+The leader plateaued; the population did not. Median ligand RMSD fell **26.0 → 4.564 A** and
+designs inside the gate rose **9 → 24 of 32**. Best placement reached **1.575 A**.
+
+**Two lineages were retired on evidence; both are recorded as deviations.** A global top-N
+selection collapsed the beam onto one backbone after a single round and was replaced with
+best-per-lineage. L3 (backbone 9) was retired after three rounds at 27 A with 0 of 8 in-gate
+children; L2 (backbone 40) after collapsing 0.38 in one round to 20.4 A. Each slot was reseeded
+from the lineage still advancing, and **the two reseeded lineages became the top two** while both
+originals regressed.
+
+**The result, against the one instrument calibrated on measured outcomes.** Margin is
+`pae_interface_mean` of a design subtracted from that of a composition-matched shuffle of its own
+sequence at its own length, built by `bin/build_sizematched_null.py` at its committed seed.
+
+| | the 48 (zero rounds) | the depth arm's 12 (five rounds) |
+|---|---|---|
+| margin, median | **+0.320** | **+7.058** |
+| best | +6.027 | **+7.492** |
+| clearing the pre-registered +6.347 | **0 of 48** | **10 of 12** |
+
++6.347 is the measured **non-binder** median and +7.814 the measured **binder** median, both from
+`analysis/02-tnf/labelled_control_2026-10-08.tsv`. **None of the twelve reaches the binder median**
+— the ceiling is +7.492 — so all of them sit between a typical measured non-binder and a typical
+measured binder. Same generator, same sequence designer, overlapping backbones; the only
+difference is five rounds.
+
+**What these designs do not have, stated here rather than left to be inferred.** Of the eight
+best, **three carry no histidine and five carry exactly one**, so objective 2 has no engineered
+mechanism; the pH 7.4 → 6.0 charge swing they show is acid protonation whose sign at the interface
+is unmeasured, and the loop carried no histidine constraint, breeding the mechanism out of 9 of
+its 32 round-one designs. **None has been folded against mouse TNF-alpha**, and §6.10d's +0.107
+human-to-mouse margin correlation gives no reason to expect transfer. And the margin instrument's
+own discrimination is weaker than this work long assumed — §6.11.
+
+**Liabilities.** All twelve are 83 residues, single chain, **cysteine-free** (banned in every
+redesign, with a post-hoc assertion per sequence), with pI 4.53-5.00, below the 6.0-7.4 assay
+window. Six of the eight best carry no express-QC flag; two are flagged for glutamate at 27-28 per
+cent.
+
+---
+
+### 6.11 Every instrument in this work was validated on one target, and three of four findings did not survive sixteen
+
+**This section corrects this work's own record.** Every number in sections 1 through 6.10 rests on
+the TNF-alpha slice of the released campaign: 150 designs, 12 binders, eight of which are variants
+of one backbone — an effective sample of roughly four independent successes. The release contains
+**1,440 designs, 354 binders and 16 targets**, with 113,550 co-folding rows.
+`bin/validate_selection_rule.py` (4 selftests) re-asks the same questions of all of it.
+
+**Two methodological traps, both of which were walked into before being fixed, and both recorded
+because the second was invisible in the output.** Measured hit rate ranges from 0 per cent (MBP,
+Mature GDF-8) to 80 per cent (TREM2), so pooling across targets rewards any quantity correlated
+with *which target* a design belongs to. The selftest quantifies it: a score encoding **only
+target identity** reads pooled AUC **0.663** and within-target **0.500**. Every figure below is
+therefore within-target, with permutations shuffled within target. Separately, stoichiometry is
+target-specific — TNF-alpha is the only target with `1to3`, eleven of sixteen are `1to1` — so a
+sweep over (model, stoichiometry) produces cells that exist for one target. The first run of this
+script silently collapsed a sixteen-target analysis back to the TNF-alpha slice and reported 12
+positives against 138 negatives while claiming 1,440 designs. Each target is now scored at its own
+one-binder-against-the-full-oligomer stoichiometry.
+
+| claim, measured on the 150-design slice | measured on all 16 targets, within-target |
+|---|---|
+| best in-silico metric, AUC **0.963** | **0.748**, and **0.674-0.702 out of sample** |
+| `plddt_binder` anti-correlates, AUC **0.000** | **0.678 — the normal direction** |
+| interface size discriminates, **0.954** | **0.633** |
+| the compositional filter enriches **4.04x** | **1.18x**, *p* = 0.055 |
+
+Out-of-sample means selecting the best cell on eight targets and scoring it on the other eight:
+0.800 → **0.674**, and 0.741 → **0.702**. Per-target spread on the best cell runs from 0.97
+(15-PGDH) to **0.39 (BBF-14), below chance.**
+
+**Three consequences for how the rest of this document should be read.** The AUC 0.901 figure that
+§4.5 and §6.2 rest on is a single-target estimate, and the honest ceiling for any metric this work
+can select is about **0.70**. The contact-census instrument of §6.10 was built on the premise that
+interface size discriminates, which holds on TNF-alpha and not across targets. And the
+compositional filter that selected the depth arm's starting pool is a **target-specific signature
+derived from twelve binders**, legitimate for designing against TNF-alpha and not evidence of
+anything more.
+
+**What survived is optimisation depth**, reported in §6.10h, and it is also the finding robust to
+label noise — which matters because **the labels disagree**. Of 1,235 designs assayed by both
+vendors they disagree on **35.0 per cent** of the 389 where either vendor saw binding, and **28.5
+per cent of the 354 published binders rest on a single vendor.** No ranker can reach AUC 1.0
+against a target that uncertain, which is itself part of why 0.70 rather than 0.95 is the honest
+number, and it means small differences between metrics are not meaningful. Requiring both vendors
+to agree moves the depth effect from 37.5-against-17.4 to **29.0 against 12.5 per cent** — a 2.3x
+lift rather than 2.2x.
+
+**And depth does not buy affinity.** All 354 binders carry a measured K_D spanning 0.03 to 6,191
+nM. Pooled, deep designs are three times weaker, but that is the same pooling trap — deep rounds
+were spent on hard targets. Within target, Spearman(rounds, log K_D) among binders is **-0.092**.
+Depth raises the probability that a design binds at all and has no detectable effect on how
+tightly. Nothing in §6.10h should be read as predicting affinity.
+
+---
+
 
 ### 6.9 Germinal: an attempted arm that never ran
 

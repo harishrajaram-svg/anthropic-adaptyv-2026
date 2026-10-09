@@ -1,12 +1,129 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-08 9:10 PM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-09 9:15 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
 
 ---
 
-## 🟡 AS OF 2026-10-08 9:10 PM: the Genie arm failed, and the instrument has now been controlled and CLEARED. Nothing running. Nothing spending. The design search is CLOSED.
+## 🟢 AS OF 2026-10-09 9:15 AM: A DEPTH ARM RAN FIVE ROUNDS AND 10 OF 12 DESIGNS NOW CLEAR THE PRE-REGISTERED MARGIN BAR. Nothing running. Nothing spending.
+
+**READ THIS BLOCK FIRST. It supersedes the 2026-10-08 blocks below, which said the design search
+was closed. It was reopened on 2026-10-08 at 10:27 PM with Harish's explicit approval and it
+worked.**
+
+✅ **NOTHING IS RUNNING.** Verified against `modal app list`, not assumed. Last jobs finished
+9:00 AM (45 pose folds + 12 null folds, both clean, 0 errors).
+
+### The result, in one table
+
+| | the 48 (0 optimisation rounds) | the depth arm's 12 (5 rounds) |
+|---|---|---|
+| margin vs own-sequence null, median | **+0.320** | **+7.058** |
+| best | +6.027 | **+7.492** |
+| clearing the pre-registered **+6.347** bar | **0 of 48** | **10 of 12** |
+| best ligand RMSD | 15.034 A | **1.575 A** |
+| best CA sc_DockQ | 0.0865 | **0.6400** |
+
+The **+6.347** bar is the measured non-binder median from `labelled_control_2026-10-08.tsv`,
+committed to git at **`5002b49`** before any depth-arm design existed. The measured BINDER median
+is **+7.814** and **none of the 12 reaches it** — ceiling +7.492. So every one sits in the band
+between a typical measured non-binder and a typical measured binder.
+
+Same generator, same sequence designer, overlapping backbones (backbone 3 is in both lists). The
+only difference is five rounds of predict-then-redesign.
+
+### What ran, and where it is
+
+| artifact | what |
+|---|---|
+| `analysis/02-tnf/PREREG-DEPTH-ARM-2026-10-08.md` | the bars, committed first |
+| `analysis/02-tnf/depth_rounds/round{1..5}.tsv` | 32 designs per round, pose-scored |
+| `analysis/02-tnf/depthA_pose_2026-10-08.tsv` | stage A, 28 scored, 4 cleared the 10 A gate |
+| `analysis/02-tnf/seed68_partial_pose_2026-10-09.tsv` + `seed45_pose_2026-10-09.tsv` | the 68, complete |
+| `runs/A-margin12-out/Amargin12` | the 12 own-sequence nulls behind the margins above |
+| `bin/run_depth_rounds.py` (8 selftests) | the round runner, `--one-round`, `--parents`, `--resume-after` |
+| `bin/depth_loop.py` (8 selftests) | scoring + the oracle guard + the stale-fold guard |
+| `bin/depth_report.py` | per-lineage round review |
+| `bin/comp_filter.py` (6 selftests) | the chemistry filter |
+| `bin/validate_selection_rule.py` (4 selftests) | the 16-target validation |
+
+Per-round best CA sc_DockQ: **0.6057 (stage A) → 0.6249 → 0.6484 → 0.6148 → 0.6343 → 0.6400.**
+Population moved much more than the leader: median ligand RMSD **26.0 → 4.564 A**, designs inside
+the 10 A gate **9 → 24 of 32**. Spend on the arm: **192 folds + 12 nulls + 68 pose folds ≈ $10.**
+
+### THE THREE THINGS THE DESIGNS STILL DO NOT HAVE — read before submitting any of them
+
+1. **No pH mechanism.** Of the 8 best, **3 carry zero histidines and 5 carry exactly one.** The
+   pH 7.4 → 6.0 charge swing they show (+1.0 to +1.4) is **acid protonation, not histidine**, and
+   its sign at the interface is unknown. The loop had **no histidine constraint**, so it bred the
+   mechanism out of 9 of its 32 round-1 designs. Objective 2 is unaddressed.
+2. **No mouse data.** Never folded against mouse TNF-alpha. The only evidence is the 48, where
+   human and mouse margins correlate **+0.107** and the best mouse design ranked 44th of 48.
+   Objective 3 is unaddressed.
+3. **The margin instrument is weaker than this project long believed.** See the correction block
+   below: its honest out-of-sample discrimination is **~0.70**, not 0.901.
+
+### THE AGREED NEXT STEP, not yet started
+
+Harish called the depth arm at round 5 and asked for **a full restart with the constraints baked
+in**: fold against **human and mouse every round** selecting on the worse of the two, and
+**require 1–2 histidines** at cation-reachable interface positions in every redesign. Design
+notes and the costing are in `projects/anthropic-adaptyv-2026/LESSONS-FOR-NEXT-PROBLEM.md` §1 and
+the "where that leaves the architecture" reasoning in the ROADMAP. **Nothing is pre-registered for
+it yet and nothing has been launched.**
+
+Mechanics known: `--omit_AAs` can forbid a residue but **cannot require one**; requiring histidine
+means fixing or biasing positions, and `bin/mpnn_constraints.py` builds those files but its
+`MAX_FORCED_HIS = 8` must drop to **2** — its current setting is what pushed the 48 outside the
+measured binder band in the first place.
+
+### 🔴 CORRECTIONS TO THIS PROJECT'S OWN RECORD, measured 2026-10-09 on all 1,440 released designs
+
+`analysis/02-tnf/SELECTION-RULE-ALL-TARGETS-2026-10-08.md`. 354 binders, 16 targets, 113,550
+co-fold rows. **Three of four headline findings from the TNF-alpha slice did not survive:**
+
+| claim, from the 150-design slice | measured on all 16 targets, within-target |
+|---|---|
+| best in-silico metric AUC 0.963 | **0.748**, and **0.674–0.702 out of sample** |
+| `plddt_binder` anti-correlates (AUC 0.000) | **0.678 — normal direction** |
+| interface size discriminates at 0.954 | **0.633** |
+| the chemistry filter enriches 4.04× | **1.18×**, p = 0.055 |
+
+**What survived and generalises: optimisation depth.** 16.2 / 20.5 / 26.7 / 32.9 / **52.9%** across
+0, 1, 2–3, 4–7, 8–12 rounds, trend **p = 1.1e-16**; within target **37.5% vs 17.4%**, Fisher
+**p = 2.1e-12**; for **Genie 3 specifically 38.6% vs 12.1%** (p = 0.0003) and **SolubleMPNN
+36.6% vs 18.5%** (p < 0.0001) — our exact pipeline, a 3.2× lift. It also survives the strict
+both-vendors-agree label (29.0% vs 12.5%).
+
+**Depth does NOT buy affinity:** within target, Spearman(rounds, log K_D) among binders = **−0.092**.
+It converts non-binders into weak binders.
+
+**The labels themselves disagree.** Of 1,235 designs assayed by both vendors they disagree on
+**35.0%** of the 389 where either saw binding, and **28.5% of the 354 published binders rest on a
+single vendor.** No ranker can reach AUC 1.0 against that, and small AUC differences are not
+meaningful.
+
+**Two numbers I had wrong and have corrected:** the 48's best margin is **+6.027**, not the +6.287
+I repeated several times. And "the chemistry-rejected pool poses better" was a 15-design artifact —
+the complete 68 gives **4 of 56 = 7.1%** clearing the pose gate against the filter-passed pool's
+**14.3%** (Fisher p = 0.43, so not significant either way, but the direction reversed).
+
+### Bugs found and fixed in the arm's own tooling, all with regression tests
+
+1. **Beam collapse.** A global top-4 put all four slots on one backbone after ONE round. Fixed to
+   best-per-lineage (`select_per_lineage`, T7 + a mutation test).
+2. **Stale folds.** An aborted round-2 run's 20 folds shared a Volume name, were silently recovered
+   into the next round's scoring, and dropped backbone 3 a second time. Fixed with an expected-id
+   regex plus a per-launch `RUN_TAG` (T8 + T8b mutation).
+3. **Discarded fold logs.** `capture_output=True` hid the per-fold timings, so a slowdown could not
+   be diagnosed. Now written to `runs/depth_logs/`. This also revealed that **my Volume-count
+   progress estimates were undercounting all night** — the rounds were never slow, folds ran at a
+   steady 55.0 s throughout.
+
+---
+
+## 🟡 SUPERSEDED — AS OF 2026-10-08 9:10 PM: the Genie arm failed, and the instrument has now been controlled and CLEARED. Nothing running. Nothing spending. The design search is CLOSED.
 
 ✅ **NOTHING IS RUNNING.** `modal app list` shows `ap-gz7W6OayBW3WfvYx5RwwI3` (`Aposctrl5`) in
 state **stopped**, finished around 7:20 PM; all **168 of 168** folds landed locally
