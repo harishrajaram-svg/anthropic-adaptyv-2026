@@ -63,3 +63,4 @@ tools/novelty-approx/
 # Its four reference databases live OUTSIDE the repo at ~/novelty_db (12 GB), rebuilt with
 #   bash ~/novelty_db/fetch_dbs.sh      (foldseek 941cd33 static binary alongside them)
 reference/anthropic-campaign/pose-control/
+reference/anthropic-campaign/all_cofold.tsv
