@@ -42,7 +42,9 @@ PATIENCE = 4                 # consecutive flat rounds before stopping; PREREG s
                              # (B3). 4 flat rounds costs 256 of the 800-fold fuse to
                              # confirm a plateau, which is the price of not stopping
                              # on noise -- single-seed ranking is Spearman 0.538.
-MAX_ROUNDS = 8               # cap, not target. 10 -> 12 -> 14 -> 8 on 2026-10-09:
+MAX_ROUNDS = 16              # cap, not target. AMENDMENT 3. History today:
+                             # 10 -> 12 -> 14 -> 8 -> 16, each move arithmetic from
+                             # a changing lineage/children/species count, not drift.
                              # all 8 Genie3 TNF binders in the release sit at 8-12
                              # rounds and 0 of 37 zero-round TNF designs bound
                              # anything. The depth arm stopped at 5. 14 comes from
@@ -600,9 +602,9 @@ def selftest():
     assert ipsae_for("/nonexistent/x.cif") is None, "a missing PAE file must give None, not a score"
     print(f"  ok  T16 ipSAE rule {IPSAE_RULE!r} maxes binder:target only, never target packing")
     # T17 the prereg's round cap and patience
-    assert MAX_ROUNDS == 8, f"PREREG AMENDMENT 2 fixes 8 rounds, found {MAX_ROUNDS}"
+    assert MAX_ROUNDS == 16, f"PREREG AMENDMENT 3 fixes 16 rounds, found {MAX_ROUNDS}"
     assert PATIENCE == 4, f"PREREG s5 fixes patience 4, found {PATIENCE}"
-    print("  ok  T17 round cap 8 and patience 4 match the pre-registration")
+    print("  ok  T17 round cap 16 and patience 4 match the pre-registration")
 
     print("\nself-tests passed: 17")
     return 0

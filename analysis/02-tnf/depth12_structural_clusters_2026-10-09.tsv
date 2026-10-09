@@ -1,0 +1,14 @@
+# binder chain D (83 res) only; foldseek 941cd33 easy-search --alignment-type 1 --exhaustive-search 1; TM = max(qtm,ttm) over both directions; n=12, 66 pairs; cluster threshold TM>=0.5
+design	backbone	single_linkage_cluster	complete_linkage_cluster_agglomerative	complete_linkage_cluster_precedent_greedy	tnfa_corrected_40_L1r4k6	tnfa_corrected_3_L0r4k0	tnfa_corrected_40_L5r5k5	tnfa_corrected_40_L1r4k1	tnfa_corrected_40_L1r2k1	tnfa_corrected_40_L1r2k5	tnfa_corrected_3_L4r5k2	tnfa_corrected_40_L1r4k2	tnfa_corrected_3_L0r5k2	tnfa_corrected_40_L5r5k6	tnfa_corrected_16_s2	tnfa_corrected_16_s1
+tnfa_corrected_40_L1r4k6	40	1	1	3	1.000	0.477	0.994	0.996	0.982	0.990	0.476	0.998	0.478	0.996	0.432	0.449
+tnfa_corrected_3_L0r4k0	3	2	2	2	0.477	1.000	0.483	0.483	0.479	0.482	0.998	0.479	1.000	0.486	0.472	0.476
+tnfa_corrected_40_L5r5k5	40	1	1	3	0.994	0.483	1.000	0.998	0.987	0.991	0.479	0.996	0.483	0.998	0.477	0.490
+tnfa_corrected_40_L1r4k1	40	1	1	3	0.996	0.483	0.998	1.000	0.984	0.991	0.481	0.996	0.483	0.999	0.477	0.485
+tnfa_corrected_40_L1r2k1	40	1	1	3	0.982	0.479	0.987	0.984	1.000	0.989	0.474	0.984	0.481	0.983	0.448	0.454
+tnfa_corrected_40_L1r2k5	40	1	1	3	0.990	0.482	0.991	0.991	0.989	1.000	0.478	0.991	0.483	0.989	0.445	0.455
+tnfa_corrected_3_L4r5k2	3	2	2	2	0.476	0.998	0.479	0.481	0.474	0.478	1.000	0.475	0.997	0.481	0.470	0.475
+tnfa_corrected_40_L1r4k2	40	1	1	3	0.998	0.479	0.996	0.996	0.984	0.991	0.475	1.000	0.480	0.997	0.434	0.480
+tnfa_corrected_3_L0r5k2	3	2	2	2	0.478	1.000	0.483	0.483	0.481	0.483	0.997	0.480	1.000	0.485	0.472	0.475
+tnfa_corrected_40_L5r5k6	40	1	1	3	0.996	0.486	0.998	0.999	0.983	0.989	0.481	0.997	0.485	1.000	0.439	0.485
+tnfa_corrected_16_s2	16	3	3	1	0.432	0.472	0.477	0.477	0.448	0.445	0.470	0.434	0.472	0.439	1.000	0.982
+tnfa_corrected_16_s1	16	3	3	1	0.449	0.476	0.490	0.485	0.454	0.455	0.475	0.480	0.475	0.485	0.982	1.000

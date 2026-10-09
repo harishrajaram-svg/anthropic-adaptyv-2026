@@ -1334,7 +1334,18 @@ in this section existed.
 
 **Why it was run.** The released campaign, re-analysed across all sixteen targets rather than
 TNF-alpha alone (§6.11), shows optimisation depth as the only factor that generalises: hit rate
-rises monotonically 16.2 / 20.5 / 26.7 / 32.9 / 52.9 per cent across 0, 1, 2-3, 4-7 and 8-12
+rises monotonically 19.2 / 20.7 / 28.0 / 34.5 / **46.0** per cent across 0, 1, 2-3, 4-7 and 8-12
+🔴 **Binning corrected 2026-10-09.** The 52.9 per cent this sentence carried, and the `85 | 45`
+row of `SELECTION-RULE-ALL-TARGETS-2026-10-08.md`, are the **8-OR-MORE** cell labelled as 8-12.
+Recomputed over the 1,320 rows carrying both a `binder_final` of True/False and a round count:
+8-12 is **29/63 = 46.0%** and 13+ is **16/17 = 94.1%**; the 45 numerator reproduces exactly and
+the 85 denominator does not (80 here), so the old pool binned 5 rows differently. The monotone
+trend is unaffected and is the finding; 52.9 is not a number to argue from. Two further
+qualifications belong with it: the 13+ cell is **survivorship-biased** -- the campaign spent
+depth on designs already working, and each released row is a FINAL design rather than a
+trajectory, so the confound cannot be removed from this data -- and **our exact stack
+(Genie3 + SolubleMPNN) has a maximum observed depth of 10 rounds**, so anything beyond that is
+extrapolation for the pipeline we run. Across 0, 1, 2-3, 4-7 and 8-12
 rounds, trend *p* = 1.1e-16, and within target 37.5 against 17.4 per cent, Fisher *p* = 2.1e-12.
 For **Genie 3** it is 38.6 against 12.1 per cent (*p* = 0.0003) and for **SolubleMPNN** 36.6
 against 18.5 (*p* < 0.0001) — this work's exact pipeline. The protocol being calibrated against
@@ -1588,9 +1599,22 @@ The dimer made cross-reactivity look half-tracking when it does not track at all
 r = +0.122, measured across mismatched constructs, happened to land near the right answer.
 
 What is true and is the useful form of the finding: **the level is fine on both species and the
-ranking does not transfer.** All 12 beat their own mouse-trimer null. **No mouse labelled control
-exists**, so "11 of 12 clear +6.347" on mouse means *beats its own null by more than the human
-non-binder median margin* — it is not evidence that any of them would bind mouse TNF-alpha.
+ranking does not transfer.** All 12 beat their own mouse-trimer null.
+
+🔴 **Corrected 2026-10-09: a mouse labelled control DOES exist, and this section previously said it
+did not.** `reference/anthropic-campaign/design_summary.csv` carries a `mouse_binding_final` call on
+**150 of 150** TNF-alpha rows, encoded `binder` / `non_binder` / `not_tested` — not a boolean, and
+reading it as one returns a spurious zero, which is how the original claim arose. Of the **12
+measured human binders, 3 also bind mouse**, at measured K_D **66.0, 135.1 and 297.0 nM**; 9 do not.
+Across all 16 targets there are **154** mouse binders. So mouse cross-reactivity among human binders
+on this target runs **3/12 = 25%**, and a mouse ranker is in principle validatable against 12
+labelled points.
+
+What survives is narrower: **we have not calibrated our margin against those labels.** So "11 of 12
+clear +6.347" on mouse means *beats its own null by more than the HUMAN non-binder median margin* —
+a borrowed bar, not a mouse-validated one, and not evidence that any design binds mouse TNF-alpha.
+Calibrating against those 12 points costs no new folds; it is recorded here as undone, not as
+impossible.
 
 #### (d) What the +6.347 bar is, stated plainly
 
@@ -1669,6 +1693,54 @@ answerable with the instruments this work ran.**
 `depth12_mouse_trimer_5seed_2026-10-09.tsv`, `depth12_mouse_dimer_5seed_2026-10-09.tsv` (each
 carrying the control statement in its header), `depth12_structural_clusters_2026-10-09.tsv`,
 `depth12_liability_2026-10-09.tsv`, `outbox/prescreen-depth12-2026-10-09/`.
+
+
+### 6.13 Objective 2: why no instrument in this work can certify a pH switch
+
+Written because the honest answer to "did you address the pH switch?" is longer than yes or no, and
+because the reason is structural rather than a failure of effort.
+
+**Nothing in the released campaign measures pH-conditional binding.** `design_summary.csv` carries
+no pH column of any kind across its 1,440 designs, and the organisers' protocol specifies no
+two-pH assay. So for this objective there is **no labelled data anywhere in the campaign** against
+which any ranker could have been calibrated — unlike objective 1, which has 354 labelled binders,
+and unlike objective 3, which has 154 labelled mouse calls. Every pH instrument below is therefore
+uncalibrated by construction, not by neglect.
+
+**The project's own mechanism gate returns zero on real TNF-alpha complexes.** `bin/his_cation_gate.py`
+implements Ahn *et al.*'s criterion and its self-tests T1-T6 pass, including three mutation tests.
+Run over twelve crystallographic TNF-alpha complexes from the PDB (`--pool`): **0 PASS / 9 FAIL /
+3 REFUSE.** Among the failures is **9DJW, which presents 32 interface histidines on the binder side
+and still scores zero designable His-cation contacts.** The tool prints its own verdict on that
+result: *"at 0% or 100% this is not yet shown to be a FILTER... do not quote it as a selection
+yield."* Consequently **"0 of 12 of our designs pass this gate" is not a statement about our
+designs** — the instrument reads zero on nature's entire anti-TNF-alpha repertoire, clinical
+antibodies included. It cannot separate a useful histidine from a useless one at this interface.
+
+**The other two instruments are no better.** `bin/dddg_elec.py` failed its known-answer control
+**0 of 5** (`challenges/02-tnf-alpha.md` §6b): all three measured adalimumab pH-switch variants of
+Schroeter *et al.* scored negative, and a scramble negative with five histidines placed >12 A away
+scored −0.129 against wild type's −0.125. `bin/ph_gate_multisite.py` self-tests clean and PROPKA
+3.5.1 is installed, but it has no labelled control, its rank across the 12 designs correlates with
+its own five-seed median at Spearman **0.469**, and its within-design spread across refolds reaches
+**844x** against a between-design spread under **20x**. It is a disclosure tool, not a ranker.
+
+**And installing the mechanism destroys the binding.** §6.12 and the pre-registration's AMENDMENT 2
+record the matched control: same parent, same round, same ProteinMPNN seed, sequences 94-95%
+identical, human CA sc_DockQ **0.6349 / 0.5053 / 0.6203 unconstrained against 0.0126 / 0.0309 /
+0.0772** with two histidines forced at cation-reachable positions. A soft logit bias
+(`--bias_by_res_jsonl`, additive pre-softmax, a genuinely different code path) is not an escape: at
+the recommended magnitude it emits sequences **byte-identical to the hard mask on 3 of 6 parents**
+and has **zero penetrance on a 4th**.
+
+**What we therefore claim, and nothing more.** Seven of the twelve designs place a histidine at a
+cation-reachable interface position (His61, 7.39-7.82 A from the nearest target cation, inside the
+8.74 A REACH_CA ceiling — a CA-distance screen that its own docstring calls necessary and not
+sufficient). The predicted rotamer does not make the contact, and the predictor has no pH state and
+is not trained for sidechain placement, so it is weak evidence either way. The pH 7.4 to 6.0 charge
+swing is **+1 unit, uniform across all twelve**, consistent with acid protonation rather than a
+histidine switch. **Objective 2 is unaddressed, and no instrument available to this work could have
+told us otherwise.** We report that rather than a pH number we cannot defend.
 
 
 ## 7. Protomer count is a measured confound for any inter-protomer epitope

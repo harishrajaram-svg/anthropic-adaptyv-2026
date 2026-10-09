@@ -67,7 +67,18 @@ MAX_FORCED_HIS = 2         # LOWERED 8 -> 2 on 2026-10-09, pre-registered in
                            # actually bound. The brief needs a pH switch, not a His cluster:
                            # one or two reachable histidines, placed, is the hypothesis.
                            # Do NOT raise this without re-running the pI comparison.
-OMIT_EVERYWHERE = "C"      # SolubleMPNN put a cysteine in 9 of 48; de novo work is Cys-free
+OMIT_EVERYWHERE = "C"      # RATIONALE REPLACED 2026-10-09. This said "SolubleMPNN put a
+                           # cysteine in 9 of 48", which has NO artifact behind it -- the only
+                           # 48-sequence file, analysis/02-tnf/genie48_final_sequences_
+                           # 2026-10-08.tsv, reads 0 of 48. The real evidence is the release:
+                           # of 1,320 labelled designs, those carrying >=1 cysteine bind at
+                           # 11/93 = 11.8% against 343/1,227 = 28.0% cysteine-free (odds ratio
+                           # 0.346, Fisher two-sided p = 3.9e-4). Decisive for a deep loop: the
+                           # penalty is INVISIBLE to our selector -- median sc_dockq_ef2fast
+                           # 0.7719 vs 0.7917 and ipsae_min_ef2fast 0.6981 vs 0.7163 -- so a
+                           # cysteine would ride a lineage through every round unseen and
+                           # convert at 42% of the rate. Counter-evidence, recorded: on our own
+                           # stack the gap nearly vanishes (21.1% vs 24.8%, n=19).
 ACIDS = "DE"
 ALL_AA = "ACDEFGHIKLMNPQRSTVWY"
 

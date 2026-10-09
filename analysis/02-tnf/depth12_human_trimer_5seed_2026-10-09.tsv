@@ -1,0 +1,19 @@
+# 5-seed (1,2,3,4,5; seed 42 EXCLUDED) margins for the 12 depth-arm designs, 2026-10-09.
+# Instrument: pae_interface.py pae_if_mean, seeds collapsed by MEDIAN per design before any join.
+# Control: re-scoring the seed-42 structures reproduced depth_margins_2026-10-09.tsv 12/12, max abs diff 0.00000.
+# margin = null_median - design_median. LOWER pae is better, so HIGHER margin is better.
+# Constructs: human trimer 3x157+83=554 res; mouse trimer 3x156+83=551 res; mouse dimer 2x156+83=395 res.
+# Bar +6.3473 = measured NON-binder median (labelled_control_2026-10-08.tsv, n=30). Human-derived; no mouse labelled control exists.
+design	construct	margin	design_median	null_median	design_sd_across_seeds	clears_6347
+tnfa_corrected_40_L1r4k6	human_trimer_554	7.4150	7.6250	15.0400	0.4540	1
+tnfa_corrected_3_L0r4k0	human_trimer_554	6.9670	7.6450	14.6120	0.2680	1
+tnfa_corrected_40_L5r5k5	human_trimer_554	7.1820	7.3050	14.4870	0.2290	1
+tnfa_corrected_40_L1r4k1	human_trimer_554	8.0310	6.9970	15.0270	0.1620	1
+tnfa_corrected_40_L1r2k1	human_trimer_554	6.8880	7.7380	14.6260	0.4910	1
+tnfa_corrected_40_L1r2k5	human_trimer_554	6.6430	7.6530	14.2960	1.1220	1
+tnfa_corrected_3_L4r5k2	human_trimer_554	6.3780	8.2400	14.6180	0.3210	1
+tnfa_corrected_40_L1r4k2	human_trimer_554	6.9100	7.7880	14.6970	2.8930	1
+tnfa_corrected_3_L0r5k2	human_trimer_554	7.5040	7.2080	14.7120	0.1550	1
+tnfa_corrected_40_L5r5k6	human_trimer_554	7.1610	7.2130	14.3740	0.3790	1
+tnfa_corrected_16_s2	human_trimer_554	6.1500	8.7300	14.8800	2.1980	0
+tnfa_corrected_16_s1	human_trimer_554	5.5410	9.1450	14.6860	1.2400	0

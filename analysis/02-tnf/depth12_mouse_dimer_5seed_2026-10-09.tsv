@@ -1,0 +1,19 @@
+# 5-seed (1,2,3,4,5; seed 42 EXCLUDED) margins for the 12 depth-arm designs, 2026-10-09.
+# Instrument: pae_interface.py pae_if_mean, seeds collapsed by MEDIAN per design before any join.
+# Control: re-scoring the seed-42 structures reproduced depth_margins_2026-10-09.tsv 12/12, max abs diff 0.00000.
+# margin = null_median - design_median. LOWER pae is better, so HIGHER margin is better.
+# Constructs: human trimer 3x157+83=554 res; mouse trimer 3x156+83=551 res; mouse dimer 2x156+83=395 res.
+# Bar +6.3473 = measured NON-binder median (labelled_control_2026-10-08.tsv, n=30). Human-derived; no mouse labelled control exists.
+design	construct	margin	design_median	null_median	design_sd_across_seeds	clears_6347
+tnfa_corrected_40_L1r4k6	mouse_dimer_395	9.1590	11.4150	20.5740	0.2540	1
+tnfa_corrected_3_L0r4k0	mouse_dimer_395	9.9810	11.1580	21.1390	2.0370	1
+tnfa_corrected_40_L5r5k5	mouse_dimer_395	7.9010	13.1480	21.0490	1.6650	1
+tnfa_corrected_40_L1r4k1	mouse_dimer_395	9.5140	11.5790	21.0930	0.2900	1
+tnfa_corrected_40_L1r2k1	mouse_dimer_395	4.8660	15.6000	20.4660	1.2020	0
+tnfa_corrected_40_L1r2k5	mouse_dimer_395	8.4860	11.9660	20.4510	4.3250	1
+tnfa_corrected_3_L4r5k2	mouse_dimer_395	6.3700	14.9560	21.3260	2.5410	1
+tnfa_corrected_40_L1r4k2	mouse_dimer_395	7.2130	12.2470	19.4600	3.2600	1
+tnfa_corrected_3_L0r5k2	mouse_dimer_395	9.9670	10.9170	20.8830	1.4870	1
+tnfa_corrected_40_L5r5k6	mouse_dimer_395	1.5790	20.2620	21.8400	0.6990	0
+tnfa_corrected_16_s2	mouse_dimer_395	8.2480	11.7630	20.0110	0.1910	1
+tnfa_corrected_16_s1	mouse_dimer_395	7.6990	12.3730	20.0720	0.2870	1

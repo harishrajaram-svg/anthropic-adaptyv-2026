@@ -69,7 +69,9 @@ BHRF1 0.64, Cas9 0.58, **BBF-14 0.39 — below chance.** The ranker is not relia
 | 1 | 215 | 44 | 20.5% |
 | 2–3 | 322 | 86 | 26.7% |
 | 4–7 | 280 | 92 | 32.9% |
-| **8–12** | 85 | 45 | **52.9%** |
+| **8+ (mislabelled 8–12 until 2026-10-09)** | 85 | 45 | **52.9%** |
+| **8–12, recomputed** | 63 | 29 | **46.0%** |
+| **13+, recomputed (survivorship-biased, n=17)** | 17 | 16 | **94.1%** |
 
 Trend across buckets **r = 0.219, z = 8.29, p = 1.1e-16**.
 

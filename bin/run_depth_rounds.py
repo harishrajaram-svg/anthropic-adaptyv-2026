@@ -6,15 +6,20 @@ code rather than a note in a document:
 
   MAX_ROUNDS      14    pre-registered ceiling (PREREG AMENDMENT 1: 7 lineages x 4
                         children x 2 species = 56 folds/round, so 14 x 56 = 784)
-  MAX_FOLDS       800   absolute spend fuse (~$26); refuses to launch a round that would cross it
+  MAX_FOLDS      1600   absolute spend fuse (~$71); refuses to launch a round that would cross it
   WALL_STOP             Sat Oct 10 18:00 EDT, pre-registered; checked before every launch
   selection             CA sc_DockQ against the designed backbone, taking the WORSE of
                         human and mouse -- enforced by depth_loop.select_parent(), which raises
                         on any confidence column. ONE declared-contaminated lineage instead uses
                         the protocol's 4:1 ipSAE+sc_DockQ rule via a fenced sibling selector and
                         is pre-committed as NOT a submission source (PREREG s2).
-  cysteine              banned in every redesign (--omit_AAs CX), because 2 of the 4 parents
-                        carry it and this project is Cys-free for de novo work
+  cysteine              banned in every redesign (--omit_AAs CX). Evidence, corrected
+                        2026-10-09: in the released campaign, designs carrying a cysteine bind
+                        at 11.8% (11/93) against 28.0% (343/1,227) cysteine-free, p = 3.9e-4,
+                        AND score identically on the metrics this loop selects on -- so the
+                        penalty is invisible to the selector across 16 rounds. Note this ban is
+                        STRICTER than the organisers require (their protocol asks for a
+                        Cys-parity liability check, not a ban); it is our choice.
   histidine             1-2 forced at cation-reachable positions computed on the PREDICTED
                         complex, via --omit_AA_jsonl, VERIFIED on the output sequences because
                         that flag fails silently. One control lineage runs without it.
@@ -49,10 +54,14 @@ mc = importlib.util.module_from_spec(_mc_spec)
 _mc_spec.loader.exec_module(mc)
 
 MAX_ROUNDS = dl.MAX_ROUNDS            # 10
-MAX_FOLDS = 800                       # spend fuse, ~$26. RAISED 400 -> 800 on
-                                      # 2026-10-09: PREREG s5. 12 rounds x 8
-                                      # lineages x 4 children x 2 SPECIES = 768,
-                                      # leaving 32 folds of headroom.
+MAX_FOLDS = 1600                      # spend fuse, ~$71. 400 -> 800 -> 1600 on
+                                      # 2026-10-09. AMENDMENT 3: 16 rounds x 6
+                                      # lineages x 8 children x 2 SPECIES = 1536,
+                                      # leaving 64 folds of headroom. The fuse is an
+                                      # OPTION not a commitment -- PATIENCE=4 and bar
+                                      # B3 end the arm if the blend does not improve
+                                      # over 4 consecutive rounds, so the extra
+                                      # rounds are only bought if still climbing.
 WALL_STOP = dt.datetime(2026, 10, 10, 18, 0, 0)
 SEQS_PER_PARENT = 8                   # 8 -> 4 -> 8 on 2026-10-09. AMENDMENT 2: the
                                       # constrained restart is dead, so the arm is an
@@ -74,16 +83,21 @@ RUN_TAG = os.environ.get("DEPTH_RUN_TAG", "v2")
 # Comma-separated, e.g. DEPTH_CONTAMINATED=7. Empty means every lineage is clean.
 CONTAMINATED = frozenset(
     x.strip() for x in os.environ.get("DEPTH_CONTAMINATED", "").split(",") if x.strip())
-# AMENDMENT 1 s1.1: the lineage(s) run with NO histidine requirement -- the B4 control.
-# It sits on the SAME backbone and parent as the clean reference lineage, so the only
-# difference between them is the constraint. Comma-separated, e.g. DEPTH_NO_HIS=5.
-NO_HIS = frozenset(
-    x.strip() for x in os.environ.get("DEPTH_NO_HIS", "").split(",") if x.strip())
-# Lineage(s) run with the ANTI-INVERSION ACID BAN DROPPED. D1 (2026-10-09) put 0 of 28
-# children inside the pose gate with the ban on, and the His / no-His arms on one parent
-# collapsed equally, so the ban -- not the histidines -- is the suspect.
-NO_ACID_BAN = frozenset(
-    x.strip() for x in os.environ.get("DEPTH_NO_ACID_BAN", "").split(",") if x.strip())
+# ---- SEQUENCE CONSTRAINTS ARE OFF BY DEFAULT. Polarity INVERTED 2026-10-09 after an audit
+# caught the launch about to run constrained.
+#
+# These started as DEPTH_NO_HIS / DEPTH_NO_ACID_BAN -- opt-OUT switches used by the 3-arm
+# diagnostic. PREREG AMENDMENT 2/A3.4 then specified "no constraint file beyond the cysteine ban",
+# but the DEFAULT still turned both constraints ON, so a launch that set neither variable would
+# have reproduced D1 exactly: 0 of 28 children inside the 10 A pose gate, on all six lineages,
+# for 1,536 folds. The selftests were green at 11/11 and asserted nothing about either flag.
+#
+# So the failing configuration now requires DELIBERATE ACTION. A lineage is constrained only if
+# it is NAMED. Unset means unconstrained, which is what the pre-registration says runs.
+FORCE_HIS = frozenset(
+    x.strip() for x in os.environ.get("DEPTH_FORCE_HIS", "").split(",") if x.strip())
+ACID_BAN = frozenset(
+    x.strip() for x in os.environ.get("DEPTH_ACID_BAN", "").split(",") if x.strip())
 
 
 LIN_RE = re.compile(r"_L(\d+)r\d+k\d+$")
@@ -115,7 +129,14 @@ def _round_out(rn, design_id):
     they must resolve BOTH or a resume would silently look in a directory that does not exist
     and die with a confusing cif count.
     """
-    cands = [f"runs/depthB-r{rn}-human-{RUN_TAG}-out/depthB{rn}human{RUN_TAG}/{design_id}",
+    # The BATCH INDEX was missing from every candidate, found by audit 2026-10-09:
+    # fold_all_species names each volume run depthB{n}{sp}b{b}{TAG}, so --resume-after and
+    # --parents could not resolve this run's OWN output and recovery was dead on arrival.
+    cands = [*sorted(glob.glob(
+                 f"runs/depthB-r{rn}-human-{RUN_TAG}-out/depthB{rn}humanb*{RUN_TAG}/{design_id}")),
+             *sorted(glob.glob(
+                 f"runs/depthB-r{rn}-human-out/depthB{rn}humanb*{RUN_TAG}/{design_id}")),
+             f"runs/depthB-r{rn}-human-{RUN_TAG}-out/depthB{rn}human{RUN_TAG}/{design_id}",
              f"runs/depthB-r{rn}-human-out/depthB{rn}human{RUN_TAG}/{design_id}",
              f"runs/depthB-r{rn}-out/depthB{rn}{RUN_TAG}/{design_id}",
              f"runs/depthB-r{rn}-out/depthB{rn}/{design_id}"]
@@ -466,8 +487,8 @@ def run_round(n, parents, folds_used, contaminated_lineages=()):
     jobs = {}
     for p in parents:
         seqs = redesign(p["cif"], f"r{n}L{p['lin']}", SEQS_PER_PARENT,
-                        force_his=p['lin'] not in NO_HIS,
-                        omit_acids=p['lin'] not in NO_ACID_BAN)
+                        force_his=p['lin'] in FORCE_HIS,
+                        omit_acids=p['lin'] in ACID_BAN)
         for k, sq in enumerate(seqs):
             # L<lineage> is carried in the id so every later round can group by lineage.
             jobs[f"tnfa_corrected_{p['backbone']}_L{p['lin']}r{n}k{k}"] = sq
@@ -527,8 +548,10 @@ def main():
         seed = seed_lineages(sys.argv[sys.argv.index("--seed-lineages") + 1])
         log(f"EXPLICIT SEED (AMENDMENT 1): {len(seed)} lineages")
         for r in seed:
-            role = ("4:1 CONTAMINATED" if r["lin"] in CONTAMINATED
-                    else "no-His CONTROL" if r["lin"] in NO_HIS else "clean + His")
+            cons = ("+His" if r["lin"] in FORCE_HIS else "") + \
+                   ("+acidban" if r["lin"] in ACID_BAN else "")
+            role = ("4:1 CONTAMINATED" if r["lin"] in CONTAMINATED else "clean") + \
+                   (f" {cons}" if cons else " UNCONSTRAINED")
             log(f"  L{r['lin']} = {r['id']} (backbone {r['backbone']}, "
                 f"dockq {float(r['ca_sc_dockq']):.4f}, lrms {float(r['lrms']):.3f} A) [{role}]")
         log(f"  backbones: {sorted({r['backbone'] for r in seed})}; "
@@ -642,8 +665,8 @@ def main():
 def selftest():
     # Value pins, updated 2026-10-09 to PREREG-CONSTRAINED-RESTART s5. The old pins read
     # (10, 400) and correctly FAILED when the constants moved, which is the test working.
-    assert dl.MAX_ROUNDS == 8, f"AMENDMENT 2 fixes 8 rounds, found {dl.MAX_ROUNDS}"
-    assert MAX_FOLDS == 800, f"PREREG s5 fixes an 800-fold fuse, found {MAX_FOLDS}"
+    assert dl.MAX_ROUNDS == 16, f"AMENDMENT 3 fixes 16 rounds, found {dl.MAX_ROUNDS}"
+    assert MAX_FOLDS == 1600, f"AMENDMENT 3 fixes a 1600-fold fuse, found {MAX_FOLDS}"
     assert SEQS_PER_PARENT == 8, f"AMENDMENT 2 fixes 8 children/parent, found {SEQS_PER_PARENT}"
     # 8 lineages x 4 children x 2 species = 64/round, and 12 rounds must FIT the fuse with
     # headroom. If any of the four numbers drifts, this is the assertion that notices.
@@ -653,6 +676,13 @@ def selftest():
     assert _per_round * dl.MAX_ROUNDS <= MAX_FOLDS, (
         f"{dl.MAX_ROUNDS} rounds x {_per_round} folds = {_per_round*dl.MAX_ROUNDS} "
         f"exceeds the {MAX_FOLDS}-fold fuse")
+    # The pin that was missing, and whose absence nearly cost 1,536 folds: with no env var set,
+    # EVERY lineage must come out UNCONSTRAINED, because that is what AMENDMENT 2/A3.4 specifies.
+    assert not FORCE_HIS, (
+        f"DEPTH_FORCE_HIS names {sorted(FORCE_HIS)}; the pre-registered arm is UNCONSTRAINED. "
+        "Naming a lineage here reproduces the D1 configuration (0 of 28 in the pose gate).")
+    assert not ACID_BAN, f"DEPTH_ACID_BAN names {sorted(ACID_BAN)}; the arm is UNCONSTRAINED."
+    print("  ok  constraints OFF by default: no lineage is forced-His or acid-banned")
     print(f"  ok  prereg pins: {dl.MAX_ROUNDS} rounds x {_per_round} folds "
           f"({dl.MAX_ROUNDS * _per_round}) fits the {MAX_FOLDS} fuse")
     t = tnf_target(); assert len(t) == 157

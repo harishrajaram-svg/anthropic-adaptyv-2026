@@ -164,9 +164,29 @@ A 3-arm diagnostic on one parent (`tnfa_corrected_40_s2`, 0.6057 / 2.773 A), 4 c
 | acid ban only, **no** His | 0.0521 | -0.5536 | 20.634 | 0/4 |
 | **neither** | **0.2860** | -0.3197 | **6.147** | **1/4** |
 
-**It is not the acid ban specifically — His-only is equally destructive.** Writing a per-position
-constraint file *at all* collapses the interface; 19 of 83 positions is enough regardless of which
-residues are restricted. **Objective 2 is not reachable through `omit_AA_jsonl` in this pipeline,
+**It is not the acid ban specifically — His-only is equally destructive.** 19 of 83 constrained
+positions is enough to collapse the interface regardless of which residues are restricted.
+
+🔴 **Wording corrected 2026-10-09 by audit.** This paragraph originally read "writing a per-position
+constraint file *at all* collapses the interface", which is false and would mislead anyone citing
+it. The arm that HOLDS pose also emits a constraint file -- an 83-position cysteine ban -- so the
+mechanism is not the file's existence. What collapses the interface is **restricting choice at
+interface positions**: forcing one residue at 2 of them, or forbidding Asp/Glu at 17, each
+independently destroys it.
+
+**A matched simultaneous control, stronger than the pooled comparison above.** From
+`analysis/02-tnf/depth_rounds/round1.tsv`, same parent, same round, same ProteinMPNN seed 37,
+index-matched by sample slot, 94-95% sequence identity (3-5 residues apart, two of them the forced
+histidines), human `ca_sc_dockq`:
+
+| slot | unconstrained | forced-His |
+|---|--:|--:|
+| k1 | **0.6349** | 0.0126 |
+| k2 | **0.5053** | 0.0309 |
+| k3 | 0.6203 | 0.0772 |
+
+Same backbone, same round, same seed, differing by three to five residues. That is a simultaneous
+control rather than a historical null, and it is the evidence this finding should rest on. **Objective 2 is not reachable through `omit_AA_jsonl` in this pipeline,
 and B4 cannot be tested as written.** B4 is retired, not failed: it was never measurable.
 
 Stated as a caveat rather than buried: the clean arm's 0.2860 is a **best-of-4** against the depth
@@ -213,3 +233,67 @@ dirs, so `diag1`'s round 1 destroyed `cr1`'s round 1 on local disk. Recovered fr
 the "never trust the local entrypoint write" rule paying off -- and now fixed: writes are
 tag-scoped and readers fall back to the untagged names so rounds 1-5 of the depth arm still resolve.
 Left unfixed, round N of this run would have overwritten round N of the depth arm.
+
+---
+
+# AMENDMENT 3 — 2026-10-09 ~14:30 ET. Sixteen rounds, and the evidence for and against it.
+
+## A3.1 · Why the round count moved again
+
+A2 set 8 rounds. That was **arithmetic, not evidence**: 800-fold fuse divided by 96 folds a round.
+Asked why not more, the released data answers, and it answers with a caveat.
+
+Hit rate by optimisation depth, all 16 targets, n = 1,320 designs carrying both a round count and a
+binding call:
+
+| rounds | n | binders | rate |
+|---|--:|--:|--:|
+| 0 | 453 | 87 | 19.2% |
+| 1 | 213 | 44 | 20.7% |
+| 2-3 | 307 | 86 | 28.0% |
+| 4-7 | 267 | 92 | 34.5% |
+| **8-12** | 63 | 29 | **46.0%** |
+| 13-17 | **2** | 2 | 100% |
+| 18-26 | **15** | 14 | 93.3% |
+
+Our exact stack, Genie3 + SolubleMPNN: 18.0% (n=61) -> 20.0% (n=60) -> 29.6% (n=27) -> **81.8%
+at 8-12 (n=11)** -> and **nothing at all above 12**.
+
+## A3.2 · Why the top of that curve is NOT the argument
+
+**Survivorship, and it is severe.** A design reached 18-26 rounds only because it was already
+working; the campaign spent depth on winners. "94% of deep designs bound" is partly "they only kept
+optimising the ones that bound." Each released row is a FINAL design, not a trajectory, so what a
+design scored BEFORE it went deep is not recoverable from this data and the confound cannot be
+removed. **n = 17 in total and n = 2 in the 13-17 bin**, so the 100% is noise. And for our pipeline
+there are **zero** designs above 12 rounds, so the region is unmeasured for the stack we run.
+
+**The evidence-backed band is 8-12.** Everything above it is extrapolation into the campaign's
+most-selected subsample.
+
+## A3.3 · The actual argument for 16
+
+Eight rounds would leave the two FRESH lineages at depth 8 -- the floor of the band -- and backbone
+16 carries the best single pose in this project (0.6655). Sixteen rounds puts:
+
+| lineages | start depth | end depth |
+|---|--:|--:|
+| 4 continued (backbones 3, 40) | 5 | **21** |
+| 2 fresh (backbones 16, 10) | 0 | **16** |
+
+**The fuse is an option, not a commitment.** `PATIENCE = 4` and bar B3 end the arm when the blend
+fails to improve over four consecutive rounds, and `pose_regressed()` ends it if every design in a
+round sits above the 10 A gate. So rounds 13-16 are only bought if the arm is still climbing into
+them, and an arm that plateaus at round 9 stops there and the remaining folds are not respent.
+
+`MAX_ROUNDS` 8 -> **16**; `MAX_FOLDS` 800 -> **1600** (16 x 96 = 1536, 64 folds of headroom).
+
+**Disclosed in advance:** the continued lineages will finish at depth 21, inside the region where
+this work has no pipeline-matched evidence and where the released comparison is survivorship-biased.
+That is a deliberate bet on the one variable with a monotone trend behind it, not a claim that the
+trend continues. If the arm's own B3 stops it early, that early stop is the result.
+
+## A3.4 · Everything else is unchanged from AMENDMENT 2
+
+6 lineages, 4 backbones, 8 children, mouse trimer every round, **no restriction of choice at
+any interface position** (the cysteine ban is global and is retained), depth recorded per lineage. B1-B3 stand. B4 stays retired as unmeasurable.
