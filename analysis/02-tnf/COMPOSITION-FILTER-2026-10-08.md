@@ -76,3 +76,44 @@ histidines — put us outside the only measured envelope we have, and the switch
 | `bin/comp_filter.py` | the filter, 6 selftests, `--validate` refuses below 2× enrichment |
 | `analysis/02-tnf/compfilter_seedpool_2026-10-08.tsv` | all 100 seed sequences with features and verdict |
 | `analysis/02-tnf/compfilter_genie48_2026-10-08.tsv` | all 48 submitted-arm sequences, same columns |
+
+---
+
+## Addendum, written at 22:45 ET while the stage-A fold was still running, so it is a bound on the premise and not a rationalisation of the result
+
+The filter matches the winners' **summary statistic** by a **different mechanism**, and a two-cut
+filter cannot see the difference. pI is a scalar; many compositions map onto the same value.
+
+Median composition (and the submitted 48 for contrast):
+
+| | E% | D% | E+D% | L% | K% | FWY% | P+G% |
+|---|---|---|---|---|---|---|---|
+| the 8 winners | 16.9 | **6.0** | 22.9 | **19.9** | 10.8 | **4.8** | **8.4** |
+| our 32 filtered | **24.1** | 2.4 | 27.1 | 16.3 | 10.2 | 2.4 | 4.8 |
+| our 48 submitted | 16.9 | 1.2 | 19.3 | 16.9 | **16.9** | 2.4 | 4.8 |
+
+The winners' glutamate range is **10.8-18.1%**. Ours is **14.5-33.7%**, median 24.1, and **1 of 32**
+falls inside their ceiling. They reach pI ~4.7 with moderate glutamate balanced by 6% aspartate
+and a 19.9% leucine core. Our 32 reach it by loading glutamate to a quarter of the sequence with
+aspartate at 2.4% — a poly-glutamate acid rod rather than a Leu-rich core. Both our pools also
+miss the winners on aromatics (2.4% against 4.8%) and on the loop proxy (4.8% against 8.4%).
+
+Note what this says about the 48, which is not what we assumed: their glutamate is **inside** the
+winners' range. Their defect is lysine at 16.9% against the winners' 10.8%, which titrates the
+acid away and lifts pI to 7.01. Two different failures, one per pool.
+
+**What this bounds.** Stage A asks a **pose** question — does a pre-constraint sequence on these
+backbones fold where it was designed to? The pose is set by the backbone and by whether the
+sequence encodes it, so the composition critique does not predict the stage-A answer either way.
+What it does mean is that a stage-A **GO must not be read as "we found the winners' chemistry."**
+We found their histidine count and their pI, by a route they did not take, on a fold that is not
+theirs (0 of 48 reach TM 0.6 against the winning family). A GO would license one claim only: that
+a pose which survives the gate is reachable on our backbones. The express-QC screen underlines it
+independently — 22 of 32 carry a flag, 8 of them cysteine, which the project's Cys-free default
+excludes outright, leaving at most 24 of the 32 submissible whatever the pose says.
+
+The honest version of the filter's limitation is that it should have cut on **composition** and not
+only on the two scalars. A `D% >= 4` and `E% <= 18` pair would be the obvious addition. It is **not**
+being added now: adding cuts after seeing which of our own designs pass, while the fold that tests
+them is running, is exactly the post-hoc tuning this project pre-registers against. It goes on the
+record as the next filter's pre-registered content, measured against the released labels first.
