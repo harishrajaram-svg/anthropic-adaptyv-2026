@@ -79,7 +79,7 @@ histidines — put us outside the only measured envelope we have, and the switch
 
 ---
 
-## Addendum, written at 22:45 ET while the stage-A fold was still running, so it is a bound on the premise and not a rationalisation of the result
+## Addendum, written at 21:41 ET while the stage-A fold was still running, so it is a bound on the premise and not a rationalisation of the result
 
 The filter matches the winners' **summary statistic** by a **different mechanism**, and a two-cut
 filter cannot see the difference. pI is a scalar; many compositions map onto the same value.
