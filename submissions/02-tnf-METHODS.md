@@ -1359,9 +1359,23 @@ sequence at its own length, built by `bin/build_sizematched_null.py` at its comm
 
 | | the 48 (zero rounds) | the depth arm's 12 (five rounds) |
 |---|---|---|
-| margin, median | **+0.320** | **+7.058** |
-| best | +6.027 | **+7.492** |
-| clearing the pre-registered +6.347 | **0 of 48** | **10 of 12** |
+| margin, median, **single seed** | **+0.320** | **+7.058** |
+| best, **single seed (42)** | +6.027 | **+7.492** |
+| best, **five-seed median, seeds 1-5** | **+6.287** (§6.10c) | **not measured** |
+| clearing the pre-registered +6.347, single seed | **0 of 48** | **10 of 12** |
+
+**THE COMPARISON IS NOT YET LIKE FOR LIKE, AND THIS IS THE ARM'S PRINCIPAL WEAKNESS.** Every
+depth-arm margin above is a **single draw at seed 42**. §4.6 measures single-seed margin noise at
+**0.858** and a pure-noise best-of-48 at **1.91**; §6.10c was written precisely because +6.027 had
+"exactly the shape of a selection artefact", and it answered that by re-folding the top 8 designs
+and their nulls at **five seeds excluding the selection seed**, where the best held at **+6.287**.
+The depth arm has had **no equivalent replication.** Its +7.492 is a best-of-12 single-seed value
+and carries the same selection-artefact risk the 48's number was cleared of. Until the twelve and
+their nulls are re-folded at seeds the selection was not made on — 96 folds, about $3.56 — the
+honest claim is "ten of twelve clear the bar **on one seed**", which is a weaker evidential
+standard than the one this work already applied to the 48 and found wanting.
+
+So the two columns are not symmetric: the 48's best is replicated, the depth arm's is not.
 
 +6.347 is the measured **non-binder** median and +7.814 the measured **binder** median, both from
 `analysis/02-tnf/labelled_control_2026-10-08.tsv`. **None of the twelve reaches the binder median**
@@ -1376,6 +1390,15 @@ is unmeasured, and the loop carried no histidine constraint, breeding the mechan
 its 32 round-one designs. **None has been folded against mouse TNF-alpha**, and §6.10d's +0.107
 human-to-mouse margin correlation gives no reason to expect transfer. And the margin instrument's
 own discrimination is weaker than this work long assumed — §6.11.
+
+**Pose and margin disagree on the same molecule, which is reported rather than resolved.** The two
+designs that FAIL the bar are `tnfa_corrected_16_s2` at +6.306 and `16_s1` at +5.782 — and `16_s1`
+has the **best CA sc_DockQ of all 215 designs in this arm, 0.6655**. Best pose, worst margin of the
+twelve. The two instruments are not measuring the same thing: pose asks whether the prediction
+reproduces the designed geometry, margin asks whether the predicted interface scores better than a
+shuffle of the same composition. A design can satisfy one and not the other, and §6.11's finding
+that pose agreement predicts binding at only 0.653 across sixteen targets is the reason not to
+assume the pose number is the more trustworthy of the two. Neither design is quietly dropped.
 
 **Liabilities.** All twelve are 83 residues, single chain, **cysteine-free** (banned in every
 redesign, with a post-hoc assertion per sequence), with pI 4.53-5.00, below the 6.0-7.4 assay

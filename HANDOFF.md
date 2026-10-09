@@ -19,11 +19,27 @@ worked.**
 
 | | the 48 (0 optimisation rounds) | the depth arm's 12 (5 rounds) |
 |---|---|---|
-| margin vs own-sequence null, median | **+0.320** | **+7.058** |
-| best | +6.027 | **+7.492** |
-| clearing the pre-registered **+6.347** bar | **0 of 48** | **10 of 12** |
+| margin, median, single seed | **+0.320** | **+7.058** |
+| best, single seed (42) | +6.027 | **+7.492** |
+| best, **five-seed median (seeds 1-5)** | **+6.287** | **NOT MEASURED** |
+| clearing **+6.347**, single seed | **0 of 48** | **10 of 12** |
 | best ligand RMSD | 15.034 A | **1.575 A** |
 | best CA sc_DockQ | 0.0865 | **0.6400** |
+
+🔴 **THE DEPTH ARM'S MARGINS ARE SINGLE-SEED AND UNREPLICATED. THIS IS ITS BIGGEST WEAKNESS AND
+THE NEXT MEASUREMENT ANYONE SHOULD RUN.** §4.6 puts single-seed margin noise at 0.858 and a
+pure-noise best-of-48 at 1.91. §6.10c exists because the 48's +6.027 "had exactly the shape of a
+selection artefact" — it was answered by re-folding the top 8 and their nulls at five seeds
+EXCLUDING the selection seed, where the best held at +6.287. The depth arm has had no such
+replication, so its +7.492 is a best-of-12 single draw carrying the same risk. **96 folds, ~$3.56,
+~1.5 h** re-folds the twelve and their nulls at seeds 1-5. Until then the claim is "ten of twelve
+clear the bar on one seed."
+
+A correction caught by a peer session on 2026-10-09 and verified here: an earlier note in this
+file said the 48's best margin is "+6.027, not +6.287". That was backwards. **+6.027 is the
+single-seed value and +6.287 is the independently replicated five-seed median** — both are real,
++6.287 is the better-supported one, and it is live in roughly nine places that are correct as
+written. Do not sweep them.
 
 The **+6.347** bar is the measured non-binder median from `labelled_control_2026-10-08.tsv`,
 committed to git at **`5002b49`** before any depth-arm design existed. The measured BINDER median
@@ -104,8 +120,10 @@ It converts non-binders into weak binders.
 single vendor.** No ranker can reach AUC 1.0 against that, and small AUC differences are not
 meaningful.
 
-**Two numbers I had wrong and have corrected:** the 48's best margin is **+6.027**, not the +6.287
-I repeated several times. And "the chemistry-rejected pool poses better" was a 15-design artifact —
+**One number I got wrong in BOTH directions, now settled:** the 48's best margin is **+6.027 at
+seed 42** and **+6.287 as the five-seed median** (§6.10c, seeds 1-5, excluding the selection seed).
+I first repeated +6.287 without its provenance, then "corrected" it to +6.027, which was backwards
+— the replicated figure is the stronger one. And "the chemistry-rejected pool poses better" was a 15-design artifact —
 the complete 68 gives **4 of 56 = 7.1%** clearing the pose gate against the filter-passed pool's
 **14.3%** (Fisher p = 0.43, so not significant either way, but the direction reversed).
 
