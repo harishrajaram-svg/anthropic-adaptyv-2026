@@ -22,6 +22,7 @@ import csv
 import datetime as dt
 import importlib.util
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -42,6 +43,43 @@ MPNN = os.path.join(REPO, "tools/ProteinMPNN")
 MPNN_PY = os.path.join(MPNN, ".venv/bin/python")
 DESIGNED = "runs/genie3-out/probe50/tnfa_corrected/pdbs"
 STATE = "analysis/02-tnf/depth_rounds"
+
+
+LIN_RE = re.compile(r"_L(\d+)r\d+k\d+$")
+LIN_RE_OLD = re.compile(r"_r\d+p(\d+)k\d+$")       # round 1 of the 2026-10-08 22:27 run
+
+
+def lineage_of(design_id):
+    for rx in (LIN_RE, LIN_RE_OLD):
+        m = rx.search(design_id)
+        if m:
+            return m.group(1)
+    raise ValueError(f"REFUSED: cannot read a lineage from {design_id!r}")
+
+
+def select_per_lineage(rows):
+    """One parent per lineage -- the pre-registration continues each design 'under the same
+    root backbone id', and a global top-N does not.
+
+    WHY THIS REPLACED A GLOBAL TOP-4 MID-RUN, on 2026-10-08 at 23:30. Round 1 of the first
+    stage-B run collapsed the beam to a single backbone in ONE round: all four carried designs
+    came from backbone 40 (three from 40_s2, one from 40_s1), while backbone 3's best child sat
+    at 3.879 A and was dropped for ranking ninth, and backbone 9 died outright. Eight further
+    rounds would then have polished one shape. It also broke the organisers' own diversity rule,
+    which caps any single cluster at 10% of designs; a beam that is 100% one backbone is the
+    opposite of that. The failure mode was named in writing before round 1 finished, so this is
+    a predicted flaw arriving rather than a result being tuned away -- but it IS a deviation from
+    a procedure that was committed before the run, and it is recorded as one.
+    """
+    best = {}
+    for r in rows:
+        lin = lineage_of(r["id"])
+        if lin not in best or float(r["ca_sc_dockq"]) > float(best[lin]["ca_sc_dockq"]):
+            best[lin] = r
+    out = [best[k] for k in sorted(best)]
+    for r in out:                      # the oracle guard still gates every selection
+        dl.select_parent([{"id": r["id"], "ca_sc_dockq": r["ca_sc_dockq"], "lrms": r["lrms"]}])
+    return out
 
 
 def log(m):
@@ -120,10 +158,11 @@ def run_round(n, parents, folds_used):
         log("STOP: wall-clock stop reached"); return None, 0
     tgt = tnf_target()
     jobs = {}
-    for pi, p in enumerate(parents):
-        seqs = redesign(p["cif"], f"r{n}p{pi}", SEQS_PER_PARENT)
+    for p in parents:
+        seqs = redesign(p["cif"], f"r{n}L{p['lin']}", SEQS_PER_PARENT)
         for k, s in enumerate(seqs):
-            jobs[f"tnfa_corrected_{p['backbone']}_r{n}p{pi}k{k}"] = s
+            # L<lineage> is carried in the id so every later round can group by lineage.
+            jobs[f"tnfa_corrected_{p['backbone']}_L{p['lin']}r{n}k{k}"] = s
     if folds_used + len(jobs) > MAX_FOLDS:
         log(f"STOP: spend fuse -- {folds_used}+{len(jobs)} would cross MAX_FOLDS={MAX_FOLDS}")
         return None, 0
@@ -165,14 +204,35 @@ def main():
                                       delimiter="\t") if float(r["lrms"]) <= dl.POSE_GATE_LRMS]
     if not seed:
         sys.exit("REFUSED: no stage-A parent clears the pose gate")
-    for r in seed:
+    for i, r in enumerate(seed):
         r["cif"] = cif_of(f"runs/A-depthA-out/AdepthA/{r['id']}")
+        r["lin"] = str(i)
     log(f"stage B start: {len(seed)} parents, best lrms "
         f"{min(float(r['lrms']) for r in seed):.3f} A")
+    for r in seed:
+        log(f"  lineage {r['lin']} = {r['id']} (backbone {r['backbone']}, lrms {r['lrms']})")
     parents, best, folds = seed, [max(float(r["ca_sc_dockq"]) for r in seed)], 0
+    start = 1
+
+    if "--resume-round2" in sys.argv:
+        prev = list(csv.DictReader(open(f"{STATE}/round1.tsv"), delimiter="\t"))
+        if not prev:
+            sys.exit("REFUSED: no round1.tsv to resume from")
+        keep = select_per_lineage(prev)
+        for r in keep:
+            r["cif"] = cif_of(f"runs/depthB-r1-out/depthB1/{r['id']}")
+            r["lin"] = lineage_of(r["id"])
+        best.append(max(float(r["ca_sc_dockq"]) for r in prev))
+        folds = len(prev)
+        log(f"RESUMING from round 1 ({len(prev)} designs already folded, not refolded)")
+        log(f"re-selected best-per-lineage: " +
+            ", ".join(f"L{r['lin']}={r['id']} ({float(r['ca_sc_dockq']):.4f}, "
+                      f"{float(r['lrms'])}A, bb {r['backbone']})" for r in keep))
+        log(f"backbones carried: {sorted({r['backbone'] for r in keep})}")
+        parents, start = keep, 2
     log(f"stage-A baseline best CA sc_DockQ {best[0]:.4f}")
 
-    for n in range(1, MAX_ROUNDS + 1):
+    for n in range(start, MAX_ROUNDS + 1):
         rows, used = run_round(n, parents, folds)
         folds += used
         if rows is None:
@@ -189,8 +249,11 @@ def main():
         log(f"round {n}: {v} -- {why}")
         if v == "STOP":
             break
-        keep = sorted(rows, key=lambda r: -float(r["ca_sc_dockq"]))[:len(seed)]
-        parents = [{"backbone": r["backbone"], "cif": r["cif"], "lrms": r["lrms"]} for r in keep]
+        keep = select_per_lineage(rows)        # one per lineage, NOT a global top-N
+        parents = [{"backbone": r["backbone"], "cif": r["cif"], "lrms": r["lrms"],
+                    "lin": lineage_of(r["id"])} for r in keep]
+        log(f"round {n}: carrying {len(parents)} lineage(s), backbones "
+            f"{sorted({r['backbone'] for r in keep})}")
 
     log(f"stage B done. per-round best: {[round(x,4) for x in best]}")
     log(f"total folds {folds} (~${folds*0.0371:.2f}). cap was {MAX_FOLDS}.")
@@ -216,7 +279,25 @@ def selftest():
     src = open(os.path.join(HERE, "run_depth_rounds.py")).read()
     assert '"--omit_AAs", "CX"' in src and 'cysteine survived the ban' in src
     print("  ok  cysteine banned in redesign, with a post-hoc assertion as a second line")
-    print("\nself-tests passed: 6")
+    # T7 best-per-lineage keeps one per lineage and never collapses the beam
+    rows = [dict(id="tnfa_corrected_40_L1r2k0", ca_sc_dockq="0.90", lrms="2.0", backbone="40"),
+            dict(id="tnfa_corrected_40_L1r2k1", ca_sc_dockq="0.80", lrms="3.0", backbone="40"),
+            dict(id="tnfa_corrected_3_L0r2k0",  ca_sc_dockq="0.40", lrms="4.0", backbone="3"),
+            dict(id="tnfa_corrected_9_L3r2k0",  ca_sc_dockq="0.10", lrms="9.0", backbone="9")]
+    got = select_per_lineage(rows)
+    assert sorted(lineage_of(r["id"]) for r in got) == ["0", "1", "3"], [r["id"] for r in got]
+    assert {r["backbone"] for r in got} == {"40", "3", "9"}
+    print("  ok  T7 best-per-lineage keeps 3 lineages / 3 backbones where a global top-3 "
+          "would have kept 2 of backbone 40 and dropped one")
+    # T7b MUTATION: a global top-N on the same rows DOES collapse, so T7 is not vacuous
+    glob = sorted(rows, key=lambda r: -float(r["ca_sc_dockq"]))[:3]
+    assert len({lineage_of(r["id"]) for r in glob}) == 2, glob
+    print("      MUTATION: the global top-3 keeps only 2 lineages, confirming the difference")
+    # T8 the round-1 id format is still parseable, so the resume path can group it
+    assert lineage_of("tnfa_corrected_40_r1p2k3") == "2"
+    assert lineage_of("tnfa_corrected_40_L2r5k3") == "2"
+    print("  ok  T8 lineage parses from both the round-1 and the new id formats")
+    print("\nself-tests passed: 8")
     return 0
 
 
