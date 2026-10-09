@@ -1215,14 +1215,22 @@ with all target-chain permutations tried and the maximum taken.
 designed contact surviving, and the quantity is **uncorrelated with our margin** -- so every margin
 reported here scored an interface the predictor chose rather than the one we designed.
 
-**Two readings we cannot separate.** Either the sequences do not encode the intended pose, or
-ESMFold2 cannot reproduce designed poses for this class of complex. Section 6.10e tilts toward the
-first: its margin separates measured binders from non-binders at AUC 0.794, so it carries real
-signal about binding.
+**Two readings, now separated by a control.** Either the sequences do not encode the intended
+pose, or ESMFold2 cannot reproduce designed poses for this class of complex. The second reading is
+now excluded. Section 6.10g folds each of the 12 measured binders in this configuration and
+compares the result with the campaign's own ESMFold2 prediction of the identical sequence: median
+ligand RMSD **1.57 A**, median Fnat **0.942**, median CA sc_DockQ **0.866**, worst case 3.01 A,
+0 of 12 refused. This configuration places a known binder on this target to within 3 A every
+time. The worst-placed measured binder is five times better placed than our best design, and the
+two distributions do not overlap. So the 31 A is a property of our designs.
 
-**The limitation we cannot close.** The released campaign gives binders' sequences but not their
-designed structures, so sc_DockQ cannot be calibrated here against known-good designs. The 0.23
-threshold is the protocol's own, measured on their pipeline.
+**The limitation, narrowed rather than closed.** The released campaign gives binders' sequences
+but not their designed structures, so sc_DockQ still cannot be calibrated against a known-good
+*designed* structure, and 6.10g's control is prediction-against-prediction of one sequence rather
+than designed-against-predicted. What it does establish is that the CA-only construction is not
+the explanation: a real binder reaches **0.866** on this scale, so a reading of 0.025 cannot be
+blamed on CA-only DockQ being deflated relative to the all-atom original. The 0.23 threshold is
+the protocol's own, measured on their pipeline, and it sits between the two by a wide margin.
 
 **This was first reported from a bug, and the control caught it.** The initial run gave the same
 figures from a five-residue register shift: the designed target is numbered 1-152 (mature 6-157)
@@ -1230,6 +1238,66 @@ and the predicted target 1-157, so residue 1 was matched to residue 1 throughout
 superposition read 13.9-19.3 A, impossible for a solved fold, which exposed it. The tool now
 REFUSES rather than scoring when the shared target fails to superpose within 4 A, with a mutation
 test proving a register shift is refused and recovers to DockQ 1.0000 once the offset is tried.
+
+---
+
+
+#### 6.10g The instrument was suspected before the designs, and it came back clean
+
+The protocol this work calibrates against says, at its own section on pose failures, that when a
+substantial fraction of top designs are `pose_FAIL` you treat the instrument as suspect before the
+designs. §6.10f reports 0 of 40 passing and a median 31 A, and read that as a verdict on the
+designs without ever running the control. This is the control, and it was pre-registered with its
+bar before any number existed (`analysis/02-tnf/PREREG-POSE-CONTROL-2026-10-08.md`, committed
+before the run).
+
+**Construction.** For each of the 12 wet-lab-confirmed binders in the released campaign, the
+campaign's own ESMFold2 prediction is compared with **our** ESMFold2 fold of the **identical
+sequence** — ours single-sequence on both chains, theirs with target-chain MSAs. Same instrument
+as §6.10f, CA-only, symmetry-maximised over the three target chains. Both target constructs are
+the same 157-residue chain numbered 1-157, so the offset is zero and the §6.10f register shift
+cannot recur; this was asserted before the comparison ran, and all 12 pairs carry byte-identical
+binder sequences on both sides.
+
+| | 12 measured binders, 0 refused |
+|---|--:|
+| median CA sc_DockQ | **0.866** |
+| median Fnat | **0.942** |
+| median ligand RMSD | **1.57 A** |
+| range, ligand RMSD | 0.50 - 3.01 A |
+
+**Pre-registered bar: PASS required median ligand RMSD <= 10 A and median Fnat >= 0.10, with the
+ambiguous band resolving as FAIL. The result is a PASS by a factor of six on the binding
+statistic.** Our configuration places a known binder on this target to within 3 A in every one of
+twelve cases, without the target MSA that the campaign used.
+
+**The negative control, and the narrower claim it supports.** A reference pose paired with the
+wrong fold of matched length gives 68 mismatched pairs, 66 scored. Pooled, matched separates from
+mismatched on ligand RMSD at AUC **0.806**, permutation p **0.00065** at 20,000 permutations,
+clearing the pre-registered 0.75 and 0.05. The pooled figure is the wrong read. Split: the 8
+Genie3 binders are variants of one backbone and **their own poses sit 1.84 A from each other**,
+so mismatching them substitutes a different sequence into the same pose rather than a wrong pose,
+and that cell does not separate (AUC 0.692, p 0.082). Their 4 PXDesign poses sit **12.42 A** from
+each other, and there matched reads 0.81 A against mismatched 12.50 A, AUC 0.917. So the control's
+power comes from four designs, and what it establishes is this: **where a wrong pose exists, this
+instrument reports it as roughly 12 A.** The 1.57 A is therefore not what you get for parking any
+binder near a large homotrimer.
+
+**What it licenses and what it does not.** The predictor is exonerated: ESMFold2 in this
+configuration can place a binder at the correct epitope on TNF-alpha. §6.10f's 31 A is a statement
+about our designs. What this does not establish is a calibrated designed-against-predicted
+threshold, because the release contains no designed structure for any of the 150 designs — only
+per-arm predictions — so the control is prediction-against-prediction of one sequence. The
+calibration it does supply is of the scale: a real binder reaches 0.866 on this CA-only
+construction, which removes "CA-only is deflated" as an explanation for 0.025.
+
+**An asymmetry in the released record, stated because it bounds how much the protocol's own gate
+should weigh here.** In the released co-folding table, 23 of the 150 designs carry a null
+`sc_dockq` on every row, and 8 of the 12 measured binders are among them — exactly the eight that
+rank 1 through 8. The protocol places `pose_dockq` in its mandatory-non-null set and makes a
+non-null value the mechanical gate on every ranked row. So the pose gate was not recorded, in the
+public release, for the recipe that produced eight of their twelve binders. Their internal sheet
+may have carried values the release dropped; what can be checked is the release.
 
 ---
 
@@ -2075,7 +2143,13 @@ those are marked.
     sc_DockQ against the designed complex gives a median of 0.025 with **0 of 40 passing** the
     protocol's 0.23 threshold, Fnat near 0, and a median ligand RMSD of 31 A -- the predictor does
     not put the binder at the designed epitope. It is uncorrelated with our margin (r = -0.159),
-    so every margin in this work scored an interface we did not design. sc_DockQ cannot be
-    calibrated against known binders because the released data gives their sequences and not their
-    designed structures. The organisers' protocol weights ipSAE and sc_DockQ 4:1 at every
-    promotion step; we used only the first for the whole campaign.
+    so every margin in this work scored an interface we did not design. The organisers' protocol
+    weights ipSAE and sc_DockQ 4:1 at every promotion step; we used only the first for the whole
+    campaign. **Controlled on the last day, and the instrument survived it.** Section 6.10g folds
+    the 12 measured binders in this configuration and recovers the campaign's own pose for each to
+    a median 1.57 A, Fnat 0.942, CA sc_DockQ 0.866, against a bar pre-registered at 10 A -- so the
+    31 A is a property of our designs, not of the predictor, and "CA-only is deflated" is excluded
+    as an explanation. What remains uncalibrated is the designed-against-predicted comparison
+    itself: the release carries no designed structure for any of the 150 designs, so 6.10g controls
+    prediction against prediction of one sequence, and the 0.23 threshold is still imported rather
+    than reproduced.
