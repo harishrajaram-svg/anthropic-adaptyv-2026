@@ -4,22 +4,31 @@
 Runs without supervision for several hours and spends money, so every limit is a hard cap in
 code rather than a note in a document:
 
-  MAX_ROUNDS      10    pre-registered ceiling
-  MAX_FOLDS       400   absolute spend fuse (~$15); refuses to launch a round that would cross it
+  MAX_ROUNDS      14    pre-registered ceiling (PREREG AMENDMENT 1: 7 lineages x 4
+                        children x 2 species = 56 folds/round, so 14 x 56 = 784)
+  MAX_FOLDS       800   absolute spend fuse (~$26); refuses to launch a round that would cross it
   WALL_STOP             Sat Oct 10 18:00 EDT, pre-registered; checked before every launch
-  selection             CA sc_DockQ against the designed backbone, ONLY -- enforced by
-                        depth_loop.select_parent(), which raises on any confidence column
+  selection             CA sc_DockQ against the designed backbone, taking the WORSE of
+                        human and mouse -- enforced by depth_loop.select_parent(), which raises
+                        on any confidence column. ONE declared-contaminated lineage instead uses
+                        the protocol's 4:1 ipSAE+sc_DockQ rule via a fenced sibling selector and
+                        is pre-committed as NOT a submission source (PREREG s2).
   cysteine              banned in every redesign (--omit_AAs CX), because 2 of the 4 parents
                         carry it and this project is Cys-free for de novo work
+  histidine             1-2 forced at cation-reachable positions computed on the PREDICTED
+                        complex, via --omit_AA_jsonl, VERIFIED on the output sequences because
+                        that flag fails silently. One control lineage runs without it.
 
 It never trusts the local entrypoint's output write. That path has failed three times on this
 project; folds are always recovered from the esmfold2-runs Volume instead.
 
     run_depth_rounds.py --selftest
-    run_depth_rounds.py --go
+    run_depth_rounds.py --go [--one-round] [--seed-lineages id:lin,...]
+                            [--parents <round> id:lin,...] [--resume-after <round>]
 """
 import csv
 import datetime as dt
+import glob
 import importlib.util
 import os
 import re
@@ -34,17 +43,47 @@ os.chdir(REPO)
 _spec = importlib.util.spec_from_file_location("_dl", os.path.join(HERE, "depth_loop.py"))
 dl = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(dl)
+_mc_spec = importlib.util.spec_from_file_location(
+    "_mc", os.path.join(HERE, "mpnn_constraints.py"))
+mc = importlib.util.module_from_spec(_mc_spec)
+_mc_spec.loader.exec_module(mc)
 
 MAX_ROUNDS = dl.MAX_ROUNDS            # 10
-MAX_FOLDS = 400                       # spend fuse, ~$15
+MAX_FOLDS = 800                       # spend fuse, ~$26. RAISED 400 -> 800 on
+                                      # 2026-10-09: PREREG s5. 12 rounds x 8
+                                      # lineages x 4 children x 2 SPECIES = 768,
+                                      # leaving 32 folds of headroom.
 WALL_STOP = dt.datetime(2026, 10, 10, 18, 0, 0)
-SEQS_PER_PARENT = 8
+SEQS_PER_PARENT = 8                   # 8 -> 4 -> 8 on 2026-10-09. AMENDMENT 2: the
+                                      # constrained restart is dead, so the arm is an
+                                      # UNCONSTRAINED continuation and best-of-4 is a
+                                      # plausible reason the diagnostic's clean arm
+                                      # read 0.286 against the depth arm's ~0.62,
+                                      # which was best-of-8. Old note: 8 lineages x 4
+                                      # x 2 species = 64 folds/round, which buys 12
+                                      # rounds at the fuse instead of 6. Total width
+                                      # per round (32) is unchanged from the depth
+                                      # arm's 4 lineages x 8; it is spread wider.
 MPNN = os.path.join(REPO, "tools/ProteinMPNN")
 MPNN_PY = os.path.join(MPNN, ".venv/bin/python")
 DESIGNED = "runs/genie3-out/probe50/tnfa_corrected/pdbs"
 STATE = "analysis/02-tnf/depth_rounds"
 # A relaunch must NOT share a Volume namespace with an aborted run. See score_round().
 RUN_TAG = os.environ.get("DEPTH_RUN_TAG", "v2")
+# PREREG s2: the lineage label(s) selected by the protocol's 4:1 rule instead of ours.
+# Comma-separated, e.g. DEPTH_CONTAMINATED=7. Empty means every lineage is clean.
+CONTAMINATED = frozenset(
+    x.strip() for x in os.environ.get("DEPTH_CONTAMINATED", "").split(",") if x.strip())
+# AMENDMENT 1 s1.1: the lineage(s) run with NO histidine requirement -- the B4 control.
+# It sits on the SAME backbone and parent as the clean reference lineage, so the only
+# difference between them is the constraint. Comma-separated, e.g. DEPTH_NO_HIS=5.
+NO_HIS = frozenset(
+    x.strip() for x in os.environ.get("DEPTH_NO_HIS", "").split(",") if x.strip())
+# Lineage(s) run with the ANTI-INVERSION ACID BAN DROPPED. D1 (2026-10-09) put 0 of 28
+# children inside the pose gate with the ban on, and the His / no-His arms on one parent
+# collapsed equally, so the ban -- not the histidines -- is the suspect.
+NO_ACID_BAN = frozenset(
+    x.strip() for x in os.environ.get("DEPTH_NO_ACID_BAN", "").split(",") if x.strip())
 
 
 LIN_RE = re.compile(r"_L(\d+)r\d+k\d+$")
@@ -57,6 +96,33 @@ def lineage_of(design_id):
         if m:
             return m.group(1)
     raise ValueError(f"REFUSED: cannot read a lineage from {design_id!r}")
+
+
+def _round_tsv(rn):
+    """Prior round's scored table, tagged or untagged. See the note at the write site."""
+    for p in (f"{STATE}/round{rn}{RUN_TAG}.tsv", f"{STATE}/round{rn}.tsv"):
+        if os.path.exists(p):
+            return p
+    sys.exit(f"REFUSED: no round{rn} table; tried round{rn}{RUN_TAG}.tsv and round{rn}.tsv")
+
+
+def _round_out(rn, design_id):
+    """Path to a prior round's HUMAN predicted complex, across both output layouts.
+
+    Rounds 1-5 of the depth arm wrote one species to runs/depthB-r<n>-out/depthB<n><tag>/.
+    From 2026-10-09 each round writes per species to runs/depthB-r<n>-<species>-out/
+    depthB<n><species><tag>/. --parents and --resume-after reach back into earlier rounds, so
+    they must resolve BOTH or a resume would silently look in a directory that does not exist
+    and die with a confusing cif count.
+    """
+    cands = [f"runs/depthB-r{rn}-human-{RUN_TAG}-out/depthB{rn}human{RUN_TAG}/{design_id}",
+             f"runs/depthB-r{rn}-human-out/depthB{rn}human{RUN_TAG}/{design_id}",
+             f"runs/depthB-r{rn}-out/depthB{rn}{RUN_TAG}/{design_id}",
+             f"runs/depthB-r{rn}-out/depthB{rn}/{design_id}"]
+    for c in cands:
+        if os.path.isdir(c):
+            return c
+    sys.exit("REFUSED: no prior-round output for " + design_id + "; tried " + ", ".join(cands))
 
 
 def select_per_lineage(rows):
@@ -119,9 +185,25 @@ def cif_of(d):
     return c[0]
 
 
-def redesign(parent_cif, tag, nseq):
-    """SolubleMPNN on the PREDICTED complex: chain D designed, A/B/C fixed, cysteine banned.
-    Returns the list of new binder sequences."""
+def redesign(parent_cif, tag, nseq, force_his=True, omit_acids=True):
+    """SolubleMPNN on the PREDICTED complex: chain D designed, A/B/C fixed, cysteine banned,
+    and -- added 2026-10-09 -- the HISTIDINE AND ACID CONSTRAINTS ACTUALLY APPLIED.
+
+    THIS WAS MISSING AND IT IS THE WHOLE POINT OF THE ARM. Until now this function passed only
+    `--omit_AAs CX`, the cysteine ban. bin/mpnn_constraints.py existed, was fixed on 2026-10-09
+    (cap 8 -> 2, positions read off the predicted complex), and was CALLED BY NOTHING. A
+    "constrained restart" would have run completely unconstrained and B4 would have measured
+    nothing.
+
+    THE FLAG FAILS SILENTLY. protein_mpnn_run.py loads the file only `if os.path.isfile(...)`
+    and otherwise prints `omit_AA_jsonl is NOT loaded` to stdout and carries on designing. A
+    typo in the path is therefore indistinguishable from an unconstrained run, so the
+    constraint is verified on the OUTPUT SEQUENCES below, not assumed from the argument list --
+    the same reason the cysteine ban carries a post-hoc assertion.
+
+    `force_his=False` is the B4 control lineage: same pipeline, acids still kept off the
+    interface, no histidine requirement.
+    """
     import gemmi
     work = f"/tmp/depth_{tag}"
     shutil.rmtree(work, ignore_errors=True)
@@ -137,77 +219,296 @@ def redesign(parent_cif, tag, nseq):
       f"--input_path={work}/in", f"--output_path={work}/p.jsonl")
     r(MPNN_PY, "helper_scripts/assign_fixed_chains.py",
       f"--input_path={work}/p.jsonl", f"--output_path={work}/c.jsonl", "--chain_list", "D")
+    # the per-position constraints, computed on THIS parent's predicted complex (C2)
+    blen = sum(1 for res in st[0]["D"])
+    iface, reach = mc.positions(parent_cif, "D")
+    cpath, citems = mc.emit("parent", "D", iface, reach, f"{work}/cons",
+                            force_his=force_his, n_res=blen, omit_acids=omit_acids)
+    log(f"  {tag}: {len(iface)} interface pos, {len(reach)} His pos {reach} "
+        f"(force_his={force_his}, omit_acids={omit_acids}), binder {blen} aa")
     r(MPNN_PY, "protein_mpnn_run.py", "--jsonl_path", f"{work}/p.jsonl",
       "--chain_id_jsonl", f"{work}/c.jsonl", "--out_folder", work,
       "--num_seq_per_target", str(nseq), "--sampling_temp", "0.1",
       "--seed", "37", "--batch_size", "1", "--use_soluble_model",
-      "--omit_AAs", "CX")                      # <-- the cysteine ban
+      "--omit_AAs", "CX",                      # <-- the cysteine ban
+      "--omit_AA_jsonl", cpath)                # <-- the His/acid constraints
     lines = [l.strip() for l in open(f"{work}/seqs/parent.fa") if l.strip()]
     seqs = [l for l in lines if not l.startswith(">")][1:]     # [0] is the native
     out = []
+    acid_only = sorted(set(iface) - set(reach))
     for s in seqs:
         s = s.split("/")[-1]
         if "C" in s:
             sys.exit(f"REFUSED: cysteine survived the ban in {tag}")
+        # POST-HOC VERIFICATION of a silently-failing flag. If omit_AA_jsonl did not load, the
+        # forced positions come back as whatever SolubleMPNN liked and an acid-omitted interface
+        # position comes back as D or E. Either means the constraint never applied.
+        if force_his:
+            bad = [p for p in reach if s[p - 1] != "H"]
+            if bad:
+                sys.exit(f"REFUSED: {tag}: omit_AA_jsonl did not apply -- forced position(s) "
+                         f"{bad} are {[s[p-1] for p in bad]}, expected H. The flag loads only "
+                         f"if the file exists and otherwise designs unconstrained.")
+        leaked = [p for p in acid_only if s[p - 1] in "DE"] if omit_acids else []
+        if leaked:
+            sys.exit(f"REFUSED: {tag}: acid survived the interface omission at {leaked} "
+                     f"({[s[p-1] for p in leaked]}); omit_AA_jsonl did not apply")
+        nh = s.count("H")
+        if force_his and not (1 <= nh <= mc.MAX_FORCED_HIS):
+            log(f"  WARN {tag}: {nh} histidines in a sequence (cap is "
+                f"{mc.MAX_FORCED_HIS} FORCED; extras are SolubleMPNN's own choice)")
         out.append(s)
     assert len(out) == nseq, (len(out), nseq)
     return out
 
 
-def run_round(n, parents, folds_used):
-    """One round. Returns (rows, n_folds) or (None, 0) if a cap blocks it."""
+def mouse_target():
+    """The 156-mer mouse TNF-alpha used by every prior mouse fold. Refuses on disagreement.
+
+    A TRIMER, not the dimer of METHODS s6.10d. s6.12(b) measured the dimer inflating margins by
+    a median +16% (spread -78% to +40%), running 6.8x noisier (SD 1.520 vs 0.225), and producing
+    at least one flatly false reading. The dimer existed because s6.6's 976-token OOM hit a 48 GB
+    L40S INSIDE THE GRADIENT COMPUTATION -- a Mosaic design-time limit. Scoring builds no
+    gradient graph, and a mouse trimer is 551 residues against the human trimer's 554 that this
+    project folds throughout: 12 trimer runs completed with zero OOM at 28.4 s/fold.
+    """
+    seen = set()
+    import glob
+    for p in glob.glob("runs/R-mtri-*-in/*.faa") + glob.glob("runs/S0-mtri-*-in/*.faa"):
+        ch, cur = {}, None
+        for l in open(p):
+            l = l.strip()
+            if not l:
+                continue
+            if l.startswith(">"):
+                cur = l.split("|")[-1]; ch[cur] = ""
+            else:
+                ch[cur] += l
+        if not {"A", "B", "C"} <= set(ch):
+            sys.exit(f"REFUSED: {p} is not a 3-protomer mouse construct (chains {sorted(ch)})")
+        if not ch["A"] == ch["B"] == ch["C"]:
+            sys.exit(f"REFUSED: {p} target protomers differ")
+        seen.add(ch["A"])
+    if not seen:
+        sys.exit("REFUSED: no prior mouse-trimer fold to take the target from")
+    if len(seen) != 1:
+        sys.exit(f"REFUSED: prior mouse folds used {len(seen)} different targets")
+    t = seen.pop()
+    if len(t) != 156:
+        sys.exit(f"REFUSED: mouse target is {len(t)} residues, expected 156")
+    return t
+
+
+SPECIES = {"human": (tnf_target, 157), "mouse": (mouse_target, 156)}
+
+
+APPS_PER_SPECIES = int(os.environ.get("DEPTH_APPS_PER_SPECIES", "4"))
+
+
+def _batches(jobs, k):
+    """Split a job dict into k round-robin batches, so each app carries a similar load."""
+    items = sorted(jobs.items())
+    return [b for b in (dict(items[i::k]) for i in range(k)) if b]
+
+
+def fold_all_species(n, jobs, contaminated_lineages=()):
+    """Fold every design against EVERY species, all apps concurrently. -> {species: rows}
+
+    WHY CONCURRENT, measured 2026-10-09. score-esmfold2.sh batches a whole input directory into
+    ONE container and folds it serially, so the first shape of this -- one app per species, the
+    species run one after the other -- put 64 folds through two serial containers: ~31 min per
+    round, ~6.2 h for twelve. Splitting each species across APPS_PER_SPECIES apps and launching
+    both species together puts 8 apps in flight at 8 folds each: ~5.5 min per round, ~1.4 h for
+    twelve. The cost is model load, ~137 s per app, so 8 loads per round instead of 2 (~+$12
+    over the run). Rates behind this: human 554 res 25.8 s/fold (n=120), mouse trimer 551 res
+    23.2 s/fold (n=28).
+
+    EVERY APP GETS ITS OWN VOLUME NAME. The stale-fold bug was two runs sharing one name; eight
+    names per round is eight times the exposure, so the name carries round, species AND batch,
+    the set is asserted unique before launch, and `expect` still checks the id format at scoring.
+    """
+    plan = []
+    for sp in sorted(SPECIES):
+        getter, tlen = SPECIES[sp]
+        tgt = getter()
+        if len(tgt) != tlen:
+            sys.exit(f"REFUSED: {sp} target is {len(tgt)} residues, expected {tlen}")
+        for b, batch in enumerate(_batches(jobs, APPS_PER_SPECIES), 1):
+            ind = f"runs/depthB-r{n}-{sp}-b{b}-{RUN_TAG}-in"
+            shutil.rmtree(ind, ignore_errors=True); os.makedirs(ind)
+            for did, sq in batch.items():
+                with open(f"{ind}/{did}.faa", "w") as fh:
+                    for c in "ABC":
+                        fh.write(f">protein|{c}\n{tgt}\n")
+                    fh.write(f">protein|D\n{sq}\n")
+            plan.append((sp, b, ind, f"depthB{n}{sp}b{b}{RUN_TAG}"))
+
+    names = [p[3] for p in plan]
+    if len(set(names)) != len(names):
+        sys.exit(f"REFUSED: duplicate Volume run name in {names}")
+    os.makedirs("runs/depth_logs", exist_ok=True)
+    log(f"round {n}: launching {len(plan)} apps concurrently "
+        f"({len(jobs)} designs x {len(SPECIES)} species)")
+
+    procs = []
+    for sp, b, ind, run in plan:
+        env = dict(os.environ, SEEDS="42", OUT_DIR=f"runs/depthB-r{n}-{sp}-{RUN_TAG}-out",
+                   MODAL_TIMEOUT="90", MODAL_GPU=os.environ.get("MODAL_GPU", "H200"))
+        logp = f"runs/depth_logs/round{n}{sp}b{b}{RUN_TAG}.log"
+        lf = open(logp, "w")
+        procs.append((sp, b, run, logp, lf,
+                      subprocess.Popen(["bash", "bin/score-esmfold2.sh", ind, run],
+                                       env=env, stdout=lf, stderr=subprocess.STDOUT, text=True)))
+    for sp, b, run, logp, lf, pr in procs:
+        rc = pr.wait()
+        lf.close()
+        if rc != 0:
+            log(f"  WARN {sp} batch {b} exited {rc}; log {logp}. "
+                "Per-fold Volume commits mean completed folds still recover.")
+
+    per = {}
+    for sp in sorted(SPECIES):
+        out = f"runs/depthB-r{n}-{sp}-{RUN_TAG}-out"
+        shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
+        rows = []
+        for psp, b, ind, run in plan:
+            if psp != sp:
+                continue
+            subprocess.run(["modal", "volume", "get", "esmfold2-runs", run],
+                           cwd=out, capture_output=True, text=True)
+            r, refused = dl.score_round(DESIGNED, f"{out}/{run}",
+                                        expect=re.compile(rf"_L\d+r{n}k\d+$"))
+            if refused:
+                log(f"  {sp} batch {b}: {len(refused)} refused")
+            rows.extend(r)
+        log(f"round {n} [{sp}]: scored {len(rows)} of {len(jobs)}")
+        for r in rows:
+            sub = next(run for psp, b, ind, run in plan
+                       if psp == sp and os.path.isdir(f"{out}/{run}/{r['id']}"))
+            r["cif"] = cif_of(f"{out}/{sub}/{r['id']}")
+            if lineage_of(r["id"]) in contaminated_lineages:
+                iv = dl.ipsae_for(r["cif"])
+                if iv is None:
+                    log(f"  WARN {r['id']}: ipSAE unavailable; 4:1 lineage cannot select on it")
+                else:
+                    r["ipsae_min"] = iv
+                    r["contaminated"] = True
+        per[sp] = rows
+    return per
+
+
+def _true_depth(design_id):
+    """Rounds of optimisation a seed already carries, from its id, not the round counter.
+
+    `tnfa_corrected_40_L1r4k6` has been through 4 rounds; `tnfa_corrected_16_s1` through 0. A
+    run that continues some lineages and starts others has two depths in flight at once, and
+    the round counter describes neither.
+    """
+    m = re.search(r"_L\d+r(\d+)k\d+$", design_id)
+    return int(m.group(1)) if m else 0
+
+
+def _seed_cif(design_id):
+    """Locate a round-0 parent's predicted complex across every stage-A / 68-pool output tree."""
+    for d in (*glob.glob(f"runs/depthB-r*-out/*/{design_id}"),
+              *glob.glob(f"runs/depthB-r*-*-out/*/{design_id}"),
+              f"runs/A-depthA-out/AdepthA/{design_id}",
+              f"runs/A-seed68-out/Aseed68/{design_id}",
+              f"runs/A-seed68b-out/Aseed68b/{design_id}",
+              f"runs/A-cofold-out/Acofold/{design_id}"):
+        if os.path.isdir(d):
+            return d
+    sys.exit(f"REFUSED: no round-0 fold found for {design_id}")
+
+
+def seed_lineages(spec):
+    """--seed-lineages id:lin,id:lin,...  explicit round-1 parents.
+
+    WHY THIS EXISTS. main()'s auto-selection takes stage-A designs inside the 10 A pose gate,
+    which yields FOUR parents on three backbones. AMENDMENT 1 needs SEVEN lineages, two of them
+    seeded from the 68-pool (backbones 16 and 10, which stage A never scored) and three sharing
+    backbone 40's parent so the B4 and C1 controls each have a matched comparator. That cannot
+    come out of a gate filter, so it is stated explicitly and every choice lands in the log.
+    """
+    pose = {}
+    srcs = ["analysis/02-tnf/depthA_pose_2026-10-08.tsv",
+            "analysis/02-tnf/seed68_partial_pose_2026-10-09.tsv",
+            "analysis/02-tnf/seed45_pose_2026-10-09.tsv"]
+    # ...and every prior round, so a run can CONTINUE finished lineages alongside fresh ones.
+    # The depth arm ended round 5 with 4 lineages on only TWO backbones (3 and 40); backbones
+    # 16 and 10 were never in the loop. Mixing continued and fresh lineages in one run is how
+    # the backbone count goes from 2 to 4, and depth stays per-lineage under the protocol's
+    # root_backbone_id rule rather than being read off the round counter.
+    srcs += sorted(glob.glob(f"{STATE}/round*.tsv"))
+    for f in srcs:
+        if not os.path.exists(f):
+            continue
+        for r in csv.DictReader(open(f), delimiter="\t"):
+            pose.setdefault(r["id"], r)
+    out = []
+    for item in spec.split(","):
+        did, lin = item.split(":")
+        if did not in pose:
+            sys.exit(f"REFUSED: {did} has no pose row in any stage-A or 68-pool table")
+        r = dict(pose[did]); r["lin"] = lin
+        r["cif"] = cif_of(_seed_cif(did))
+        r["true_depth"] = _true_depth(did)
+        out.append(r)
+    if len({r["lin"] for r in out}) != len(out):
+        sys.exit("REFUSED: duplicate lineage labels in --seed-lineages")
+    return out
+
+
+def run_round(n, parents, folds_used, contaminated_lineages=()):
+    """One round, BOTH species. Returns (rows, n_folds) or (None, 0) if a cap blocks it."""
     if dt.datetime.now() >= WALL_STOP:
         log("STOP: wall-clock stop reached"); return None, 0
-    tgt = tnf_target()
     jobs = {}
     for p in parents:
-        seqs = redesign(p["cif"], f"r{n}L{p['lin']}", SEQS_PER_PARENT)
-        for k, s in enumerate(seqs):
+        seqs = redesign(p["cif"], f"r{n}L{p['lin']}", SEQS_PER_PARENT,
+                        force_his=p['lin'] not in NO_HIS,
+                        omit_acids=p['lin'] not in NO_ACID_BAN)
+        for k, sq in enumerate(seqs):
             # L<lineage> is carried in the id so every later round can group by lineage.
-            jobs[f"tnfa_corrected_{p['backbone']}_L{p['lin']}r{n}k{k}"] = s
-    if folds_used + len(jobs) > MAX_FOLDS:
-        log(f"STOP: spend fuse -- {folds_used}+{len(jobs)} would cross MAX_FOLDS={MAX_FOLDS}")
+            jobs[f"tnfa_corrected_{p['backbone']}_L{p['lin']}r{n}k{k}"] = sq
+    n_folds = len(jobs) * len(SPECIES)          # BOTH species count against the fuse
+    if folds_used + n_folds > MAX_FOLDS:
+        log(f"STOP: spend fuse -- {folds_used}+{n_folds} would cross MAX_FOLDS={MAX_FOLDS}")
         return None, 0
+    log(f"round {n}: {len(jobs)} designs from {len(parents)} parent(s) "
+        f"x {len(SPECIES)} species = {n_folds} folds")
 
-    ind = f"runs/depthB-r{n}-in"
-    shutil.rmtree(ind, ignore_errors=True); os.makedirs(ind)
-    for did, s in jobs.items():
-        with open(f"{ind}/{did}.faa", "w") as fh:
-            for c in "ABC":
-                fh.write(f">protein|{c}\n{tgt}\n")
-            fh.write(f">protein|D\n{s}\n")
-    log(f"round {n}: {len(jobs)} designs from {len(parents)} parent(s), folding")
+    per = fold_all_species(n, jobs, contaminated_lineages)
+    for sp, rows in per.items():
+        if not rows:
+            log(f"STOP: no design scored for species {sp}"); return None, n_folds
 
-    run = f"depthB{n}{RUN_TAG}"
-    env = dict(os.environ, SEEDS="42", OUT_DIR=f"runs/depthB-r{n}-out", MODAL_TIMEOUT="90")
-    # Write the fold log to its own file instead of discarding it. Without this, the only
-    # observable signal was the Volume file count, so on 2026-10-09 round 4's slowdown could not
-    # be attributed to a cold start, a slower GPU allocation, or contention -- the per-fold
-    # timings existed and were being thrown away.
-    os.makedirs("runs/depth_logs", exist_ok=True)
-    logp = f"runs/depth_logs/round{n}{RUN_TAG}.log"
-    with open(logp, "w") as lf:
-        subprocess.run(["bash", "bin/score-esmfold2.sh", ind, run], env=env,
-                       stdout=lf, stderr=subprocess.STDOUT, text=True)
-    log(f"round {n}: fold log at {logp}")
-    # never trust the local write -- recover from the Volume
-    out = f"runs/depthB-r{n}-out"
-    shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
-    subprocess.run(["modal", "volume", "get", "esmfold2-runs", run],
-                   cwd=out, capture_output=True, text=True)
-    rows, refused = dl.score_round(DESIGNED, f"{out}/{run}",
-                                   expect=re.compile(rf"_L\d+r{n}k\d+$"))
-    log(f"round {n}: scored {len(rows)}, refused {len(refused)}")
-    if not rows:
-        log("STOP: no design scored this round"); return None, len(jobs)
-    os.makedirs(STATE, exist_ok=True)
-    with open(f"{STATE}/round{n}.tsv", "w", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=["id", "backbone", "ca_sc_dockq", "fnat", "lrms", "irms"],
-                           delimiter="\t")
-        w.writeheader(); w.writerows(rows)
+    # PREREG s3 step 3: the selector becomes the WORSE of the two species. combine_species
+    # REFUSES a partial join rather than quietly selecting on whichever species is present.
+    rows = dl.combine_species(per)
+
+    # WHICH COMPLEX THE NEXT ROUND REDESIGNS ON -- a choice the pre-registration did not cover,
+    # recorded here rather than left implicit. It is the HUMAN predicted complex, always, for
+    # two reasons: human is objective 1 and the primary target, and the histidine positions are
+    # computed on the same complex (mpnn_constraints, C2), so constraint and redesign see one
+    # structure. Redesigning on whichever species scored worse would move the structure the
+    # lineage is climbing from round to round and make a plateau unreadable.
+    human_cif = {r["id"]: r["cif"] for r in per["human"]}
     for r in rows:
-        r["cif"] = cif_of(f"{out}/{run}/{r['id']}")
-    return rows, len(jobs)
+        r["cif"] = human_cif[r["id"]]
+
+    os.makedirs(STATE, exist_ok=True)
+    fields = ["id", "backbone", "ca_sc_dockq", "fnat", "lrms", "irms", "worse_species"]
+    fields += [f"ca_sc_dockq_{sp}" for sp in sorted(SPECIES)]
+    fields += ["ipsae_min", "contaminated"]
+    # TAG-SCOPED ON WRITE. Fixed 2026-10-09 after it destroyed data: RUN_TAG scoped the Volume
+    # names and the input dirs but NOT this file, so the diagnostic run's round 1 overwrote the
+    # dry run's round 1. Readers (_round_tsv) fall back to the untagged name so rounds 1-5 of
+    # the depth arm, written before this change, still resolve.
+    with open(f"{STATE}/round{n}{RUN_TAG}.tsv", "w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=fields, delimiter="\t", extrasaction="ignore")
+        w.writeheader(); w.writerows(rows)
+    return rows, n_folds
 
 
 def main():
@@ -222,6 +523,17 @@ def main():
         f"{min(float(r['lrms']) for r in seed):.3f} A")
     for r in seed:
         log(f"  lineage {r['lin']} = {r['id']} (backbone {r['backbone']}, lrms {r['lrms']})")
+    if "--seed-lineages" in sys.argv:
+        seed = seed_lineages(sys.argv[sys.argv.index("--seed-lineages") + 1])
+        log(f"EXPLICIT SEED (AMENDMENT 1): {len(seed)} lineages")
+        for r in seed:
+            role = ("4:1 CONTAMINATED" if r["lin"] in CONTAMINATED
+                    else "no-His CONTROL" if r["lin"] in NO_HIS else "clean + His")
+            log(f"  L{r['lin']} = {r['id']} (backbone {r['backbone']}, "
+                f"dockq {float(r['ca_sc_dockq']):.4f}, lrms {float(r['lrms']):.3f} A) [{role}]")
+        log(f"  backbones: {sorted({r['backbone'] for r in seed})}; "
+            f"folds/round = {len(seed)} x {SEQS_PER_PARENT} x {len(SPECIES)} "
+            f"= {len(seed)*SEQS_PER_PARENT*len(SPECIES)}")
     parents, best, folds = seed, [max(float(r["ca_sc_dockq"]) for r in seed)], 0
     start = 1
 
@@ -236,19 +548,18 @@ def main():
         rn = int(sys.argv[i + 1])
         spec = [x.split(":") for x in sys.argv[i + 2].split(",")]
         prev = {r["id"]: r for r in csv.DictReader(
-            open(f"{STATE}/round{rn}.tsv"), delimiter="\t")}
+            open(_round_tsv(rn)), delimiter="\t")}
         chosen = []
         for did, lg in spec:
             if did not in prev:
                 sys.exit(f"REFUSED: {did} is not in round{rn}.tsv")
             r = dict(prev[did]); r["lin"] = lg
-            sub = f"depthB{rn}{RUN_TAG}" if rn > 1 else "depthB1"
-            r["cif"] = cif_of(f"runs/depthB-r{rn}-out/{sub}/{did}")
+            r["cif"] = cif_of(_round_out(rn, did))
             chosen.append(r)
         if len({r["lin"] for r in chosen}) != len(chosen):
             sys.exit("REFUSED: duplicate lineage labels in --parents")
         best.append(max(float(r["ca_sc_dockq"]) for r in prev.values()))
-        folds = 32 * rn
+        folds = SEQS_PER_PARENT * len(chosen) * len(SPECIES) * rn
         log(f"EXPLICIT PARENTS for round {rn+1} (deviation, recorded):")
         for r in chosen:
             log(f"  L{r['lin']} = {r['id']} (backbone {r['backbone']}, "
@@ -258,7 +569,7 @@ def main():
 
     if "--resume-after" in sys.argv:
         rn = int(sys.argv[sys.argv.index("--resume-after") + 1])
-        prev = list(csv.DictReader(open(f"{STATE}/round{rn}.tsv"), delimiter="\t"))
+        prev = list(csv.DictReader(open(_round_tsv(rn)), delimiter="\t"))
         keep_rx = re.compile(rf"_L\d+r{rn}k\d+$") if rn > 1 else re.compile(r"_r1p\d+k\d+$")
         before = len(prev)
         prev = [r for r in prev if keep_rx.search(r["id"])]
@@ -269,11 +580,10 @@ def main():
             sys.exit(f"REFUSED: no usable rows in round{rn}.tsv")
         keep = select_per_lineage(prev)
         for r in keep:
-            sub = f"depthB{rn}{RUN_TAG}" if rn > 1 else "depthB1"
-            r["cif"] = cif_of(f"runs/depthB-r{rn}-out/{sub}/{r['id']}")
+            r["cif"] = cif_of(_round_out(rn, r["id"]))
             r["lin"] = lineage_of(r["id"])
         best.append(max(float(r["ca_sc_dockq"]) for r in prev))
-        folds = len(prev)
+        folds = len(prev) * len(SPECIES)
         log(f"RESUMING after round {rn} ({len(prev)} designs already folded, not refolded)")
         log(f"re-selected best-per-lineage: " +
             ", ".join(f"L{r['lin']}={r['id']} ({float(r['ca_sc_dockq']):.4f}, "
@@ -283,13 +593,29 @@ def main():
     log(f"stage-A baseline best CA sc_DockQ {best[0]:.4f}")
 
     for n in range(start, MAX_ROUNDS + 1):
-        rows, used = run_round(n, parents, folds)
+        rows, used = run_round(n, parents, folds, CONTAMINATED)
         folds += used
         if rows is None:
             break
-        # SELECTION: strip every confidence column; depth_loop refuses if one survives
-        clean = [{"id": r["id"], "ca_sc_dockq": r["ca_sc_dockq"], "lrms": r["lrms"]} for r in rows]
+        # SELECTION. The six CLEAN lineages get every confidence column STRIPPED; depth_loop
+        # refuses if one survives. The ONE declared-contaminated lineage is selected separately
+        # by the fenced 4:1 selector (PREREG s2), so the clean path never sees ipSAE at all.
+        clean_rows = [r for r in rows if lineage_of(r["id"]) not in CONTAMINATED]
+        contam_rows = [r for r in rows if lineage_of(r["id"]) in CONTAMINATED]
+        clean = [{"id": r["id"], "ca_sc_dockq": r["ca_sc_dockq"], "lrms": r["lrms"]}
+                 for r in clean_rows]
         top = dl.select_parent(clean)
+        if contam_rows:
+            ready = [r for r in contam_rows if "ipsae_min" in r]
+            if len(ready) < 2:
+                log(f"round {n}: 4:1 lineage has {len(ready)} scorable row(s); "
+                    "it selects on the clean rule this round and that is recorded")
+            else:
+                dl.protocol_4to1_blend(ready)
+                ctop = dl.select_parent_declared_contaminated(ready, acknowledge=dl._CONTAM_ACK)
+                log(f"round {n}: 4:1 lineage picks {ctop['id']} "
+                    f"(blend {ctop[dl.PROTOCOL_BLEND_KEY]:+.3f}, "
+                    f"pose {float(ctop['ca_sc_dockq']):.4f})")
         best.append(float(top["ca_sc_dockq"]))
         log(f"round {n}: best CA sc_DockQ {best[-1]:.4f} ({top['id']}), "
             f"best lrms {min(float(r['lrms']) for r in rows):.3f} A, folds used {folds}")
@@ -314,9 +640,25 @@ def main():
 
 
 def selftest():
-    assert MAX_ROUNDS == 10 and MAX_FOLDS == 400
+    # Value pins, updated 2026-10-09 to PREREG-CONSTRAINED-RESTART s5. The old pins read
+    # (10, 400) and correctly FAILED when the constants moved, which is the test working.
+    assert dl.MAX_ROUNDS == 8, f"AMENDMENT 2 fixes 8 rounds, found {dl.MAX_ROUNDS}"
+    assert MAX_FOLDS == 800, f"PREREG s5 fixes an 800-fold fuse, found {MAX_FOLDS}"
+    assert SEQS_PER_PARENT == 8, f"AMENDMENT 2 fixes 8 children/parent, found {SEQS_PER_PARENT}"
+    # 8 lineages x 4 children x 2 species = 64/round, and 12 rounds must FIT the fuse with
+    # headroom. If any of the four numbers drifts, this is the assertion that notices.
+    N_LINEAGES = 6                   # AMENDMENT 2; was 7 (and 8 before that)
+    _per_round = N_LINEAGES * SEQS_PER_PARENT * len(SPECIES)
+    assert _per_round == 96, _per_round
+    assert _per_round * dl.MAX_ROUNDS <= MAX_FOLDS, (
+        f"{dl.MAX_ROUNDS} rounds x {_per_round} folds = {_per_round*dl.MAX_ROUNDS} "
+        f"exceeds the {MAX_FOLDS}-fold fuse")
+    print(f"  ok  prereg pins: {dl.MAX_ROUNDS} rounds x {_per_round} folds "
+          f"({dl.MAX_ROUNDS * _per_round}) fits the {MAX_FOLDS} fuse")
     t = tnf_target(); assert len(t) == 157
-    print("  ok  target construct resolves to the 157-mer used by every prior fold")
+    mt = mouse_target(); assert len(mt) == 156
+    assert t != mt, "human and mouse targets must not be the same sequence"
+    print("  ok  targets resolve: human 157-mer, mouse 156-mer TRIMER (not the s6.10d dimer)")
     seed = [r for r in csv.DictReader(open("analysis/02-tnf/depthA_pose_2026-10-08.tsv"),
                                       delimiter="\t") if float(r["lrms"]) <= dl.POSE_GATE_LRMS]
     assert len(seed) == 4, len(seed)
@@ -351,7 +693,37 @@ def selftest():
     assert lineage_of("tnfa_corrected_40_r1p2k3") == "2"
     assert lineage_of("tnfa_corrected_40_L2r5k3") == "2"
     print("  ok  T8 lineage parses from both the round-1 and the new id formats")
-    print("\nself-tests passed: 8")
+    # T9 (2026-10-09) the parallel dispatch must partition the jobs EXACTLY -- no design lost,
+    # none folded twice. A lost design silently shrinks the round; a duplicated one gets two
+    # Volume entries under different batch names and score_round would see both.
+    _jobs = {f"tnfa_corrected_40_L{i % 8}r1k{i // 8}": "SEQ" for i in range(32)}
+    _b = _batches(_jobs, APPS_PER_SPECIES)
+    assert len(_b) == APPS_PER_SPECIES, [len(x) for x in _b]
+    assert sum(len(x) for x in _b) == len(_jobs), [len(x) for x in _b]
+    _union = set()
+    for _x in _b:
+        assert not (_union & set(_x)), "a design appears in two batches"
+        _union |= set(_x)
+    assert _union == set(_jobs), "batching lost designs"
+    assert max(len(x) for x in _b) - min(len(x) for x in _b) <= 1, "batches badly unbalanced"
+    # a batch count above the job count must not emit empty batches (an empty input dir makes
+    # score-esmfold2.sh refuse, which would fail the whole round for no reason)
+    assert all(_x for _x in _batches({"a": "S", "b": "S"}, 8)), "empty batch emitted"
+    print(f"  ok  T9 dispatch partitions {len(_jobs)} designs into {APPS_PER_SPECIES} "
+          f"balanced batches with no loss or overlap")
+    # T10 every app in a round needs its OWN Volume name. Two runs sharing one name is the
+    # 2026-10-09 stale-fold bug; 8 apps per round is 8x the exposure.
+    _names = [f"depthB{_r}{_sp}b{_i}{RUN_TAG}"
+              for _r in (1, 2) for _sp in sorted(SPECIES)
+              for _i in range(1, APPS_PER_SPECIES + 1)]
+    assert len(set(_names)) == len(_names), "Volume run names collide"
+    assert len(_names) == 2 * len(SPECIES) * APPS_PER_SPECIES, len(_names)
+    # and the name must distinguish species, or human folds would score as mouse
+    assert len({_n.replace("human", "X").replace("mouse", "X") for _n in _names}) < len(_names)
+    print(f"  ok  T10 {len(SPECIES) * APPS_PER_SPECIES} Volume names per round, all distinct, "
+          "species encoded in each")
+
+    print("\nself-tests passed: 11")   # NOTE: hardcoded; drifted twice on 2026-10-09. See backlog.
     return 0
 
 

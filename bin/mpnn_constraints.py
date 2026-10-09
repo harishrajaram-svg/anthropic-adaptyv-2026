@@ -58,14 +58,39 @@ CATIONS = {("ARG", "NE"), ("ARG", "NH1"), ("ARG", "NH2"), ("LYS", "NZ")}
 # rank-1 design (30% Ala with a 7-Ala run), and express_qc_p2 flags it. So forced positions are
 # now SPACED and CAPPED, chosen nearest-cation-first.
 MIN_HIS_SPACING = 3        # no two forced histidines within 3 positions of each other
-MAX_FORCED_HIS = 8         # the top of the 8-11 His-cation contact range in working designs
+MAX_FORCED_HIS = 2         # LOWERED 8 -> 2 on 2026-10-09, pre-registered in
+                           # analysis/02-tnf/PREREG-CONSTRAINED-RESTART-2026-10-09.md.
+                           # 8 was the top of the 8-11 His-cation contact range in the
+                           # organisers' working designs, and forcing it is what pushed our
+                           # 48 to median 3 His and pI 7.01 against the MEASURED binders'
+                           # pI 4.53-5.26 -- i.e. outside the band of the molecules that
+                           # actually bound. The brief needs a pH switch, not a His cluster:
+                           # one or two reachable histidines, placed, is the hypothesis.
+                           # Do NOT raise this without re-running the pI comparison.
 OMIT_EVERYWHERE = "C"      # SolubleMPNN put a cysteine in 9 of 48; de novo work is Cys-free
 ACIDS = "DE"
 ALL_AA = "ACDEFGHIKLMNPQRSTVWY"
 
 
 def read_atoms(path):
-    """[(chain, resnum, resname, atomname, (x,y,z))] for every ATOM record."""
+    """[(chain, resnum, resname, atomname, (x,y,z))] for every atom.
+
+    mmCIF IS SUPPORTED AND IT MATTERS, added 2026-10-09 for the constrained restart.
+    The Genie 3 complex this function was written for is a SPARSE file: measured on
+    `tnfa_corrected_3.pdb`, 573 atoms in total, target chains carrying only a partial sidechain
+    set, and **3 cation atoms in the whole complex**. The ESMFold2 PREDICTED complex of the same
+    design carries ~33 cation atoms per target chain, i.e. ~99. So histidine positions computed
+    on the Genie complex were chosen against about 3 per cent of the cations that are really
+    there. The constrained restart redesigns ON the predicted complex, where the target is
+    present in full, so positions are computed there and the transfer assumption below is
+    retired rather than inherited.
+    """
+    if path.endswith((".cif", ".mmcif")):
+        import gemmi
+        st = gemmi.read_structure(path)
+        st.setup_entities()
+        return [(ch.name, r.seqid.num, r.name, a.name, (a.pos.x, a.pos.y, a.pos.z))
+                for ch in st[0] for r in ch for a in r]
     out = []
     for l in open(path):
         if l.startswith("ATOM"):
@@ -131,8 +156,19 @@ def backbone_rmsd(a_pdb, b_pdb, chain_a, chain_b=None):
     return float(np.sqrt(((P @ R - Q) ** 2).sum() / len(common))), len(common)
 
 
-def emit(name, binder_chain, iface, reach, out_dir, force_his=True, n_res=None):
-    """Write ProteinMPNN omit_AA_jsonl. Format: {name: {chain: [[[1-based pos], 'AAs'], ...]}}"""
+def emit(name, binder_chain, iface, reach, out_dir, force_his=True, n_res=None,
+         omit_acids=True):
+    """Write ProteinMPNN omit_AA_jsonl. Format: {name: {chain: [[[1-based pos], 'AAs'], ...]}}
+
+    `omit_acids=False` DROPS THE ANTI-INVERSION BAN, added 2026-10-09 as a separable control.
+    Until today the D/E ban applied whenever this function ran, independent of force_his, so a
+    "no histidine" lineage was still acid-banned and could not isolate either constraint. D1
+    measured the consequence: 7 lineages, 0 of 28 children inside the 10 A pose gate, and the
+    His and no-His arms on the same parent collapsed equally (0.0373 vs 0.0498 from 0.6057).
+    The ban is also in tension with the labelled data -- the MEASURED binders carry pI
+    4.53-5.26, i.e. acidic -- so forbidding Asp and Glu across 17 of 19 interface positions
+    pushes designs away from the composition of the molecules that actually bound.
+    """
     os.makedirs(out_dir, exist_ok=True)
     items = []
     # n_res is the BINDER LENGTH, so the global omission covers the whole chain. Defaulting it
@@ -142,12 +178,12 @@ def emit(name, binder_chain, iface, reach, out_dir, force_his=True, n_res=None):
     if OMIT_EVERYWHERE and n_res:
         items.append([list(range(1, n_res + 1)), OMIT_EVERYWHERE])
     acid_only = [n for n in iface if n not in set(reach)]
-    if acid_only:
+    if omit_acids and acid_only:
         items.append([acid_only, ACIDS])
     if force_his and reach:
         # allow ONLY histidine: omit the other nineteen
         items.append([list(reach), "".join(c for c in ALL_AA if c != "H")])
-    elif reach:
+    elif omit_acids and reach:
         items.append([list(reach), ACIDS])
     # ONE JSON OBJECT FOR ALL DESIGNS, not one line each. ProteinMPNN reads this file as
     #     for json_str in list(json_file): omit_AA_dict = json.loads(json_str)
@@ -227,6 +263,28 @@ def selftest():
                 picked.append(n)
         assert len(picked) == MAX_FORCED_HIS, picked
         assert all(b - a >= MIN_HIS_SPACING for a, b in zip(picked, picked[1:])), picked
+        # MUTATION, added 2026-10-09: the two asserts above compare the constant to ITSELF, so
+        # they stay green at any value and pin nothing. Pin the VALUE. 8 is what put the 48
+        # outside the measured binder pI band; the constrained restart is pre-registered at 2.
+        assert MAX_FORCED_HIS == 2, (
+            f"MAX_FORCED_HIS is {MAX_FORCED_HIS}, pre-registered at 2 "
+            "(PREREG-CONSTRAINED-RESTART-2026-10-09.md s1). Raising it needs the pI "
+            "comparison re-run, not a test edit.")
+        # MUTATION: positions() itself must honour the cap, not just this local reimplementation.
+        # A fixture whose every binder CA sits next to a cation must still yield at most 2.
+        import tempfile as _tf
+        with _tf.TemporaryDirectory() as _d:
+            _p = os.path.join(_d, "dense.pdb")
+            with open(_p, "w") as _fh:
+                for _i in range(1, 21):          # 20 binder CAs in a line, 1 A apart
+                    _fh.write(f"ATOM  {_i:5d}  CA  GLY A{_i:4d}    "
+                              f"{_i*1.0:8.3f}{0.0:8.3f}{0.0:8.3f}\n")
+                for _j in range(1, 21):          # an ARG NH1 cation beside each of them
+                    _fh.write(f"ATOM  {1000+_j:5d}  NH1 ARG B{_j:4d}    "
+                              f"{_j*1.0:8.3f}{3.0:8.3f}{0.0:8.3f}\n")
+            _if, _re = positions(_p, "A")
+            assert len(_re) <= MAX_FORCED_HIS, f"cap not honoured by positions(): {_re}"
+            assert len(_re) == 2, f"20 reachable candidates must thin to exactly 2, got {_re}"
         # MUTATION: the file must be ONE object holding BOTH designs on ONE line. Appending a
         # line per design makes ProteinMPNN keep only the last and KeyError on all the rest.
         body = open(os.path.join(d, "omit_AA.jsonl")).read().strip()
@@ -248,8 +306,12 @@ def selftest():
         print("  SKIP  the superposition mutation test needs numpy, which this interpreter")
         print("        lacks. Run it with the project venv: .venv/bin/python "
               "bin/mpnn_constraints.py --selftest")
-        print("\nself-tests passed: 8 of 9 (1 SKIPPED -- numpy absent)")
-        return 0
+        # CORRECTED 2026-10-09: this used to print "8 of 9 passed", but every `ok` line in
+        # this suite is emitted AFTER this gate, so on an interpreter without numpy the suite
+        # reports nothing and claimed eight passes anyway. An unrun test must never look green.
+        print("\nself-tests DID NOT RUN: numpy absent, 0 of 10 reported. "
+              "This is not a pass -- use .venv/bin/python.")
+        return 1
     import tempfile as _tf
     pts = np.array([[0.,0.,0.],[3.8,0,0],[7.0,2.1,0],[9.1,5.0,1.2],[11.0,8.0,2.0]])
     th = 0.7
@@ -275,14 +337,50 @@ def selftest():
     print(f"  ok  MUTATION: acid omission covers interface positions that are NOT His sites")
     print(f"  ok  MUTATION: a rotated and translated copy superposes to RMSD {r:.2e}")
     print(f"  ok  forced histidines spaced >= {MIN_HIS_SPACING} apart, capped at {MAX_FORCED_HIS}")
+    # MUTATION, 2026-10-09: the mmCIF path must return the SAME tuple shape as the PDB path and
+    # must see sidechain cations. The constrained restart computes positions on the PREDICTED
+    # complex, where the target is whole; the Genie complex carries 3 cation atoms against the
+    # prediction's ~99, and the two disagree on the histidine positions for 9 of 12 measured
+    # designs. If this path silently returned nothing, every design would quietly lose its
+    # histidine constraint and the arm would test nothing.
+    try:
+        import gemmi as _gemmi
+    except ImportError:
+        print("  SKIP  the mmCIF read test needs gemmi; run with .venv/bin/python")
+    else:
+        with tempfile.TemporaryDirectory() as _d:
+            _st = _gemmi.Structure(); _st.add_model(_gemmi.Model("1"))
+            for _cn, _rn, _an, _xyz in (("D", "GLY", "CA", (0.0, 0.0, 0.0)),
+                                        ("A", "ARG", "NH1", (3.0, 0.0, 0.0)),
+                                        ("A", "ARG", "CA", (5.0, 0.0, 0.0))):
+                _ch = None
+                for _c in _st[0]:
+                    if _c.name == _cn:
+                        _ch = _c
+                if _ch is None:
+                    _st[0].add_chain(_gemmi.Chain(_cn)); _ch = _st[0][_cn]
+                _r = _gemmi.Residue(); _r.name = _rn; _r.seqid = _gemmi.SeqId(len(_ch) + 1, " ")
+                _a = _gemmi.Atom(); _a.name = _an; _a.pos = _gemmi.Position(*_xyz)
+                _r.add_atom(_a); _ch.add_residue(_r)
+            _p = os.path.join(_d, "pred.cif")
+            _st.make_mmcif_document().write_file(_p)
+            _at = read_atoms(_p)
+            assert _at and len(_at[0]) == 5, f"mmCIF tuple shape differs from PDB: {_at[:1]}"
+            assert any((rn, an) in CATIONS for _, _, rn, an, _ in _at), \
+                "mmCIF path found no cation atoms; sidechains are being dropped"
+            _if, _re = positions(_p, "D")
+            assert _re == [1], f"the binder CA 3 A from an ARG NH1 must be reachable, got {_re}"
+        print("  ok  mmCIF path returns PDB-shaped tuples and sees sidechain cations")
     print(f"  ok  {OMIT_EVERYWHERE} omitted at every position of the binder, full length")
-    print("\nself-tests passed: 9")
+    print("\nself-tests passed: 10")
 
 
 if __name__ == "__main__":
     a = sys.argv
     if len(a) == 1 or "--selftest" in a:
-        selftest()
+        # sys.exit the RESULT: selftest() returns 1 when it could not run (numpy absent), and a
+        # bare call swallowed that, so a numpy-less CI path exited 0 and looked green.
+        sys.exit(selftest() or 0)
     else:
         cx = a[a.index("--complex") + 1]
         bc = a[a.index("--binder") + 1] if "--binder" in a else "A"

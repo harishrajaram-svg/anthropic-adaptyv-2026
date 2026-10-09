@@ -294,6 +294,15 @@ msa` returns **0** in both the wrapper and its tracked patch. The AUC separating
 `ipsae_min`'s 0.822 is therefore not transferable to our numbers, and
 `analysis/02-tnf/CONFIG-COMPARABILITY-2d.md` records that gap rather than papering over it.
 
+⚠️ **The configuration gap is the smaller of the two problems, and the second one is not fixable by
+running a different arm.** §6.11 re-measured every metric in the table above on all **1,440**
+released designs across **16 targets**, 113,550 co-fold rows. The best cell falls to **0.748**
+within target, and to **0.674-0.702 out of sample** when the cell is chosen on eight targets and
+scored on the other eight. Per-target spread on that cell runs from 0.97 (15-PGDH) down to **0.39
+(BBF-14), below chance.** So roughly **0.70** is the ceiling for any ranker this work can select,
+the three-digit differences between the cells above are not resolvable, and every number in this
+document that rests on a single-target AUC should be read against 0.70 rather than 0.90.
+
 **What replaced it.** All 35 designs were scored on our own configuration, and each was compared to
 a **size-matched shuffled null** at its own cross-chain pair count — the earlier control band paired
 a 164-residue receptor against the trimer (302,382 pairs) while the designs sit at 219,486/227,022,
@@ -1106,6 +1115,12 @@ is below its own null at five. Any design put forward must carry a multi-seed ma
 
 #### 6.10d Objective 3 was never designed for, and the two species do not track
 
+🔴 **Read §6.12(b) first. Every number in this subsection was measured against a mouse DIMER, and
+the dimer is the wrong construct.** On 2026-10-09 the same designs were folded against a mouse
+trimer: the dimer inflates the margin by a median **+16%** (spread -78% to +40%), is **6.8x**
+noisier, and produced at least one flatly false reading. The conclusion of this subsection — that
+the species do not track — survives and is strengthened; the individual mouse numbers below do not.
+
 Mouse cross-reactivity is one of the three objectives. The Genie 3 problem definition conditioned
 on **human hotspots only**; mouse entered no objective at any stage. 48 designs were folded
 against a mouse TNF-α **dimer** with their own shuffled nulls in the same construct, 96 folds, ~$3.
@@ -1496,6 +1511,165 @@ largest identifiable gap between this method and the one that worked on this tar
 visible in data published before our search closed.
 
 ---
+
+### 6.12 The depth arm replicated on unseen seeds, and the mouse construct was wrong
+
+480 folds on H100, seeds **1-5 with seed 42 deliberately excluded**, $11.64. Three sets: the 12
+depth-arm designs and their matched composition-preserving shuffled nulls, folded against a human
+trimer (554 residues), a mouse dimer (395) and a mouse trimer (551).
+
+**The control ran before any new number was read.** Re-scoring the 12 seed-42 design/null pairs
+through `bin/pae_interface.py` reproduced `analysis/02-tnf/depth_margins_2026-10-09.tsv` at **12 of
+12, maximum absolute difference 0.00000**. Seeds are collapsed per design by median before any
+join, because the standing trap in this repo is a `{row['id']: row}` join silently keeping the last
+of N seed rows.
+
+#### (a) The level replicates. The ranking does not.
+
+| | seed 42 | seeds 1-5 |
+|---|--:|--:|
+| clearing +6.347 | 10 / 12 | **10 / 12** |
+| median margin | +7.058 | **+6.938** |
+| best | +7.492 (`40_L1r4k6`) | +8.031 (**`40_L1r4k1`**) |
+| mean per-design SD across seeds | — | 0.826 |
+
+The count is identical and the median moves -0.120, so the arm's result is not a selection
+artefact. But **Spearman between the two orderings is 0.538**, five of twelve designs move by more
+than 0.5, and the leader changes. This is §6.10c's finding reproduced on a second population: a
+best-of-N selected on single seeds identifies a real tail and gets the order inside it wrong. The
+consequence for selection is direct — the margin can say which cluster to ship and cannot say which
+member of it.
+
+🔴 **Correction to this document.** An earlier 2026-10-09 reading of the single-seed table reported
+that the 12 separate completely from the 48 of §6.10e on `design_mean`, the depth arm's worst
+(8.599) beating stage A's best (8.862). Under replication `16_s1` moves to **9.145** and the
+separation is **11 of 12, not 12 of 12**. The claim was built on one draw and should not have been
+made on one draw.
+
+#### (b) The mouse dimer is the wrong construct
+
+| | human trimer | mouse **dimer** | mouse **trimer** |
+|---|--:|--:|--:|
+| median margin | +6.938 | +8.075 | **+7.310** |
+| worst | +5.541 | **+1.579** | +5.505 |
+| clearing +6.347 | 10 / 12 | 10 / 12 | 11 / 12 |
+| mean per-design SD across seeds | 0.826 | **1.520** | **0.225** |
+| null level, median | 14.7 | **20.5** | 15.1 |
+
+The dimer **inflates** the margin by a median **+16%**, spread **-78% to +40%**; it is **6.8x
+noisier** than the trimer; and it produced a false reading. `40_L5r5k6` scored **+1.579** on the
+dimer with a design mean equal to its own null, which §6.10d-era analysis would have called a
+design that does not engage mouse at all. On the trimer it reads **+7.254**, mid-pack.
+
+**§7's protomer-count control does not transfer.** That control puts a real binder's
+dimer-versus-trimer penalty at about 14%, i.e. two protomers recovering 86% of the signal. On these
+designs the dimer does not lose 14%, it gains 16%. The adalimumab measurement is sound for
+adalimumab and is not a correction factor for designed binders.
+
+**Why the dimer was used at all, and why that reason never applied here.** §6.6 records a measured
+hardware limit: three mouse protomers reach 976 tokens and exhaust a 48 GB L40S *with a single
+34.24 GiB allocation inside the gradient computation*. That is a design-time constraint on Mosaic's
+dual-species loss graph. Scoring builds no gradient graph, and a mouse trimer complex is 551
+residues against the human trimer's 554 that this work has folded throughout. The constraint was
+carried from the design stage into the scoring stage, where it never held. All 12 trimer runs
+completed with zero out-of-memory events at 28.4 s/fold.
+
+#### (c) The species do not track, measured trimer against trimer
+
+Both constructs now sit at the same null level (14.7 and 15.1), so the margins are comparable
+without the caveat §6.10d had to carry.
+
+| | Spearman with human |
+|---|--:|
+| mouse **trimer** | **+0.084** |
+| mouse dimer | +0.448 |
+
+The dimer made cross-reactivity look half-tracking when it does not track at all. §6.10d's
+r = +0.122, measured across mismatched constructs, happened to land near the right answer.
+
+What is true and is the useful form of the finding: **the level is fine on both species and the
+ranking does not transfer.** All 12 beat their own mouse-trimer null. **No mouse labelled control
+exists**, so "11 of 12 clear +6.347" on mouse means *beats its own null by more than the human
+non-binder median margin* — it is not evidence that any of them would bind mouse TNF-alpha.
+
+#### (d) What the +6.347 bar is, stated plainly
+
+The bar is the **measured non-binder median** (`labelled_control_2026-10-08.tsv`, n = 30), so half
+of all measured non-binders clear it by construction. Reproduced from that file: non-binder median
+**6.3473**, binder median **7.8144**, tie-corrected AUC **0.7944**. Placing the 12 in both labelled
+distributions, on single seeds:
+
+| | beats non-binders | beats binders |
+|---|--:|--:|
+| best design | 70% | **17%** |
+| worst design | 43% | 0% |
+
+The labelled distributions overlap to the point that **the highest non-binder (8.625) exceeds the
+highest binder (8.209)**, so the instrument's upper end carries no label information. Stage A's
+best (+6.027) sat near the 47th percentile of non-binders and 8% of binders. Five rounds moved the
+leader to the 70th and 17th. That is real movement, and it lands well short of the molecules it
+imitates. "Clears the pre-registered bar" should be read as "beats the median thing that did not
+bind".
+
+#### (e) The twelve designs are three folds
+
+Foldseek TM-align, binder chain only, pinned binary `941cd33`, all-vs-all over 66 pairs
+(`analysis/02-tnf/depth12_structural_clusters_2026-10-09.tsv`). **Three clusters at TM >= 0.5**,
+identical under single linkage, textbook agglomerative complete linkage and the greedy variant the
+48-design precedent used. The clusters are the parent backbones exactly: **40 (7 designs), 3 (3),
+16 (2)**. Within a backbone, pairwise TM runs **0.982-1.000** — the same fold. Between backbones,
+0.432-0.490. The method was validated by reproducing the 48-design precedent at **maximum absolute
+difference 0.0** before being applied here. Design diversity is one of the three stated selection
+criteria, so this set is worth about three slots, not twelve.
+
+#### (f) Screens on the twelve
+
+**Pre-submission screen: 12 of 12 pass**, whole-sequence identity to the 4,964-entry known-anti-TNF
+corpus **0.000**, binding-region identity 0.28-0.37 against a 0.80 cut, `cluster_size` 1 for every
+design. Run with `--skip-prior-art`, as both precedent runs were, so a pass means no known-binder
+match and no within-batch duplicate — **not** the absence of public prior art, which was never
+searched here or in the precedent.
+
+**Liability: 11 of 12 clean on pH and charge** (`depth12_liability_2026-10-09.tsv`). pI runs
+**4.53-5.47** for eleven of them, against the measured binders' 4.53-5.26 and stage A's median
+7.01. Zero cysteines, zero sequons and zero deamidation motifs across all 12. One design,
+`3_L0r5k2`, sits at pI **6.63**, inside the assayed 6.0-7.4 window and near-neutral at both pH
+values. Three carry a lone Glu>25% composition flag.
+
+**Objective 2: the position is there, the rotamer is not.** Five of the twelve carry **zero**
+histidines and seven carry exactly one; none carries more. The pH 7.4 to 6.0 charge swing is about
+**+1 unit for every design**, uniform and small, consistent with acid protonation. The loop ran with
+no histidine constraint.
+
+🔴 **Corrected 2026-10-09, having first been stated too strongly here.** An earlier version of this
+subsection said no design carried a cation-reachable histidine. That read `mpnn_constraints.positions()`'s
+**spaced, capped top-two** output as though it were the full reachable set. Measured against the
+uncapped criterion, **7 of 12 designs — every backbone-40 member — carry His61 at 7.39-7.82 A from
+the nearest target cation**, inside the 8.74 A REACH_CA ceiling, with 8-11 reachable candidate
+positions each. The five without any histidine are backbones 3 and 16.
+
+**The contact does not form in the predicted pose, and that is a weaker statement than it sounds.**
+`bin/his_cation_gate.py` implements Ahn *et al.*'s criterion — at least one binder histidine
+*accepting* an H-bond from an Arg/Lys donor, 3.5 A heavy-atom N...N inside a cone — and **0 of 12
+pass**. For the leader `tnfa_corrected_40_L1r4k1` the gate reports one binder histidine and no hits,
+and the slack band fails at every distance out to 3.9 A and every cone out to 90 degrees. But the
+backbone geometry is comfortable rather than marginal: a CA 7.81 A from the cation, against an ideal
+His CA-to-ring-N of 5.24 A, leaves the ring nitrogen able to sit **2.57 A** from the cation under a
+3.5 A ceiling. What is missing is a rotamer, not a position.
+
+**And the instrument cannot settle it.** Sidechain placement is not what ESMFold2 is good at, and
+per §6 no structure predictor in this work represents the pH-6.0 state at all, so its rotamer choice
+is weak evidence in either direction. Resolving it needs a repacker. PyRosetta is installed at
+`tools/pyrosetta/.venv` and **has never been run**; the licence question is unresolved and is the
+entrant's to answer (§12). So the honest claim for objective 2 is: **seven of twelve designs place a
+histidine within reach of a target cation, and whether that histidine makes the contact is not
+answerable with the instruments this work ran.**
+
+**Artifacts.** `depth12_human_trimer_5seed_2026-10-09.tsv`,
+`depth12_mouse_trimer_5seed_2026-10-09.tsv`, `depth12_mouse_dimer_5seed_2026-10-09.tsv` (each
+carrying the control statement in its header), `depth12_structural_clusters_2026-10-09.tsv`,
+`depth12_liability_2026-10-09.tsv`, `outbox/prescreen-depth12-2026-10-09/`.
+
 
 ## 7. Protomer count is a measured confound for any inter-protomer epitope
 
@@ -2259,6 +2433,10 @@ those are marked.
     35 designs scored, each against a shuffled null at its own length, with the min and the mean
     ordering the set identically. An earlier version of this limitation said no ESMFold2 prediction
     of our 35 existed; that was true when written and is no longer.
+    **Widened 2026-10-09:** the configuration gap is real but secondary. §6.11 measures the same
+    metrics on 1,440 designs across 16 targets, where the best cell reads 0.748 within target and
+    **0.674-0.702 out of sample**. The honest ceiling is about **0.70**, and that holds whatever
+    configuration we had run, so this limitation is no longer only about MSAs.
 
 52. **The calibration in §4.5 is not blind.** Medians for several models were inspected before AUC was
     chosen as the statistic. The guard is completeness — all 160 cells are printed, so no subset can
