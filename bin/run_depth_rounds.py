@@ -260,6 +260,10 @@ def main():
         log(f"round {n}: {v} -- {why}")
         if v == "STOP":
             break
+        if "--one-round" in sys.argv:
+            log(f"--one-round: stopping after round {n}. "
+                f"resume with --resume-after {n} --one-round")
+            break
         keep = select_per_lineage(rows)        # one per lineage, NOT a global top-N
         parents = [{"backbone": r["backbone"], "cif": r["cif"], "lrms": r["lrms"],
                     "lin": lineage_of(r["id"])} for r in keep]
