@@ -1,19 +1,47 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-08 6:35 PM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-08 9:10 PM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
 
 ---
 
-## 🟡 AS OF 2026-10-08 6:35 PM: the Genie arm ran, and the instrument that was missing all along says it failed. Nothing spending. The design search is CLOSED.
+## 🟡 AS OF 2026-10-08 9:10 PM: the Genie arm failed, and the instrument has now been controlled and CLEARED. Nothing running. Nothing spending. The design search is CLOSED.
 
-⚠️ **ONE JOB IS RUNNING as of 6:50 PM: `ap-gz7W6OayBW3WfvYx5RwwI3`**, 134/168 folds — 4 extra
-seeds on the 42 labelled-control designs, tightening §6.10e's AUC 0.794. ~33 min left, ~$1.20 more.
-It is `modal run`, NOT detached, so it dies with its client window; folds already in the
-`esmfold2-runs` Volume under `Aposctrl5` survive and are recoverable. It decides nothing — stage C
-is already closed on the single-seed read. (This paragraph said "`modal app list` is empty" until
-6:50 PM, which was wrong from 4:20 PM onward; a peer session caught it.)
+✅ **NOTHING IS RUNNING.** `modal app list` shows `ap-gz7W6OayBW3WfvYx5RwwI3` (`Aposctrl5`) in
+state **stopped**, finished around 7:20 PM; all **168 of 168** folds landed locally
+(`runs/A-posctrl5-out/Aposctrl5`, 42 designs × 4 extra seeds). Total Modal spend for the day
+~$3.00. No job has been launched since. **Caution for anyone re-running the contact census or the
+margin on that tree:** `iface_contacts.py:176` derives its row id from the containing directory, so
+`Aposctrl5` emits 4 rows per id and a `{row['id']: row}` join silently keeps the last. Collapse
+seeds explicitly first.
+
+🆕 **THE POSE CONTROL RAN TONIGHT AND PASSED.** Bars pre-registered and committed at `a4974d3`
+before any number existed; result at `analysis/02-tnf/POSE-CONTROL-RESULT-2026-10-08.md`, new
+METHODS §6.10g, commits `0da0b5a` and `369c9ef`. $0 spent — 4.3 MB of HTTP and local CPU.
+
+- The 12 measured binders folded in **our** configuration reproduce the campaign's own ESMFold2
+  pose of the identical sequence to **median ligand RMSD 1.57 A**, Fnat 0.942, CA sc_DockQ 0.866,
+  worst case 3.01 A, 0 of 12 refused. Bar was 10 A and Fnat 0.10.
+- Our 40 designs read median LRMS 31.1 A, best 15.0 A. **The worst measured binder is 5× better
+  placed than our best design and the distributions never overlap.** §6.10f's 31 A is a verdict on
+  our designs; the predictor is exonerated. "CA-only is deflated" is dead as an excuse — a real
+  binder reaches 0.866 on the same CA-only scale.
+- Still uncalibrated: designed-against-predicted. The release has **no designed structure for any
+  of the 150** designs, only per-arm predictions, so the control is prediction-against-prediction
+  of one sequence. The 0.23 threshold remains imported, not reproduced.
+- 8 of the 12 measured binders carry a **null `sc_dockq` on every row** of the released co-folding
+  table — exactly ranks 1-8 — while the protocol puts `pose_dockq` in its mandatory-non-null set.
+  The pose gate was not recorded, in the public release, for the recipe that made 8 of their 12.
+
+🆕 **OUR 48 ARE ONE FOLD, AND IT IS NOT THE WINNERS' FOLD.** Foldseek TM-align 48×48: median
+pairwise TM 0.458; at the pre-registered TM ≥ 0.5 there are **3 single-linkage clusters with 46 of
+48 in one** (complete linkage 18 — the verdict survives the most conservative read). So the honest
+claim is **48 sequence families, 3 structural clusters**: we bought sequence breadth and almost no
+structural breadth. Against the 12 measured binders' own folds, **0 of 48 reach TM 0.6 for the
+8-member winning family** (best 0.570, `tnfa_corrected_11_s1`) while **12 of 48 clear it for the 4
+PXDesign binders** (best 0.825). Our fold space overlaps the family that went 4/57 and misses the
+one that went 8/10 in its deep cell.
 
 **Two pre-registered arms ran on 10-07 and both returned nulls**, and both
 carried hard stops written before the run. Those stops are honoured: **no further design arms.**
