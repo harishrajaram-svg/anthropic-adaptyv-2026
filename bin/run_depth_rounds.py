@@ -43,6 +43,8 @@ MPNN = os.path.join(REPO, "tools/ProteinMPNN")
 MPNN_PY = os.path.join(MPNN, ".venv/bin/python")
 DESIGNED = "runs/genie3-out/probe50/tnfa_corrected/pdbs"
 STATE = "analysis/02-tnf/depth_rounds"
+# A relaunch must NOT share a Volume namespace with an aborted run. See score_round().
+RUN_TAG = os.environ.get("DEPTH_RUN_TAG", "v2")
 
 
 LIN_RE = re.compile(r"_L(\d+)r\d+k\d+$")
@@ -176,7 +178,7 @@ def run_round(n, parents, folds_used):
             fh.write(f">protein|D\n{s}\n")
     log(f"round {n}: {len(jobs)} designs from {len(parents)} parent(s), folding")
 
-    run = f"depthB{n}"
+    run = f"depthB{n}{RUN_TAG}"
     env = dict(os.environ, SEEDS="42", OUT_DIR=f"runs/depthB-r{n}-out", MODAL_TIMEOUT="90")
     subprocess.run(["bash", "bin/score-esmfold2.sh", ind, run], env=env,
                    capture_output=True, text=True)
@@ -185,7 +187,8 @@ def run_round(n, parents, folds_used):
     shutil.rmtree(out, ignore_errors=True); os.makedirs(out)
     subprocess.run(["modal", "volume", "get", "esmfold2-runs", run],
                    cwd=out, capture_output=True, text=True)
-    rows, refused = dl.score_round(DESIGNED, f"{out}/{run}")
+    rows, refused = dl.score_round(DESIGNED, f"{out}/{run}",
+                                   expect=re.compile(rf"_L\d+r{n}k\d+$"))
     log(f"round {n}: scored {len(rows)}, refused {len(refused)}")
     if not rows:
         log("STOP: no design scored this round"); return None, len(jobs)
@@ -214,22 +217,30 @@ def main():
     parents, best, folds = seed, [max(float(r["ca_sc_dockq"]) for r in seed)], 0
     start = 1
 
-    if "--resume-round2" in sys.argv:
-        prev = list(csv.DictReader(open(f"{STATE}/round1.tsv"), delimiter="\t"))
+    if "--resume-after" in sys.argv:
+        rn = int(sys.argv[sys.argv.index("--resume-after") + 1])
+        prev = list(csv.DictReader(open(f"{STATE}/round{rn}.tsv"), delimiter="\t"))
+        keep_rx = re.compile(rf"_L\d+r{rn}k\d+$") if rn > 1 else re.compile(r"_r1p\d+k\d+$")
+        before = len(prev)
+        prev = [r for r in prev if keep_rx.search(r["id"])]
+        if before != len(prev):
+            log(f"dropped {before - len(prev)} stale row(s) from round{rn}.tsv "
+                f"that did not match this run's id format")
         if not prev:
-            sys.exit("REFUSED: no round1.tsv to resume from")
+            sys.exit(f"REFUSED: no usable rows in round{rn}.tsv")
         keep = select_per_lineage(prev)
         for r in keep:
-            r["cif"] = cif_of(f"runs/depthB-r1-out/depthB1/{r['id']}")
+            sub = f"depthB{rn}{RUN_TAG}" if rn > 1 else "depthB1"
+            r["cif"] = cif_of(f"runs/depthB-r{rn}-out/{sub}/{r['id']}")
             r["lin"] = lineage_of(r["id"])
         best.append(max(float(r["ca_sc_dockq"]) for r in prev))
         folds = len(prev)
-        log(f"RESUMING from round 1 ({len(prev)} designs already folded, not refolded)")
+        log(f"RESUMING after round {rn} ({len(prev)} designs already folded, not refolded)")
         log(f"re-selected best-per-lineage: " +
             ", ".join(f"L{r['lin']}={r['id']} ({float(r['ca_sc_dockq']):.4f}, "
                       f"{float(r['lrms'])}A, bb {r['backbone']})" for r in keep))
         log(f"backbones carried: {sorted({r['backbone'] for r in keep})}")
-        parents, start = keep, 2
+        parents, start = keep, rn + 1
     log(f"stage-A baseline best CA sc_DockQ {best[0]:.4f}")
 
     for n in range(start, MAX_ROUNDS + 1):

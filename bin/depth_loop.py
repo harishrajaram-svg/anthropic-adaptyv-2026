@@ -99,12 +99,20 @@ def pose_regressed(rows):
     return all(float(r["lrms"]) > POSE_GATE_LRMS for r in rows)
 
 
-def score_round(designed_dir, cofold_dir):
+def score_round(designed_dir, cofold_dir, expect=None):
     """One row per co-folded design: CA sc_DockQ against its own Genie 3 backbone.
 
     Joins on the backbone index parsed from the design id, NOT on file order. Refuses on a
     missing or duplicated backbone rather than scoring the wrong pair.
+
+    `expect` is a compiled regex every design id must match. IT IS NOT OPTIONAL IN PRACTICE.
+    On 2026-10-09 an aborted round-2 run had already written 20 folds to the Volume under the
+    same run name; the relaunch recovered all 52, and because the stale ids parsed to the same
+    lineage LABELS as the new ones, two lineages were won by designs from the collapsed beam and
+    backbone 3 was dropped for the second time in one night. Stale folds in a shared namespace
+    are indistinguishable from fresh ones unless the id format is checked.
     """
+    import re as _re
     designed = {}
     for p in sorted(glob.glob(os.path.join(designed_dir, "tnfa_corrected_*.pdb"))):
         idx = os.path.basename(p)[len("tnfa_corrected_"):-len(".pdb")]
@@ -120,6 +128,8 @@ def score_round(designed_dir, cofold_dir):
         if not os.path.isdir(d):
             continue
         did = os.path.basename(d)
+        if expect is not None and not expect.search(did):
+            continue                      # a stale fold from an earlier run under this name
         if did in seen:
             raise SystemExit(f"REFUSED: duplicate design dir {did} -- collapse seeds first")
         seen.add(did)
@@ -218,7 +228,36 @@ def selftest():
         raise AssertionError("an unmatched design must refuse, not be scored against the wrong backbone")
     print("  ok  T7 score_round refuses a design with no matching backbone (no silent mis-join)")
 
-    print("\nself-tests passed: 7")
+    # T8 THE STALE-FOLD GUARD. A round-2 tree holding one fresh id and one id from an aborted
+    # earlier run under the same name must yield ONLY the fresh one.
+    import re as _re2
+    d2 = tempfile.mkdtemp()
+    os.makedirs(os.path.join(d2, "des"))
+    open(os.path.join(d2, "des", "tnfa_corrected_40.pdb"), "w").close()
+    for did in ("tnfa_corrected_40_L1r2k5", "tnfa_corrected_40_r2p0k5"):
+        os.makedirs(os.path.join(d2, "cof", did))
+        open(os.path.join(d2, "cof", did, "x.cif"), "w").close()
+    seen = []
+    orig = _scd.sc_dockq
+    try:
+        _scd.sc_dockq = lambda *a, **k: (seen.append(a[1]) or (0.5, 0.5, 5.0, 1.0))
+        rows, _ = score_round(os.path.join(d2, "des"), os.path.join(d2, "cof"),
+                              expect=_re2.compile(r"_L\d+r2k\d+$"))
+    finally:
+        _scd.sc_dockq = orig
+    ids = sorted(r["id"] for r in rows)
+    assert ids == ["tnfa_corrected_40_L1r2k5"], ids
+    print("  ok  T8 GUARD: a stale `_r2p0k5` fold sharing the Volume name is skipped; "
+          "only the fresh `_L1r2k5` is scored")
+    # T8b MUTATION: without `expect` BOTH are scored, which is the 2026-10-09 bug
+    try:
+        _scd.sc_dockq = lambda *a, **k: (0.5, 0.5, 5.0, 1.0)
+        rows2, _ = score_round(os.path.join(d2, "des"), os.path.join(d2, "cof"))
+    finally:
+        _scd.sc_dockq = orig
+    assert len(rows2) == 2, len(rows2)
+    print("      MUTATION: dropping `expect` scores both, reproducing the contamination")
+    print("\nself-tests passed: 8")
     return 0
 
 
