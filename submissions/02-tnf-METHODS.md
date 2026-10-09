@@ -304,9 +304,14 @@ so it was never a yardstick (`analysis/02-tnf/SIZEMATCHED-NULL-2f.md`):
 | L76 | 21 | 11.218–16.586 | 14.047 | 14.248 | 15/21 |
 | L84 | 14 | 13.945–15.434 | 14.648 | 14.996 | 10/14 |
 
-**25 of 35 beat their own-length null** (one-sided binomial *p* = 0.0083), and **the same 25 beat it
-on the min**, so at our configuration the two metrics order the set identically and the choice
-between them no longer carries weight. The margin is what matters: TNFR2 scores 7.713 where its own
+**25 of 35 beat their own-length null** (one-sided binomial *p* = 0.0083), and **25 beat it on the
+min as well** — but **not the same 25**. The two counts coincide, and so do the per-length splits
+(15 of 21 at L76, 10 of 14 at L84 on both metrics), which is why this read as agreement for two
+days. The sets differ by **6 of 35**: `p2smoke01_L76_s0`, `p2dry04_L84_s0` and `p2dry04_L84_s1`
+beat the mean null only, while `p2grad-n-p_L76_s0`, `p2free-r_L84_s0` and `p2grad-n-r_L84_s0` beat
+the min null only. Spearman between the two metrics is **0.433** over the 35 and **0.288** within
+L84, so they do not order the set identically and the choice between them **does** carry weight.
+This correction was found by audit on 2026-10-08; the earlier text asserted the opposite. The margin is what matters: TNFR2 scores 7.713 where its own
 shuffles score ~18.99, a margin of **11.28**. Our best design clears its null by **3.03 (27%)**, our
 best L84 by 1.05 (9%), and the median by **0.20–0.35 (2–3%)**. Statistically above chance;
 biologically almost nothing.
@@ -880,14 +885,19 @@ already returned a null and changing two things at once wastes the run.
 
 **Bar pre-registered before the run**, same statistic and tool: four-run mean rise in
 `iptm_repred`, `loss_traj.py --block 13`, ≥ +0.12 to act, < +0.02 null. The R108 null distribution
-at that point was seventeen trajectories: +0.004 ± 0.013 (free footprint), +0.008 ± 0.012 (arm A),
-and twelve flat tuning trajectories.
+at that point was **twenty** trajectories: +0.004 ± 0.013 (free footprint, 4), +0.008 ± 0.012
+(arm A, 4), and twelve flat tuning trajectories. This sentence read "seventeen" until the
+2026-10-08 audit; 4 + 4 + 12 is 20, and every total downstream of it inherited the three-count
+deficit, which is how "21 trajectories" entered five documents.
 
 **Result: −0.0092 ± 0.0126. Null.** The interface term did not improve, and it moved *down*.
 
 **The hard stop is honoured.** The launcher's own header recorded *"this is the last arm."* It was.
-**Twenty-one trajectories, six conditions, two structurally unrelated epitopes.** The interface
-term improved in none of them.
+**Twenty-four trajectories, seven conditions, two structurally unrelated epitopes.** The interface
+term improved in none of them. The count is `analysis/02-tnf/traj/`: 25 logs, of which one
+(`free_smoke`) is a smoke test, leaving 24 real runs in six groups of four. Seven conditions
+follows from §6.4's own correct total for its date — 16 trajectories and 5 conditions, being 12
+tuning across 4 conditions plus the 4-run free footprint — then arm A and Region I.
 
 🔶 **Independent corroboration arriving after the fact, 2026-10-08.** Genie 3's published
 BinderBench ships a TNF-α problem whose hotspot is mature **113 + 73 across two protomers**, tagged
@@ -1379,7 +1389,7 @@ assembled dimer packs about half as tightly as the trimer.
 
 *Method fixed and exercised; no design has passed it.*
 
-**The gate has now been applied to all 21 candidate sequences and rejected all 21** (§10). That is
+**The gate has now been applied to all 35 candidate sequences and rejected all 35** (§10). That is
 a result about the filter, not only about the designs, and it cuts in an uncomfortable direction:
 **a gate that has only ever rejected is half-validated.** Its specificity was set from the negative
 side, where measurements exist, and every application so far has been a rejection — so nothing in
@@ -1426,7 +1436,7 @@ threshold below which we withdraw a geometry verdict to `n/a` (D-P2-1), which is
 
 **The filter that does work is monomer foldability, and this work never applied it.**
 `reference/anthropic-binder-design-protocol.md:100` specifies a default floor of **0.70 mean pLDDT
-on the binder alone**, to be run *before any co-folding spend*. We applied the 0.45 bar twenty-one
+on the binder alone**, to be run *before any co-folding spend*. We applied the 0.45 bar thirty-five
 times and this floor zero times.
 
 | `plddt_binder`, Boltz-2, 1 binder : 3 protomers | 150 assayed designs | our 35 |
@@ -1455,7 +1465,7 @@ gate uses.
 
 *Design fixed; results pending generation — and their value is now conditional, see below.*
 
-🔴 **A matched pair is only informative if the parent binds.** With 0 of 21 candidates clearing the
+🔴 **A matched pair is only informative if the parent binds.** With 0 of 35 candidates clearing the
 interface gate (§8, §10), a histidine-removal control would compare two sequences that both fail to
 bind, and the paired difference would measure nothing. **The controls do not rescue a non-binding
 set; they only interpret a binding one.** This is stated here rather than discovered at analysis
@@ -1467,11 +1477,19 @@ Their design is unchanged and is kept for the case where generation succeeds. If
 four control slots are better spent on additional candidates, and the submission says so rather
 than shipping controls for an effect that was never established.
 
-**Matched histidine-removal pairs.** Four of the twenty submitted designs are derived from shipped
-backbones by removing the engineered histidine and re-predicting. The backbone is otherwise
-identical, so the pair differs in the engineered feature and nothing else.
+**Matched histidine-removal pairs: designed, and NOT BUILT.** The design was four of the twenty
+submitted designs derived from shipped backbones by removing the engineered histidine and
+re-predicting, the backbone otherwise identical so the pair differed in the engineered feature and
+nothing else. **None was built, and none is submitted.** The voiding condition stated in the
+paragraph above fired: 0 of 35 candidates clear the interface gate, so both members of every pair
+would be non-binders and the paired difference would measure nothing.
 
-**These controls carry two independent functions.**
+An earlier revision of this section asserted the four controls in the present tense, as
+accomplished fact, four lines after stating the condition that cancels them. The audit of
+2026-10-08 caught it. The reasoning below is kept because it is why the arm was designed and why it
+was abandoned — read it as the case for a control that does not exist in this submission.
+
+**These controls were designed to carry two independent functions.**
 
 **(a) They test whether the engineered histidine does anything.** In the preceding challenge, a
 1.432× ratio appeared to be a pH switch until matched arms pinning a non-titratable residue
@@ -1510,13 +1528,16 @@ riding on target dissociation does not.
 
 ## 10. The submission
 
-*Pending generation.* The allocation and the ordering rule are fixed.
+*Pending generation.* The allocation and the ordering rule are fixed. The control row reads **0**
+because 0 of 35 candidates bind, which voids a matched pair; those four slots go to additional
+candidates or stay empty, and the submission says so rather than shipping controls for an effect
+that was never established.
 
 | arm | designs | anchor |
 |---|---|---|
 | R108-oriented | 12 | canonical R108 = our positional 27 |
 | K166-oriented | 4 | canonical K166 = our positional 85 |
-| matched histidine-removal controls | 4 | derived from shipped backbones |
+| matched histidine-removal controls | **0** | ~~derived from shipped backbones~~ — cancelled, see below |
 
 At most two candidate slots may come from the inverted-objective pilot (§12), and only if it
 produces a defensible result.
@@ -1535,8 +1556,10 @@ for experimental testing.** No retired score is used as a calibrated prediction.
 ### What exists right now, counted rather than estimated
 
 Candidate material is not hypothetical, and stating its size is more useful than describing the
-intended allocation. **Twenty-five distinct sequences exist**, one per trajectory across every
-condition run, at two lengths. That is more than the twenty slots. **None of them is a success by
+intended allocation. **Thirty-five distinct sequences exist**, across 24 trajectories and seven
+conditions, at two lengths — more sequences than trajectories, because some trajectories yielded
+more than one. That is more than the twenty slots. `analysis/02-tnf/design_inventory.py` prints the
+count; it reads 35 rows and 35 distinct sequences. **None of them is a success by
 this work's own instruments:**
 
 | | count of 25 |
@@ -1691,7 +1714,7 @@ that Boltz needs alignment context on both chains to judge an interface, *which 
 can never supply*. Verdict: exclude Boltz. On 2026-09-29 a frozen decision forbade designing on the
 ranking instrument, to keep the ranking question answerable in December. Both decisions were correct.
 But the third permitted predictor emits no PAE, so the two together left **exactly one permitted
-design oracle: the excluded one.** Twenty-one trajectories descended its gradient, and the external
+design oracle: the excluded one.** Twenty-four trajectories descended its gradient, and the external
 calibration in §4.5 puts it last among credible models at AUC 0.781. **The project had a rule for
 this** — an arm that fails its gate is excluded for that target — **and applied it to ranking but not
 to generation, because the rule governed what a design objective may not use and never what it must

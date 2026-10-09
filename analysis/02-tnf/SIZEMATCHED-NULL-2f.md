@@ -31,8 +31,20 @@ resulting pair counts equal the designs' own.
 | L76 | 21 | 11.218 - 16.586 | 14.047 | 14.248 | 15/21 |
 | L84 | 14 | 13.945 - 15.434 | 14.648 | 14.996 | 10/14 |
 
-25 of 35 beat their size-matched null on the mean (one-sided binomial p = 0.0083). The same 25 beat
-it on the min, so the two metrics agree design-by-design at this configuration.
+25 of 35 beat their size-matched null on the mean (one-sided binomial p = 0.0083). 25 also beat it
+on the min -- but NOT the same 25, and this file said they were for two days.
+
+The counts coincide and so do the per-length splits (15/21 and 10/14 on both metrics), which is why
+it read as agreement. The sets differ by 6 of 35:
+
+  beat the MEAN null only:  p2smoke01_L76_s0, p2dry04_L84_s0, p2dry04_L84_s1
+  beat the MIN null only:   p2grad-n-p_L76_s0, p2free-r_L84_s0, p2grad-n-r_L84_s0
+
+p2smoke01_L76_s0 reads 0.877 / 14.047 -- mean below the 14.248 null, min ABOVE the 0.854 null.
+p2grad-n-p_L76_s0 reads 0.753 / 14.328, the exact mirror. Spearman(min, mean) = 0.4326 over the 35,
+0.8494 within L76 and 0.2879 within L84. So the two metrics do NOT agree design-by-design, and the
+choice between them carries weight. Corrected 2026-10-08 by audit; recomputed from
+analysis/02-tnf/p2_pae_interface_2026-10-08.tsv against the nulls in the table above.
 
 ## What that is worth
 

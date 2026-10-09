@@ -51,7 +51,7 @@ carried hard stops written before the run. Those stops are honoured: **no furthe
 | **A** (§45) | the gradient estimator — 4-sample averaging, momentum 0.9 → 0.0 | ≥ +0.12 acts, < +0.02 null | **+0.0078 ± 0.0124 → NULL** |
 | **Region I** (§47) | the **epitope** — a second site 15.42 Å away | same bar | **−0.0092 ± 0.0126 → NULL** |
 
-**Twenty-one trajectories now, six conditions, two structurally unrelated epitopes.** The interface
+**Twenty-four trajectories now, seven conditions, two structurally unrelated epitopes.** The interface
 term improved in none of them. Best `iptm_repred` anywhere is **0.2468** (arm A) against the **0.45**
 gate we set before any number existed. 0 of 35 designs clear it (the 10-07 export
 of `design_inventory.py --export` regenerated 25 -> 35).
