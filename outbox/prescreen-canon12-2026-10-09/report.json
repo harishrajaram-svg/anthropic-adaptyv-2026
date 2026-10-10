@@ -1,0 +1,1185 @@
+{
+ "results": {
+  "tnfa_corrected_40_L1r4k6": {
+   "id": "tnfa_corrected_40_L1r4k6",
+   "sequence": "NIMERLKELLEELKKLNNPYLVSLMERIIELLEKYKAGIDPAGNLKEMADLLKTLITLMKHENVPQDIIKRVEEILKEVESKL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.1333,
+     "monobody": 0.1636,
+     "darpin": 0.2676
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "NIMERLKELLEELKKLNNPYLVSLMERIIELLEKYKAGIDPAGNLKEMADLLKTLITLMKHENVPQDIIKRVEEILKEVESKL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.32,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03258|designed_other|tested_non_binder|Proteinbase|proteinbase:ivory-moth-willow",
+     "region_reference_seq": "AVQEAAKLLNEAIENLKKALEVLEKNGGDPDTIGLLSRAIHLLEGAITYLLDGDYETALKLLKEAEKLLEEALKKVTHPEAKEYIEKALEKIKEAIKLLE",
+     "region_query_seq": "NIMERLKELLEELKKLNNPYLVSLMERIIELLEKYKAGIDPAGNLKEMADLLKTLITLMKHENVPQDIIKRVEEILKEVESKL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L1r4k6",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_3_L0r4k0": {
+   "id": "tnfa_corrected_3_L0r4k0",
+   "sequence": "SMEEVKELLELLKLMIKRKEPIELILSEFEKLLEETKTEEEKELVIDFLIEELGLSRKEAEELLSLPKEERKKRLSEILEKLR",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.1556,
+     "monobody": 0.2273,
+     "darpin": 0.2267
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "SMEEVKELLELLKLMIKRKEPIELILSEFEKLLEETKTEEEKELVIDFLIEELGLSRKEAEELLSLPKEERKKRLSEILEKLR",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3191,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03252|designed_other|tested_non_binder|Proteinbase|proteinbase:silver-swan-oak",
+     "region_reference_seq": "SEKVKQALDILEKTLKELEKTKDPQKMQEIIDRALKEIEEIIETLSEEELVELLNKAEELFDKFARTITDSLVREALSGFYLRFLGVIGKHLSK",
+     "region_query_seq": "SMEEVKELLELLKLMIKRKEPIELILSEFEKLLEETKTEEEKELVIDFLIEELGLSRKEAEELLSLPKEERKKRLSEILEKLR",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_3_L0r4k0",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L5r5k5": {
+   "id": "tnfa_corrected_40_L5r5k5",
+   "sequence": "DLKKKLEELLEKLKKLNNPYLVSLMERIIELYEKYEAGIDPEGKLREMADLLKTLITLMKHEKVPKEIIEEVEEILEEVESKL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2973,
+     "monobody": 0.18,
+     "darpin": 0.3425
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DLKKKLEELLEKLKKLNNPYLVSLMERIIELYEKYEAGIDPEGKLREMADLLKTLITLMKHEKVPKEIIEEVEEILEEVESKL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3684,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03253|designed_other|tested_non_binder|Proteinbase|proteinbase:vast-swan-oak",
+     "region_reference_seq": "EEIKKLLDEGLERLRELLLRAGVPEKVVQEIIDEIRERLEAAIDNKDPELVLREAKVVAENVISILLDLGVPLEVAEEVRNLILELGEKIAKMLE",
+     "region_query_seq": "DLKKKLEELLEKLKKLNNPYLVSLMERIIELYEKYEAGIDPEGKLREMADLLKTLITLMKHEKVPKEIIEEVEEILEEVESKL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L5r5k5",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L1r4k1": {
+   "id": "tnfa_corrected_40_L1r4k1",
+   "sequence": "DLRERLLELLEELKKLNNPYLVALMERIIALLEDYEAGVDPEGKLREMADLLKTLLTLMKHEQVPQELIERVEEILREVEARL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.3421,
+     "monobody": 0.2083,
+     "darpin": 0.3014
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DLRERLLELLEELKKLNNPYLVALMERIIALLEDYEAGVDPEGKLREMADLLKTLLTLMKHEQVPQELIERVEEILREVEARL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.32,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03258|designed_other|tested_non_binder|Proteinbase|proteinbase:ivory-moth-willow",
+     "region_reference_seq": "AVQEAAKLLNEAIENLKKALEVLEKNGGDPDTIGLLSRAIHLLEGAITYLLDGDYETALKLLKEAEKLLEEALKKVTHPEAKEYIEKALEKIKEAIKLLE",
+     "region_query_seq": "DLRERLLELLEELKKLNNPYLVALMERIIALLEDYEAGVDPEGKLREMADLLKTLLTLMKHEQVPQELIERVEEILREVEARL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L1r4k1",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L1r2k1": {
+   "id": "tnfa_corrected_40_L1r2k1",
+   "sequence": "DLREQIEELLEEFKKLQNPFLVALMERLLALLEEYEKGIDPEKKLQEMADLLDTLLTLAKHEQVPQSVIDKIEEIRQKVLELL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2,
+     "monobody": 0.18,
+     "darpin": 0.2949
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DLREQIEELLEEFKKLQNPFLVALMERLLALLEEYEKGIDPEKKLQEMADLLDTLLTLAKHEQVPQSVIDKIEEIRQKVLELL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.28,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03258|designed_other|tested_non_binder|Proteinbase|proteinbase:ivory-moth-willow",
+     "region_reference_seq": "AVQEAAKLLNEAIENLKKALEVLEKNGGDPDTIGLLSRAIHLLEGAITYLLDGDYETALKLLKEAEKLLEEALKKVTHPEAKEYIEKALEKIKEAIKLLE",
+     "region_query_seq": "DLREQIEELLEEFKKLQNPFLVALMERLLALLEEYEKGIDPEKKLQEMADLLDTLLTLAKHEQVPQSVIDKIEEIRQKVLELL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L1r2k1",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L1r2k5": {
+   "id": "tnfa_corrected_40_L1r2k5",
+   "sequence": "DIGKKLEELLEKFKELKNPFLVSLMERIIELYEQYKAGIDPEKKLQEMADLLKTLLTLAKHEKVPEEVIKLVEEILEEVEKLL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.3111,
+     "monobody": 0.1698,
+     "darpin": 0.3733
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DIGKKLEELLEKFKELKNPFLVSLMERIIELYEQYKAGIDPEKKLQEMADLLKTLLTLAKHEKVPEEVIKLVEEILEEVEKLL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3474,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03253|designed_other|tested_non_binder|Proteinbase|proteinbase:vast-swan-oak",
+     "region_reference_seq": "EEIKKLLDEGLERLRELLLRAGVPEKVVQEIIDEIRERLEAAIDNKDPELVLREAKVVAENVISILLDLGVPLEVAEEVRNLILELGEKIAKMLE",
+     "region_query_seq": "DIGKKLEELLEKFKELKNPFLVSLMERIIELYEQYKAGIDPEKKLQEMADLLKTLLTLAKHEKVPEEVIKLVEEILEEVEKLL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L1r2k5",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_3_L4r5k2": {
+   "id": "tnfa_corrected_3_L4r5k2",
+   "sequence": "SMEEVKELIENLKLMIKRKEPIENILKEFEKLLKATKTEEERELVIDFLIEELGLSREEAEELLSLPIEERKKKLKEILEKLR",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2222,
+     "monobody": 0.1778,
+     "darpin": 0.2933
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "SMEEVKELIENLKLMIKRKEPIENILKEFEKLLKATKTEEERELVIDFLIEELGLSREEAEELLSLPIEERKKKLKEILEKLR",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3133,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03243|miniprotein|tested_non_binder|Proteinbase|proteinbase:noble-boar-lava",
+     "region_reference_seq": "KLIEEAKKLIEEAEKLIEEARKLLPKNPELAGEALTKAFLAKNAASGAIGYALAGDLETAEELLRKAKELLKEAKELLKKAE",
+     "region_query_seq": "SMEEVKELIENLKLMIKRKEPIENILKEFEKLLKATKTEEERELVIDFLIEELGLSREEAEELLSLPIEERKKKLKEILEKLR",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_3_L4r5k2",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L1r4k2": {
+   "id": "tnfa_corrected_40_L1r4k2",
+   "sequence": "DIKKELEELLEELKKLNNPYLVALMEEIIGLYENYEAGINPEENLQKMADLLKTLITLMKHENVPQEIIEKVEKILEEVEKKL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2143,
+     "monobody": 0.1698,
+     "darpin": 0.3333
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DIKKELEELLEELKKLNNPYLVALMEEIIGLYENYEAGINPEENLQKMADLLKTLITLMKHENVPQEIIEKVEKILEEVEKKL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3579,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03253|designed_other|tested_non_binder|Proteinbase|proteinbase:vast-swan-oak",
+     "region_reference_seq": "EEIKKLLDEGLERLRELLLRAGVPEKVVQEIIDEIRERLEAAIDNKDPELVLREAKVVAENVISILLDLGVPLEVAEEVRNLILELGEKIAKMLE",
+     "region_query_seq": "DIKKELEELLEELKKLNNPYLVALMEEIIGLYENYEAGINPEENLQKMADLLKTLITLMKHENVPQEIIEKVEKILEEVEKKL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L1r4k2",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_3_L0r5k2": {
+   "id": "tnfa_corrected_3_L0r5k2",
+   "sequence": "SMEKVKELLELLKLMIKRKEPISLILSEFEKLLKETKTEEEKKLVVDFLIEELGLSEKEAKELLSLPKEERKKKLSEILEKLR",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2,
+     "monobody": 0.2222,
+     "darpin": 0.25
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "SMEKVKELLELLKLMIKRKEPISLILSEFEKLLKETKTEEEKKLVVDFLIEELGLSEKEAKELLSLPKEERKKKLSEILEKLR",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3191,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03252|designed_other|tested_non_binder|Proteinbase|proteinbase:silver-swan-oak",
+     "region_reference_seq": "SEKVKQALDILEKTLKELEKTKDPQKMQEIIDRALKEIEEIIETLSEEELVELLNKAEELFDKFARTITDSLVREALSGFYLRFLGVIGKHLSK",
+     "region_query_seq": "SMEKVKELLELLKLMIKRKEPISLILSEFEKLLKETKTEEEKKLVVDFLIEELGLSEKEAKELLSLPKEERKKKLSEILEKLR",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_3_L0r5k2",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_40_L5r5k6": {
+   "id": "tnfa_corrected_40_L5r5k6",
+   "sequence": "NLMERLKELLEELKKLNNPYLVALMERIIELLEKYEAGIDPEKQLKEMADLLKTLITLMKHEEVPQEIIERVEEILKEVESKL",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.2632,
+     "monobody": 0.1636,
+     "darpin": 0.2817
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "NLMERLKELLEELKKLNNPYLVALMERIIELLEKYEAGIDPEKQLKEMADLLKTLITLMKHEEVPQEIIERVEEILKEVESKL",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.34,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03258|designed_other|tested_non_binder|Proteinbase|proteinbase:ivory-moth-willow",
+     "region_reference_seq": "AVQEAAKLLNEAIENLKKALEVLEKNGGDPDTIGLLSRAIHLLEGAITYLLDGDYETALKLLKEAEKLLEEALKKVTHPEAKEYIEKALEKIKEAIKLLE",
+     "region_query_seq": "NLMERLKELLEELKKLNNPYLVALMERIIELLEKYEAGIDPEKQLKEMADLLKTLITLMKHEEVPQEIIERVEEILKEVESKL",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_40_L5r5k6",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_16_s2": {
+   "id": "tnfa_corrected_16_s2",
+   "sequence": "SQEELDTLAANLEILAKRKDYEGMAAALAEFFGRYEEARELIEKIKKLSEEEARKLLREFLRRAAEEEGLDEETIKRLLEALE",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.1556,
+     "monobody": 0.1481,
+     "darpin": 0.2222
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "SQEELDTLAANLEILAKRKDYEGMAAALAEFFGRYEEARELIEKIKKLSEEEARKLLREFLRRAAEEEGLDEETIKRLLEALE",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3253,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03242|miniprotein|tested_non_binder|Proteinbase|proteinbase:pale-ant-thorn",
+     "region_reference_seq": "KKELIDALLDALVLALQEGNLELAKKLEKAIEALKKGKIDEEAVKLAVEFLKKKVEEAKKLGDEERAEYYEKKVKLLEEALK",
+     "region_query_seq": "SQEELDTLAANLEILAKRKDYEGMAAALAEFFGRYEEARELIEKIKKLSEEEARKLLREFLRRAAEEEGLDEETIKRLLEALE",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_16_s2",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  },
+  "tnfa_corrected_16_s1": {
+   "id": "tnfa_corrected_16_s1",
+   "sequence": "DEEELETLIANLRILAEREDFEGIAAALAEFFGRPEEARRLIEKIKGLSKEEARELLREWLERAMEEEGLPEEWRRRALEALE",
+   "length": 83,
+   "category": "miniprotein",
+   "region_kind": "whole",
+   "category_confidence": 1.0,
+   "category_evidence": {
+    "framework_identity": {
+     "affibody": 0.1591,
+     "monobody": 0.1207,
+     "darpin": 0.2647
+    },
+    "gate": 0.85,
+    "min_length": {
+     "affibody": 34,
+     "monobody": 56,
+     "darpin": 94
+    },
+    "antibody_numbering": "no_valid_domain",
+    "antibody_reject": null
+   },
+   "focus_chain": "W",
+   "focus_region": "DEEELETLIANLRILAEREDFEGIAAALAEFFGRPEEARRLIEKIKGLSKEEARELLREWLERAMEEEGLPEEWRRRALEALE",
+   "n_chains": 1,
+   "chain_lengths": [
+    83
+   ],
+   "declared_class": null,
+   "declared_class_match": null,
+   "prior_art": {
+    "best": null,
+    "best_design": null,
+    "per_db": {},
+    "top": [],
+    "per_chain": {
+     "1.1": {
+      "best": null,
+      "best_design": null,
+      "n_hits": 0
+     }
+    },
+    "arms_searched": [
+     "pdb",
+     "swissprot",
+     "thpdb",
+     "uspto"
+    ],
+    "arms_missing": [
+     "plabdab",
+     "plabdab_nano",
+     "therasabdab",
+     "proteinbase_public"
+    ],
+    "best_chain": null,
+    "best_design_chain": null,
+    "region": {
+     "region_identity": null,
+     "hit": null,
+     "db": null,
+     "hit_region": null,
+     "chain": null,
+     "per_hit": {}
+    }
+   },
+   "target": {
+    "whole": null,
+    "region": {
+     "region_identity": 0.3133,
+     "region_compared": true,
+     "region_exact": false,
+     "region_reference": "TNFB03247|miniprotein|tested_non_binder|Proteinbase|proteinbase:shy-mole-iron",
+     "region_reference_seq": "SPEVRLRAALLARRLRERLLKEPALSAALATTVAAITYELLTENPDLSAEELAERVLERLEEAGIELTEEQKETIRRTVKEVL",
+     "region_query_seq": "DEEELETLIANLRILAEREDFEGIAAALAEFFGRPEEARRLIEKIKGLSKEEARELLREWLERAMEEEGLPEEWRRRALEALE",
+     "region_chain": "W",
+     "region_label": "cdr3",
+     "binder_status": null,
+     "named_agent": null,
+     "citation": null,
+     "supporting_exact_regions": 0,
+     "per_region": {}
+    },
+    "substring": null
+   },
+   "batch": {
+    "cluster_representative": "tnfa_corrected_16_s1",
+    "cluster_size": 1
+   },
+   "verdict": "pass",
+   "flags": [
+    "pass"
+   ],
+   "reasons": {},
+   "context": {}
+  }
+ },
+ "dropped": [],
+ "timing": {
+  "classify_regions": 0.09,
+  "reference_annotation": 0.0,
+  "target_whole": 0.88,
+  "target_region": 0.94,
+  "target_substring": 0.0,
+  "prior_art": 99.73,
+  "prior_art_regions": 0.0,
+  "batch_cluster": 1.26
+ },
+ "config": {
+  "known_sequence": 0.95,
+  "near_known_sequence": 0.8,
+  "tnf_known_identity": 0.9,
+  "tnf_known_coverage": 0.8,
+  "tnf_known": 0.9,
+  "tnf_homolog": 0.7,
+  "region_match": 0.8,
+  "region_min_length": 5,
+  "prior_art_region_known": 0.9,
+  "prior_art_top_hits": 3,
+  "batch_cluster_identity": 0.95,
+  "batch_cluster_coverage": 0.8,
+  "db_root": "/Users/harish/prescreen-dbs",
+  "mmseqs_bin": "mmseqs",
+  "threads": 0,
+  "include_patent_arm": true,
+  "allow_missing_arms": true,
+  "target_name": "TNF-alpha",
+  "target_fasta": null,
+  "target_metadata": null,
+  "target_cdr_csv": null,
+  "extras": {}
+ },
+ "target": {
+  "name": "TNF-alpha",
+  "fasta": "/Users/harish/code/adaptyv-2026/tools/binder-prescreen/prescreen/data/tnfa_binders.fasta",
+  "references": 4964,
+  "checksum": "6abb43afc8d91a07"
+ }
+}

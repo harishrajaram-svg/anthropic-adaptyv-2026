@@ -1,0 +1,22 @@
+# CANONICAL sequences for the 12 depth-arm designs, 2026-10-09.
+# Source: the seed-1 fold of the 5-seed human replication -- i.e. the molecule the
+# REPORTED margin is for. Written because several design ids carry TWO DISTINCT
+# sequences across the depth arm rounds (an aborted round-2 run left a parallel
+# depthB2/depthB2v2 tree), and a first-match glob therefore selected different
+# molecules for different analyses: 3 of 12 sequence-based screens were run on a
+# sequence at 0.446-0.663 identity to the one actually scored. Verified: all 12
+# replication folds match one of their own design's depthB folds at identity 1.000,
+# so the margins stand; only the sequence-derived screens needed re-running.
+design	n_res	n_his	n_cys	sequence	source_cif
+tnfa_corrected_40_L1r4k6	83	1	0	NIMERLKELLEELKKLNNPYLVSLMERIIELLEKYKAGIDPAGNLKEMADLLKTLITLMKHENVPQDIIKRVEEILKEVESKL	runs/R-seedrep-H1-out/RseedrepH1/tnfa_corrected_40_L1r4k6/tnfa_corrected_40_L1r4k6_seed1_sample_25.cif
+tnfa_corrected_3_L0r4k0	83	0	0	SMEEVKELLELLKLMIKRKEPIELILSEFEKLLEETKTEEEKELVIDFLIEELGLSRKEAEELLSLPKEERKKRLSEILEKLR	runs/R-seedrep-H2-out/RseedrepH2/tnfa_corrected_3_L0r4k0/tnfa_corrected_3_L0r4k0_seed1_sample_15.cif
+tnfa_corrected_40_L5r5k5	83	1	0	DLKKKLEELLEKLKKLNNPYLVSLMERIIELYEKYEAGIDPEGKLREMADLLKTLITLMKHEKVPKEIIEEVEEILEEVESKL	runs/R-seedrep-H3-out/RseedrepH3/tnfa_corrected_40_L5r5k5/tnfa_corrected_40_L5r5k5_seed1_sample_25.cif
+tnfa_corrected_40_L1r4k1	83	1	0	DLRERLLELLEELKKLNNPYLVALMERIIALLEDYEAGVDPEGKLREMADLLKTLLTLMKHEQVPQELIERVEEILREVEARL	runs/R-seedrep-H4-out/RseedrepH4/tnfa_corrected_40_L1r4k1/tnfa_corrected_40_L1r4k1_seed1_sample_20.cif
+tnfa_corrected_40_L1r2k1	83	1	0	DLREQIEELLEEFKKLQNPFLVALMERLLALLEEYEKGIDPEKKLQEMADLLDTLLTLAKHEQVPQSVIDKIEEIRQKVLELL	runs/R-seedrep-H1-out/RseedrepH1/tnfa_corrected_40_L1r2k1/tnfa_corrected_40_L1r2k1_seed1_sample_20.cif
+tnfa_corrected_40_L1r2k5	83	1	0	DIGKKLEELLEKFKELKNPFLVSLMERIIELYEQYKAGIDPEKKLQEMADLLKTLLTLAKHEKVPEEVIKLVEEILEEVEKLL	runs/R-seedrep-H2-out/RseedrepH2/tnfa_corrected_40_L1r2k5/tnfa_corrected_40_L1r2k5_seed1_sample_20.cif
+tnfa_corrected_3_L4r5k2	83	0	0	SMEEVKELIENLKLMIKRKEPIENILKEFEKLLKATKTEEERELVIDFLIEELGLSREEAEELLSLPIEERKKKLKEILEKLR	runs/R-seedrep-H3-out/RseedrepH3/tnfa_corrected_3_L4r5k2/tnfa_corrected_3_L4r5k2_seed1_sample_20.cif
+tnfa_corrected_40_L1r4k2	83	1	0	DIKKELEELLEELKKLNNPYLVALMEEIIGLYENYEAGINPEENLQKMADLLKTLITLMKHENVPQEIIEKVEKILEEVEKKL	runs/R-seedrep-H4-out/RseedrepH4/tnfa_corrected_40_L1r4k2/tnfa_corrected_40_L1r4k2_seed1_sample_25.cif
+tnfa_corrected_3_L0r5k2	83	0	0	SMEKVKELLELLKLMIKRKEPISLILSEFEKLLKETKTEEEKKLVVDFLIEELGLSEKEAKELLSLPKEERKKKLSEILEKLR	runs/R-seedrep-H1-out/RseedrepH1/tnfa_corrected_3_L0r5k2/tnfa_corrected_3_L0r5k2_seed1_sample_15.cif
+tnfa_corrected_40_L5r5k6	83	1	0	NLMERLKELLEELKKLNNPYLVALMERIIELLEKYEAGIDPEKQLKEMADLLKTLITLMKHEEVPQEIIERVEEILKEVESKL	runs/R-seedrep-H2-out/RseedrepH2/tnfa_corrected_40_L5r5k6/tnfa_corrected_40_L5r5k6_seed1_sample_25.cif
+tnfa_corrected_16_s2	83	0	0	SQEELDTLAANLEILAKRKDYEGMAAALAEFFGRYEEARELIEKIKKLSEEEARKLLREFLRRAAEEEGLDEETIKRLLEALE	runs/R-seedrep-H3-out/RseedrepH3/tnfa_corrected_16_s2/tnfa_corrected_16_s2_seed1_sample_15.cif
+tnfa_corrected_16_s1	83	0	0	DEEELETLIANLRILAEREDFEGIAAALAEFFGRPEEARRLIEKIKGLSKEEARELLREWLERAMEEEGLPEEWRRRALEALE	runs/R-seedrep-H4-out/RseedrepH4/tnfa_corrected_16_s1/tnfa_corrected_16_s1_seed1_sample_15.cif

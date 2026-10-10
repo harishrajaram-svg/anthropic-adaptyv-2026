@@ -1684,10 +1684,7 @@ His CA-to-ring-N of 5.24 A, leaves the ring nitrogen able to sit **2.57 A** from
 **And the instrument cannot settle it.** Sidechain placement is not what ESMFold2 is good at, and
 per §6 no structure predictor in this work represents the pH-6.0 state at all, so its rotamer choice
 is weak evidence in either direction. Resolving it needs a repacker. PyRosetta is installed at
-`tools/pyrosetta/.venv` and **has never been run**; the licence question is unresolved and is the
-entrant's to answer (§12). So the honest claim for objective 2 is: **seven of twelve designs place a
-histidine within reach of a target cation, and whether that histidine makes the contact is not
-answerable with the instruments this work ran.**
+`tools/pyrosetta/.venv`. 🔴 **Corrected 2026-10-09: this previously said it had never been run and that the licence question was unresolved. Both are stale.** PyRosetta was run on **2026-10-06**: `analysis/02-tnf/dddg_elec_repacked.py` (11:38) with dated artifacts `repacked_sweep_results.txt` (11:40), `repacked_sweep_schroter_all.json` and `.txt` (11:55) and `k166q_repacked.txt` (12:03); `pyrosetta` imports in the project venv. The licence was cleared in the organisers' #design-methods channel on 2026-10-06. The claim was carried forward unverified from an earlier session handoff.
 
 **Artifacts.** `depth12_human_trimer_5seed_2026-10-09.tsv`,
 `depth12_mouse_trimer_5seed_2026-10-09.tsv`, `depth12_mouse_dimer_5seed_2026-10-09.tsv` (each
@@ -1717,13 +1714,23 @@ yield."* Consequently **"0 of 12 of our designs pass this gate" is not a stateme
 designs** — the instrument reads zero on nature's entire anti-TNF-alpha repertoire, clinical
 antibodies included. It cannot separate a useful histidine from a useless one at this interface.
 
-**The other two instruments are no better.** `bin/dddg_elec.py` failed its known-answer control
-**0 of 5** (`challenges/02-tnf-alpha.md` §6b): all three measured adalimumab pH-switch variants of
+**The other two instruments are no better.** `bin/dddg_elec.py` failed its known-answer control **0 of 5** — ⚠️ **a figure that applies
+only to the RIGID reimplementation and that §6b has since retracted.** The surviving kill on
+this instrument class is §20a's **41 of 82 = chance** on 82 labelled pH variants against an
+83 per cent trivial null, which is also what line 207 carries. Do not cite the 0 of 5 (`challenges/02-tnf-alpha.md` §6b): all three measured adalimumab pH-switch variants of
 Schroeter *et al.* scored negative, and a scramble negative with five histidines placed >12 A away
 scored −0.129 against wild type's −0.125. `bin/ph_gate_multisite.py` self-tests clean and PROPKA
 3.5.1 is installed, but it has no labelled control, its rank across the 12 designs correlates with
-its own five-seed median at Spearman **0.469**, and its within-design spread across refolds reaches
-**844x** against a between-design spread under **20x**. It is a disclosure tool, not a ranker.
+its own five-seed median, and its within-design spread across refolds exceeds its between-design
+spread. It is a disclosure tool, not a ranker.
+
+⚠️ **Numbers withdrawn 2026-10-09 for want of an artifact.** This passage previously quoted a
+Spearman of 0.469 and a within-design spread of 844x against a between-design spread under 20x.
+Those figures were computed in-session and **never written to a file**: there is no artifact in
+`analysis/02-tnf/` recording any run of `ph_gate_multisite.py`. By §13's own rule — every number
+names the code that produced it — they cannot stand, so the claim is stated qualitatively until
+the run is committed as an artifact. The qualitative form is what the argument rests on and is
+unaffected: the instrument's noise within one design is larger than its signal between designs.
 
 **And installing the mechanism destroys the binding.** §6.12 and the pre-registration's AMENDMENT 2
 record the matched control: same parent, same round, same ProteinMPNN seed, sequences 94-95%
@@ -1736,11 +1743,118 @@ and has **zero penetrance on a 4th**.
 **What we therefore claim, and nothing more.** Seven of the twelve designs place a histidine at a
 cation-reachable interface position (His61, 7.39-7.82 A from the nearest target cation, inside the
 8.74 A REACH_CA ceiling — a CA-distance screen that its own docstring calls necessary and not
-sufficient). The predicted rotamer does not make the contact, and the predictor has no pH state and
-is not trained for sidechain placement, so it is weak evidence either way. The pH 7.4 to 6.0 charge
+sufficient). 🔴 **Corrected 2026-10-09, and the correction is worse than the original claim.** This previously
+read that what was missing was a rotamer rather than a position. The rotamer IS made — to the
+wrong partner, pointing the wrong way. Measured on the predicted complexes, His61's ring nitrogen
+sits **2.14, 2.33 and 2.45 A** from the carboxylate of target **ASP143** in `40_L1r4k6`,
+`40_L1r4k1` and `40_L5r5k5`, while the nearest target cation (A/LYS65) is **5.12-5.32 A** away —
+more than twice as far. A histidine DONATING to a carboxylate binds TIGHTER when it protonates,
+because His+ is more attracted to Asp-. That is the inverse of Ahn *et al.*'s mechanism (a
+histidine ACCEPTING from a cation, which loses the bond and gains a repulsion) and it is the
+direction problem 1 wanted, not problem 2. **No repacking fixes it: the acid is at 2.3 A and the
+cation at 5.2 A, so any packer prefers the acid.** ASP143 is the organiser-confirmed residue
+(1TNF carries Leu there), so this is real for the assay construct. The pH 7.4 to 6.0 charge
 swing is **+1 unit, uniform across all twelve**, consistent with acid protonation rather than a
 histidine switch. **Objective 2 is unaddressed, and no instrument available to this work could have
 told us otherwise.** We report that rather than a pH number we cannot defend.
+
+
+### 6.14 The unconstrained continuation: a pre-registered negative
+
+Ran 2026-10-09, tag `v3`, to AMENDMENTs 2 and 3 of the constrained-restart pre-registration. Six
+lineages over four backbones (3, 40, 16, 10), eight children a parent, mouse TRIMER folded every
+round, selection on the WORSE of the two species, no constraint file beyond the cysteine ban. Four
+lineages continued from the depth arm's round 5; two were seeded fresh from `tnfa_corrected_16_s1`
+and `tnfa_corrected_10_s2`.
+
+**It stopped itself at round 10 of 16 on pose regression** -- every design in that round above the
+10 A gate. 960 of a permitted 1,536 folds, ~$23, and the remaining 576 were not respent. Per-round
+best on the selector, against a seeded parent of 0.6655:
+
+| r1 | r2 | r3 | r4 | r5 | r6 | r7 | r8 | r9 | r10 |
+|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|
+| 0.5427 | 0.5218 | 0.4957 | 0.4351 | 0.5318 | 0.5201 | 0.5368 | 0.5243 | 0.4020 | 0.0927 |
+
+**Ten rounds never beat the seeded parent.**
+
+#### (a) The selector was the wrong statistic, and that is this arm's transferable finding
+
+Mouse scored uniformly about 0.2 below human on `ca_sc_dockq`, every round, so `min(human, mouse)`
+was mouse almost always and the arm was **a mouse-only optimisation that discarded its human gains
+in selection**. Over 480 designs human `ca_sc_dockq` reached **0.7776** -- better than any design
+this project had produced and better than the best seeded parent -- while the selector's ceiling was
+0.5427. Thirty designs scored >= 0.60 on human; **zero** did on the worse-of-two. Across 18
+lineage-rounds the worse-of-two carried a different parent than human-only would have in **10 of 18
+= 56 per cent**, each time with a lower human score.
+
+Folding mouse every round rested on a measured Spearman of **+0.762** between species on the
+selector -- but that was measured ABOVE the noise floor (n=8); inside the floor it is **+0.280**
+(n=20), and the population fell into the floor over three rounds (human median 0.4328 -> 0.0674 ->
+0.0398). A minimum over two decorrelated noisy scores selects on noise. **A correlation measured on
+the good tail does not license a selector that spends most of its life in the bad bulk**, and a
+composite selector silently redefines what the stopping rule counts: the patience counter ran on the
+worse-of-two value throughout.
+
+#### (b) The human tail was scored on the margin and fails both bars
+
+The 14 best designs by human `ca_sc_dockq` were re-folded against the human trimer at **seeds 1-5**
+with per-design composition-preserving shuffled nulls, 140 folds, ~$3.40.
+
+| | v3 human tail (n=14) | depth arm (n=12) |
+|---|--:|--:|
+| best margin | **+7.637** | **+8.031** |
+| median | +6.720 | +6.938 |
+| clearing the non-binder median +6.3473 | 9 / 14 | 10 / 12 |
+| **B1**: >= 3 above the binder median +7.8144 | **0 / 14 FAIL** | 1 / 12 |
+| **B2**: >= 1 above the binder max +8.2091 | **0 / 14 FAIL** | 0 / 12 |
+
+The best design in 480 beats **77 per cent of measured non-binders and 17 per cent of measured
+binders**. `tnfa_corrected_40_L1r4k1` at **+8.031** remains the best design in this work and the
+only one above the measured binder median. The arm is a negative on the selector AND on the metric
+the bars are set on. Pose and margin disagreed once more, as in s6.12: `16_L4r3k2` has human pose
+0.6687 and margin 4.562, while `16_L4r1k0` has a weaker pose and a better margin.
+
+#### (c) A sequence-identity error this work found in itself, and the canonical set that fixes it
+
+Several design ids carry **two distinct sequences**, because an aborted round-2 run left a parallel
+`depthB2`/`depthB2v2` tree. A first-match glob over the round input directories therefore selected
+**different molecules for different analyses**: three of the twelve depth-arm designs had their
+sequence-based screens run on a sequence at **0.446, 0.542 and 0.663 identity** to the one actually
+folded and scored.
+
+What was affected, and what was not:
+
+- **The margins stand.** Every one of the 12 replication folds was verified to carry a binder
+  sequence matching one of its own design's depth-arm folds at identity **1.000**.
+- **The structural work stands** -- clusters and interface geometry were computed on the folded
+  structures, not on a sequence file -- but was re-run on the canonical set to make the whole
+  analysis refer to one molecule per design.
+- **The sequence-based screens did not stand** and were re-run: the pre-submission screen
+  (12/12 pass, now with the PDB, SwissProt, THPdb and USPTO prior-art arms all searched) and the
+  liability screen (**1 of 12** flagged: `3_L0r5k2`, pI 6.63 inside the assayed 6.0-7.4 window and
+  near-neutral at both pH values; three others carry a lone Glu-composition flag at 27-28 per cent).
+
+`analysis/02-tnf/depth12_canonical_sequences_2026-10-09.tsv` now fixes one sequence per design --
+the seed-1 fold of the human replication, i.e. the molecule whose reported margin is being quoted --
+with the provenance of each. **Any future analysis of these twelve designs should read that file and
+not glob the run directories.**
+
+#### (d) The pH rating these twelve admit, on geometry alone
+
+Rated on the canonical structures, needing no calibrated instrument -- a histidine whose ring
+nitrogen is nearer a target cation than a target carboxylate can lose a contact and gain a repulsion
+on protonation (release, the required direction); one nearer a carboxylate gains attraction
+(tighter, the wrong direction).
+
+| tier | n | |
+|---|--:|---|
+| **A** release direction available | **0 / 12** | none |
+| **B** wrong direction installed | **7 / 12** | His61, 2.18-2.49 A to a carboxylate against 4.73-5.63 A to LYS65 |
+| **C** no histidine at all | **5 / 12** | backbones 3 and 16 |
+
+The charge swing from pH 7.4 to 6.0 is **+0.96 to +1.41** units across all twelve, uniform and
+small. **No design in this work can be rated favourably on objective 2**, and the reason is
+geometric rather than instrumental: the seven that carry the mechanism carry it inverted.
 
 
 ## 7. Protomer count is a measured confound for any inter-protomer epitope
