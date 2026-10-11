@@ -1,0 +1,2 @@
+quadH_E3Q_k12                       83aa  pI  4.93  GRAVY -0.44  q7.4  -5.46  q6.0  -4.48  CLEAN
+quadH_E3Q_k14                       83aa  pI  4.93  GRAVY -0.64  q7.4   -8.3  q6.0   -5.6  CLEAN

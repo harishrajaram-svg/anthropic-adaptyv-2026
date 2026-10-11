@@ -1,0 +1,15 @@
+identity against the ship set + quad (batch_duplicate fires at 0.95):
+
+  quadH_E3Q_k12
+      0.6627  vs 3_L0r5k2
+      0.6627  vs 3_L0r4k0
+      0.6386  vs 3_L4r5k2
+      -> CLEARS 0.95
+
+  quadH_E3Q_k14
+      0.6024  vs 3_L0r4k0_quadH
+      0.5663  vs 3_L0r5k2
+      0.5542  vs 3_L4r5k2
+      -> CLEARS 0.95
+
+  k12 vs k14 identity: 0.6265 -> CLEARS 0.95
