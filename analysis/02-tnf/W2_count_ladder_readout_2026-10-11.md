@@ -175,3 +175,40 @@ for de novo miniproteins of this size **decides whether `W2_H7c` is inside its w
 it** — which is the question arm M opened and this arm has not closed. Zero folds, zero dollars,
 local CPU. If it does not close, the honest conclusion is that no instrument in this project can
 measure ΔG_fold and the fold route cannot be advanced further by computation alone.
+
+---
+
+# X6 — the cost decomposition's own pick FAILS, and that bounds the instrument
+
+Amendment 2 built the molecule arm T's attribution and W2's per-position costs jointly specify:
+**`W2_X6`** = `quadH` + **H45V** + I78H + I16H + L82H, six buried histidines, the expensive one shed
+and all three cheap ones kept. 15 folds.
+
+| bar | threshold | `W2_X6` | verdict |
+|---|---|--:|---|
+| **X4** (free, run first) | ΔΔG_install reported, predicted net negative | **−5.923 REU** vs `quadH` | **PASS** — better than the −3.97 additivity predicted |
+| **X2** | Σ ≥ +3.60 | **+3.864** | **PASS** (additive prediction +3.797) |
+| **X3** | human margin ≥ +6.3473 | **+6.747** (SD 0.127) | **PASS** |
+| **X1** | monomer pLDDT ≥ 0.85 | **0.7912** (0.7854–0.7958) | 🔴 **FAIL** |
+
+**X1 was the whole point of X6 and it fails in the wrong direction.** Rosetta says `W2_X6` is
+5.9 REU *more* stable than the shipped `quadH` and 9.3 REU more stable than `W2_H7c`. ESMFold2 gives
+it **the lowest monomer pLDDT of the three** — 0.7912 against 0.8169 and 0.8070. The stability the
+decomposition says was bought back is invisible to the instrument that is not Rosetta.
+
+**So `cart_ddg_fold.py` has resolution at the clash scale and none at the design scale.** It called
+the ±30–45 REU collapses correctly and in advance (Spearman −0.964, n=7), and it is wrong about a
+±6 REU difference between three molecules that all fold. That is a clean, useful bound on a tool
+this project only just acquired, and it is the second independent reason — alongside the +10.315 REU
+antisymmetry failure and arm T's 16.4 kcal/mol self-consistency failure — that **PyRosetta cannot
+supply ΔG_fold here.**
+
+Σ for X6 (+3.864) lands between `quadH` (+3.064) and `W2_H7c` (+4.572), as designed, and its
+histidines are individually deeper than H7c's (H53 at pKa 2.86, H16 at 4.96 against H7c's 5.59) —
+losing H45 let the rest bury further. The depression physics behaved. The stability accounting did
+not.
+
+**`W2_H7c` therefore remains this arm's only design to clear every bar**, and the count lever is
+closed at seven histidines.
+
+Revised spend: **85 folds of the 150 cap, ~$3.83.**
