@@ -105,6 +105,18 @@ def set_problem(n):
     ONE_PROTON_BOUND = 10 ** (PH_HI - PH_LO)
 
 
+OVERRIDE = None
+"""Explicit (target_chains, binder_chain), set ONLY by main() and ONLY when BOTH flags are given.
+
+ADDED 2026-10-11 for R1, the calibration arm, and deliberately opt-in. family() recognises four
+registered constructs and REFUSES everything else; that fail-closed behaviour is load-bearing -- it
+is what kept 1,551 mouse poses out of the E1 pool. External structures (published pH-switch
+complexes) have no registered family, so they cannot be scored at all without naming the chains.
+This override exists for exactly that and NEVER activates implicitly: selftest M7 asserts an
+unregistered target still refuses while OVERRIDE is None.
+"""
+
+
 def orient_multi(model):
     """(target_chains, binder_chain, names) -- generalised from the two-chain case.
 
@@ -121,6 +133,18 @@ def orient_multi(model):
     tuple matches a registered family is a target protomer, and the one remaining chain is the
     binder. Refuses anything that is not N target chains plus exactly one binder.
     """
+    if OVERRIDE is not None:
+        tg, bd = OVERRIDE
+        have = {c.name for c in model}
+        missing = [x for x in list(tg) + [bd] if x not in have]
+        if missing:
+            return None, None, None, f'named chain(s) {missing} absent; model has {sorted(have)}'
+        if bd in tg:
+            return None, None, None, f'binder chain {bd!r} is also named as a target chain'
+        # No registered family, so histidine labels are built from the structure itself.
+        nm = {r.seqid.num: f'H{r.seqid.num}'
+              for c in model if c.name in tg for r in c if r.name == 'HIS'}
+        return sorted(tg), bd, nm, None
     chains = list(model)
     matched, names = [], None
     for c in chains:
@@ -474,6 +498,23 @@ def selftest():
     assert 'need exactly one binder' in why3, why3
     # MUTATION: zero non-target chains (apo target alone) must refuse too
     assert 'need exactly one binder' in orient_multi([_C('A', tnf_hs)])[3]
+    # M7 -- the R1 override must be OPT-IN. With OVERRIDE unset, an unregistered target still
+    # refuses; the flags must be the only way in.
+    global OVERRIDE
+    assert OVERRIDE is None, 'selftest must run with the override unset'
+    assert orient_multi([_C('X', [1, 2]), _C('Y', [3, 4])])[3] == 'target family unrecognised'
+    OVERRIDE = (['X'], 'Y')
+    try:
+        tgo, bdo, nmo, whyo = orient_multi([_C('X', [1, 2]), _C('Y', [3, 4])])
+        assert whyo is None and tgo == ['X'] and bdo == 'Y', (tgo, bdo, whyo)
+        assert nmo == {1: 'H1', 2: 'H2'}, nmo
+        assert 'absent' in orient_multi([_C('X', [1]), _C('Z', [2])])[3]
+        OVERRIDE = (['X'], 'X')
+        assert 'also named as a target' in orient_multi([_C('X', [1])])[3]
+    finally:
+        OVERRIDE = None
+    assert orient_multi([_C('X', [1, 2]), _C('Y', [3, 4])])[3] == 'target family unrecognised'
+    print('  ok  MUTATION: the R1 chain override is opt-in and refuses absent/duplicate chains')
     # MUTATION: the free-TARGET leg must delete the binder ONLY. Deleting every non-target
     # chain -- what the two-chain code did -- removes the sibling protomers, and H73 sits at
     # the inter-protomer seam, so its free pKa would come from a monomer that never exists.
@@ -500,12 +541,26 @@ def main():
     ap.add_argument('cifs', nargs='*')
     ap.add_argument('--dir'); ap.add_argument('--tsv'); ap.add_argument('--json')
     ap.add_argument('--selftest', action='store_true')
+    ap.add_argument('--target-chains', help='R1 only: comma-separated target chain ids. Requires '
+                                            '--binder-chain. Bypasses the family fingerprint.')
+    ap.add_argument('--binder-chain', help='R1 only: the binder chain id. Requires --target-chains.')
     ap.add_argument('--problem', type=int, default=1, choices=sorted(PROBLEMS),
                     help='1 = bind 6.5 / silent 7.4 (default, EGFR). '
                          '2 = bind 7.4 / silent 6.0 (TNF-alpha). Sets the pH pair, the '
                          'one-proton ceiling AND the direction of merit together.')
     a = ap.parse_args()
     if a.selftest: selftest(); return
+    # R1 override. BOTH flags or neither -- one alone is an error, never a silent default.
+    global OVERRIDE
+    if bool(a.target_chains) != bool(a.binder_chain):
+        raise SystemExit('REFUSE: --target-chains and --binder-chain must be given together')
+    if a.target_chains:
+        tg = [x.strip() for x in a.target_chains.split(',') if x.strip()]
+        if not tg:
+            raise SystemExit('REFUSE: --target-chains parsed to nothing')
+        OVERRIDE = (tg, a.binder_chain.strip())
+        print(f"  OVERRIDE ACTIVE: target chains {OVERRIDE[0]}, binder {OVERRIDE[1]!r} "
+              f"-- the family fingerprint is BYPASSED for every structure in this run\n")
     set_problem(a.problem)
     print(f"problem {PROBLEM}: pH {PH_LO} vs {PH_HI}, one-proton ceiling "
           f"{ONE_PROTON_BOUND:.3f}x per site")
