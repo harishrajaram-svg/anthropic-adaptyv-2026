@@ -100,3 +100,19 @@ ESMFold2 is pH-agnostic, so B3 is a geometric arrangement in a predicted pose an
 demonstrated pH switch. No histidine pKa is predicted. A B1+B3 pass ships as a **declared
 hypothesis with its own matched controls** — the parent, `relD50H`, and `ctrlH61Q` are all already
 measured, which is what makes the claim checkable rather than decorative.
+
+---
+
+## AMENDMENT 1 — sampling temperature, written 2026-10-11 1:42 AM, before any C7 fold exists
+
+The arm as specified used the depth loop's `--sampling_temp 0.1`. At that temperature over **11**
+positions SolubleMPNN is near-deterministic: 64 samples returned **8 distinct sequences** in arm A
+and **2** in arm B, with only 1-3 of the 11 shell positions moved. The depth loop's 0.1 is calibrated
+for designing a whole 83-residue chain, where 0.1 still yields diversity; over a shell it collapses,
+and a molecule 2 residues from `relD50H` cannot plausibly recover 2.25 margin units.
+
+**Amended:** sampling temperatures **0.2 and 0.3**, 128 sequences each, pooled per arm, with the same
+verification (fixed positions byte-checked against the template, histidines required, cysteine
+banned) and the same bars. The 0.1 pool is retained and eligible, so this widens the candidate set
+rather than replacing it. Nothing else changes: same template, same fixed set, same 11 shell
+positions, same free screens, same B1/B2/B3 thresholds.
