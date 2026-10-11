@@ -1,12 +1,187 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-09 9:15 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-09 10:10 PM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
 
 ---
 
-## 🟢 AS OF 2026-10-09 9:15 AM: A DEPTH ARM RAN FIVE ROUNDS AND 10 OF 12 DESIGNS NOW CLEAR THE PRE-REGISTERED MARGIN BAR. Nothing running. Nothing spending.
+## 🔴 AS OF 2026-10-09 10:10 PM: THE SECOND ARM IS ALSO A NEGATIVE. NOTHING DISPLACES `40_L1r4k1` AT +8.031. Nothing running. Nothing spending.
+
+**READ THIS FIRST. It supersedes every block below.** Detail in METHODS **§6.12, §6.13, §6.14** and
+AMENDMENTs 1-3 of `analysis/02-tnf/PREREG-CONSTRAINED-RESTART-2026-10-09.md`. ~1,570 folds today,
+**~$38**. Verified against `modal app list`, not assumed.
+
+### What ships, and the one decision left
+
+**`tnfa_corrected_40_L1r4k1`, 5-seed human margin +8.031**, is the best design in this project and
+the only one above the measured binder median (+7.8144). It was not displaced by anything today.
+
+**D1 is the only open decision and it is Harish's:** which of the 12 depth-arm designs to submit.
+Three structural clusters; **backbone 16 fails on both species and drops.** With mouse included:
+
+| design | bb | human | mouse | min | pH-clean |
+|---|--:|--:|--:|--:|:-:|
+| `40_L1r4k1` | 40 | **8.031** | 7.207 | 7.207 | yes |
+| `3_L0r5k2` | 3 | 7.504 | 7.522 | **7.504** | **NO -- pI 6.63 in the assay window** |
+| `40_L1r4k6` | 40 | 7.415 | 7.365 | 7.365 | yes |
+| `3_L4r5k2` | 3 | 6.378 | **8.686** | 6.378 | yes |
+
+10 of 12 clear the non-binder median on BOTH species; 1 of 12 clears the binder median (human only).
+Suggested: `40_L1r4k1` plus one from backbone 3 -- `3_L4r5k2` for the strongest mouse number in the
+set, or `3_L0r4k0` (6.967/7.581, clean) to avoid its Glu-composition flag. Fewer than 20 is
+explicitly fine. **`3_L0r5k2` is the trap: best cross-species minimum and the only liability failure.**
+
+### The v3 arm, in one paragraph
+
+6 lineages / 4 backbones / 8 children / mouse trimer every round / worse-of-two selection /
+unconstrained. **Stopped itself at round 10 of 16 on pose regression**, 960 of 1,536 folds, ~$23.
+Ten rounds never beat the seeded parent of 0.6655. Its human tail -- the 14 best by human pose,
+which the selector never carried -- was margin-scored at 5 seeds: best **+7.637**, **B1 FAIL (0 of
+14 above +7.8144), B2 FAIL (0 above +8.2091)**. A negative on the selector and on the bars.
+
+🔴 **The transferable lesson, and it was a design error of ours:** mouse scored uniformly ~0.2 below
+human, so `min(human, mouse)` was mouse almost always and the arm was **a mouse-only run that
+discarded its human gains in selection**. Human `ca_sc_dockq` reached **0.7776** -- better than any
+design this project has made -- while the selector's ceiling was 0.5427; 30 designs cleared 0.60 on
+human and **zero** did on the worse-of-two. The +0.762 cross-species Spearman that justified
+mouse-every-round was measured ABOVE the noise floor; inside the floor it is +0.280, and the
+population fell into the floor by round 3. **Next time: primary species as selector, secondary as an
+END GATE, and measure the per-objective score GAP before choosing a composite selector.**
+`LESSONS-FOR-NEXT-PROBLEM.md` §§9-12.
+
+### Objective 2 is closed, with evidence rather than silence
+
+**No design can be rated favourably, and the reason is geometric.** Of the 12: **0 have the release
+direction available, 7 have it INVERTED** (His61 sits 2.18-2.49 A from a target carboxylate against
+4.73-5.63 A to LYS65 -- protonation tightens the grip, which is problem 1's direction), and **5 carry
+no histidine at all**. Charge swing +0.96 to +1.41 units, uniform.
+
+And nothing could have told us otherwise: the campaign released **no pH column across 1,440
+designs**, so there are no labels to calibrate against -- against 354 labelled binders for objective
+1 and 154 labelled mouse calls for objective 3. Three instruments were built and all three failed
+their controls (`his_cation_gate` 0 PASS on 9 real crystallographic TNF-alpha complexes, one of them
+presenting 32 interface histidines; `dddg_elec` at chance on 82 labelled variants; the PROPKA
+linkage gate with within-design noise exceeding its between-design signal). Installing the mechanism
+also fails by matched control: 0.6349/0.5053/0.6203 unconstrained against 0.0126/0.0309/0.0772 with
+two histidines forced, same parent, same seed, 94-95% identity.
+
+### ⚠️ A sequence-identity error found in our own work -- read before any new analysis of the 12
+
+Several design ids carry **two distinct sequences** (an aborted round-2 run left a parallel
+`depthB2`/`depthB2v2` tree). A first-match glob selected **different molecules for different
+analyses**: 3 of 12 had their sequence-based screens run on a sequence at **0.446-0.663 identity** to
+the one actually scored. The **margins are unaffected** -- all 12 replication folds verified to match
+one of their own design's folds at identity 1.000 -- but the prescreen and liability screens were
+re-run, and the structural work was recomputed on one canonical molecule per design.
+
+**`analysis/02-tnf/depth12_canonical_sequences_2026-10-09.tsv` is now the single source of truth for
+these twelve sequences. Read it; do not glob the run directories.**
+
+### Re-run on the canonical set, both clean
+
+- **Pre-submission screen 12/12 pass**, now with PDB, SwissProt, THPdb **and USPTO patents** all
+  searched (prior-art arm 99.7 s vs 12.8 s without patents). Still unsearched: the three antibody
+  arms (PLAbDab 404 at OPIG) and `proteinbase_public`; recorded per row.
+- **Liability 1 of 12 flagged**: `3_L0r5k2` (pI 6.63 inside 6.0-7.4, near-neutral at both pH).
+  Three carry a lone Glu-composition flag at 27-28%. Zero cysteines, sequons or deamidation motifs
+  across all twelve.
+
+### Still to do
+
+| # | task | who | time |
+|---|---|---|---|
+| 1 | **D1: pick what ships** | **Harish** | 20 min |
+| 2 | Rewrite methodology box FIELD 2 -- still describes the 35 Mosaic designs | me | 90 min |
+| 3 | Upload, designate, attach | me | 30 min |
+
+**Clocks:** last upload preserving a 24 h retry **Sun Oct 11 07:59 EDT**; hard close Mon Oct 12
+07:59. All 24 gates green at this block's commit.
+
+---
+
+## 🟡 SUPERSEDED — AS OF 2026-10-09 1:30 PM: THE DEPTH ARM REPLICATED ON UNSEEN SEEDS. THE MOUSE DIMER WAS THE WRONG CONSTRUCT. THE 12 DESIGNS ARE 3 FOLDS. Nothing running. Nothing spending.
+
+**READ THIS BLOCK FIRST. It supersedes the 9:15 AM block immediately below, which is correct but
+incomplete and overstates two things.** Full detail in METHODS **§6.12**. 480 folds on H100, seeds
+1-5 with 42 excluded, **$11.64**. Verified against `modal app list`, not assumed.
+
+**The control ran first.** Re-scoring the 12 seed-42 pairs reproduced
+`depth_margins_2026-10-09.tsv` at **12 of 12, max absolute difference 0.00000**.
+
+| | seed 42 | seeds 1-5 | verdict |
+|---|--:|--:|---|
+| clearing +6.347 | 10 / 12 | **10 / 12** | the level replicates |
+| median margin | +7.058 | +6.938 | -0.120 |
+| best | +7.492 `40_L1r4k6` | +8.031 **`40_L1r4k1`** | **the leader changed** |
+| Spearman between the orderings | — | **0.538** | the ranking does NOT replicate |
+
+**So the margin can say which cluster to ship and cannot say which member.** §6.10c's lesson on a
+second population: a best-of-N on single seeds finds a real tail and gets the order inside it wrong.
+
+### Four things that are now known and were not at 9:15 AM
+
+1. 🔴 **The mouse DIMER is the wrong construct and every mouse number in §6.10d rests on it.** On a
+   mouse trimer the dimer **inflates** the margin by a median **+16%** (spread -78% to +40%), is
+   **6.8x noisier** (SD 1.520 vs 0.225), and produced a false reading: `40_L5r5k6` read **+1.579**
+   on the dimer ("does not engage mouse") and **+7.254**, mid-pack, on the trimer. §7's adalimumab
+   control predicted the dimer would *lose* 14%; it *gains* 16%, so that control does not transfer.
+   **Why the dimer existed:** §6.6's OOM is a **34.24 GiB allocation inside the gradient
+   computation** on a 48 GB L40S — a Mosaic design-time limit. Scoring builds no gradient graph and
+   a mouse trimer is 551 residues against the human trimer's 554 we fold throughout. All 12 trimer
+   runs completed with **zero** OOM at 28.4 s/fold. The constraint was carried into a stage where it
+   never applied.
+2. **The species do not track, measured trimer against trimer for the first time: Spearman
+   +0.084.** The dimer flattered it at +0.448. The level is fine on both species (all 12 beat their
+   own mouse-trimer null); the ranking does not transfer. **No mouse labelled control exists**, so
+   "11 of 12 clear +6.347 on mouse" means *beats its own null by more than the human non-binder
+   median margin* — not that anything would bind mouse.
+3. **The 12 designs are 3 folds.** Foldseek TM-align, binder chain only: **3 clusters at TM >= 0.5**
+   under single, complete and greedy linkage alike, and they are the parent backbones exactly —
+   **40 (x7), 3 (x3), 16 (x2)**. Within-backbone TM **0.982-1.000**; between, 0.432-0.490. Method
+   validated by reproducing the 48-design precedent at max abs difference **0.0**. The set is worth
+   about **3 slots, not 12**, and design diversity is one of three stated selection criteria.
+4. **What the bar actually is.** +6.347 is the measured **non-binder median**, so half of all
+   measured non-binders clear it by construction. The best design beats **70% of non-binders and
+   17% of binders**; the worst, 43% and 0%. The highest non-binder (8.625) exceeds the highest
+   binder (8.209), so the instrument's top end carries no label information. Stage A's best sat at
+   ~47% / 8%, so five rounds moved the leader to 70% / 17%: real, and short of the target.
+
+### 🔴 TWO CORRECTIONS TO WHAT I WROTE EARLIER TODAY
+
+- **"The 12 separate completely from the 48 on `design_mean`" is wrong.** Under replication `16_s1`
+  moves 8.599 -> **9.145**, past stage A's best of 8.862. It is **11 of 12**, not 12 of 12. Built on
+  one draw.
+- **"+6.287 is wrong, the artifact says +6.027" was backwards** and is retracted. METHODS §6.10c
+  reads `22_s1` at seed 42 = **+6.027** and 5-seed median = **+6.287**, under "the best margin
+  replicates on seeds it was not selected on". Both are real; **+6.287 is the replicated one**. The
+  nine places carrying +6.287 were NOT swept and should not be.
+
+### Screens on the 12, all clean, all new
+
+- **Prescreen 12/12 pass**: whole-sequence identity to the 4,964-entry corpus **0.000**,
+  binding-region 0.28-0.37 against a 0.80 cut. Run `--skip-prior-art` as both precedents were, so it
+  means no known-binder match and no within-batch duplicate, **not** no public prior art.
+- **Liability 11/12 clean on pH and charge**: pI **4.53-5.47** for eleven, against measured binders'
+  4.53-5.26 and stage A's median 7.01. Zero cysteines, sequons, deamidation motifs. `3_L0r5k2` is
+  the exception at pI 6.63, inside the assayed window.
+- **Objective 2 is unaddressed and the composition says why:** 5 of 12 carry **zero** histidines, 7
+  exactly one, none more. The pH 7.4->6.0 swing is ~**+1 charge unit for every design** — uniform,
+  small, and from acid protonation rather than a histidine switch.
+
+### The decision this leaves
+
+**D1 is still Harish's and it is now a different question.** Not "ship 10 of 12" but "ship the best
+survivor of each of 2-3 clusters, chosen on something other than the margin, and say so". Backbone
+**16** fails the bar in every read (human seed 42, human 5-seed, mouse trimer) and is the cluster to
+drop. Fewer than 20 is explicitly fine.
+
+**W1 is DONE:** the out-of-sample AUC **0.674-0.702** now appears in METHODS §4.5, limitation 51 and
+the methodology box, each cross-referencing §6.11. **All 24 gates green.**
+
+---
+
+## 🟡 SUPERSEDED (correct but incomplete) — AS OF 2026-10-09 9:15 AM: A DEPTH ARM RAN FIVE ROUNDS AND 10 OF 12 DESIGNS NOW CLEAR THE PRE-REGISTERED MARGIN BAR.
 
 **READ THIS BLOCK FIRST. It supersedes the 2026-10-08 blocks below, which said the design search
 was closed. It was reopened on 2026-10-08 at 10:27 PM with Harish's explicit approval and it
@@ -43,7 +218,9 @@ written. Do not sweep them.
 
 The **+6.347** bar is the measured non-binder median from `labelled_control_2026-10-08.tsv`,
 committed to git at **`5002b49`** before any depth-arm design existed. The measured BINDER median
-is **+7.814** and **none of the 12 reaches it** — ceiling +7.492. So every one sits in the band
+is **+7.814** and **none of the 12 reaches it on a single seed** — ceiling +7.492. ⚠️ **Superseded
+by §6.12: at 5 seeds the ceiling is +8.031 (`40_L1r4k1`), which IS above the binder median and beats
+9 of the 12 measured binders.** On single seeds every one sits in the band
 between a typical measured non-binder and a typical measured binder.
 
 Same generator, same sequence designer, overlapping backbones (backbone 3 is in both lists). The
@@ -510,9 +687,16 @@ identical `L=76 seed=0` runs. Also: **every TNF launcher must name `--epitope` o
    at the published floor where working designs had **8 and 11**; record Germinal as an attempted,
    failed arm; add the size-matched null band and the liability screen.
 3. **Sweep older prose for reader-addressed imperatives** — disqualification risk, not style.
-4. **Three stale claims:** `submission-basis-p2.md:48` says `molecule_class: protein` (code is
-   already correct); `setup-checklist.md:24` still says avoid PyRosetta; problem 1's METHODS §27 owes
-   the PyRosetta correction with today's date.
+4. **Three stale claims — resolved 2026-10-09, two of the three pointers were wrong.**
+   `submission-basis-p2.md` was **already fixed** on 10-08 (item 7 reads `single_chain` with a dated
+   note). `setup-checklist.md:24` **is fixed** — the top line no longer reads as a settled "avoid
+   it" when the status is installed/never-run with the licence question open. Problem 1's **§27 is
+   the wrong reference**: it is limitation 27, on the tethered-versus-extended footprint, and has no
+   PyRosetta content. The PyRosetta text lives in **§12 Declarations**, already corrected 10-05 with
+   a 10-08 addendum. ⚠️ **But §12 now contradicts itself and it is Harish's call:** a 🟢 "RESOLVED
+   2026-10-06 by the organisers" block declares "no licence breach", directly below a 🔶 addendum
+   saying the determination "is still ours to make". The 🟢 block settles a question Harish owns.
+   Left untouched.
 5. **Nominate ≤20 + ranking rationale.** The screen changed what this is: **only 15 of 35 clear
    both the pH and charge flags**, so liability is a ranking term, not a tiebreak. Needs the item-1
    decision first.
