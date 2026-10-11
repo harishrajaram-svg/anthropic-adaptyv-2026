@@ -232,7 +232,12 @@ def redesign(parent_cif, tag, nseq, force_his=True, omit_acids=True):
     interface, no histidine requirement.
     """
     import gemmi
-    work = f"/tmp/depth_{tag}"
+    # RUN_TAG-SCOPED. Two arms launched concurrently on 2026-10-11 both resolved to
+    # /tmp/depth_r1L0 and the second overwrote the first's constraint file mid-flight: the
+    # acid-banned arm read back an omit file containing only the cysteine ban, produced no
+    # sequences the verifier would accept, and died on assert len(out) == nseq with (0, 8).
+    # The Volume names were already tag-scoped (T10); this directory was not.
+    work = f"/tmp/depth_{RUN_TAG}_{tag}"
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(f"{work}/in")
     st = gemmi.read_structure(parent_cif)
