@@ -1,0 +1,41 @@
+C4 mechanism-B readout, 2026-10-11. 4 designs + 4 matched nulls, 5 seeds, 40 folds, 4 shards, H100.
+Pre-registered at c616a5a (PREREG-C4-MECHB-2026-10-11.md) before any C4 fold existed.
+Instrument: bin/pae_interface.py pae_if_mean, seeds collapsed by MEDIAN. margin = null_med - design_med.
+Geometry: bin/mechB_scan.py on each variant's OWN folds, all 5 seeds.
+
+design            margin   design_med  null_med   B1(>=6.347)  B2(>=7.8144)  B3 release >=3/5
+----------------------------------------------------------------------------------------------
+40_L3r5k2         +8.143        7.805    15.947       PASS          PASS        FAIL  (2 of 5)
+3_L2r3k7          +0.597       13.875    14.472       fail          fail        FAIL  (1 of 5)
+10_L5r9k2         +0.451       14.377    14.828       fail          fail        FAIL  (0 of 5)
+3_L0r2k2          +0.314       14.299    14.613       fail          fail        FAIL  (0 of 5)
+----------------------------------------------------------------------------------------------
+reference: 40_L1r4k1 pooled 15-seed +7.706 (5-seed +8.031); non-binder median +6.347; binder median +7.8144
+
+PER-SEED GEOMETRY, which is the whole point of B3:
+  40_L3r5k2   tighten / RELEASE / no-contact / no-contact / RELEASE
+  3_L2r3k7    RELEASE / no-contact / no-contact / tighten / tighten
+  3_L0r2k2    no-contact x5     <-- its seed-42 fold read LYS27 4.07 A vs GLU28 8.04 A
+  10_L5r9k2   no-contact x4, tighten x1
+
+RESULT 1 -- pH: NEGATIVE, and decisively so. 0 of 4 clear B3. Per the prereg, a pH slot needed
+B1 AND B3, so no candidate qualifies. The single-seed release geometry did not survive reseeding:
+3_L0r2k2, whose seed-42 contact was the cleanest in the pool (4.07 A cation vs 8.04 A carboxylate),
+reads no-contact in 5 of 5 fresh seeds. This is a stronger negative than the project's three earlier
+pH closures, because it is not an instrument failing its control -- the geometry itself is a
+single-seed artifact, caught by a bar fixed before the folds existed.
+=> Objective 2 is closed for the fourth time. Mechanism B joins mechanism A as measured dead.
+
+RESULT 2 -- an unexpected binder, and it needs the same scepticism C2 just taught us.
+40_L3r5k2 clears BOTH margin bars at +8.143, higher than 40_L1r4k1's own 5-seed +8.031 and higher
+than its pooled 15-seed +7.706. Three caveats, stated rather than buried:
+  (a) It is ONE 5-seed draw. C2 measured a -0.374 shift between 5-seed and fresh-seed reads on the
+      leader, so +8.143 may deflate the same way. Seeds 6-15 are the test, not more argument.
+  (b) On the DESIGN side alone it is worse: pae_if_mean 7.805 against the leader's 6.997 (lower is
+      better). Its larger margin comes partly from a worse null (15.947 vs 15.027). The margin is
+      the pre-registered instrument because the 150-design calibration selected it, and both
+      molecules are 83-mers, but the raw interface PAE ranks them the other way and that is reported.
+  (c) It carries 1 histidine and has never been through express_qc_p2, the prior-art prescreen, the
+      monomer floor, or a mouse leg. None of that is known.
+It comes out of the v3 arm's discarded human-side tree -- the designs the worse-of-two selector
+built and then threw away. That lesson now has a number attached.
