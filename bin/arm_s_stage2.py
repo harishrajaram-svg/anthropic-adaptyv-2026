@@ -21,7 +21,7 @@ omit_acids=False because the wholesale acid ban cannot hold a pose at all (arm A
 Layering either constraint now would confound S1 -- a failure could not be read as "the seam does
 not dock" rather than "the constraint broke it", which is the confound that cost arm A its answer.
 """
-import sys, os, glob, argparse, importlib.util
+import sys, os, glob, shutil, subprocess, argparse, importlib.util
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gemmi
 
@@ -59,6 +59,58 @@ def relabel(path, out_path):
     return binder_len, None
 
 
+
+def ca_design(pdb, tag, nseq, blen):
+    """CA-only ProteinMPNN on a Genie 3 backbone. Designs chain D, A/B/C fixed, cysteine banned.
+
+    WHY NOT run_depth_rounds.redesign(). Genie 3 emits CA-ONLY coordinates -- 83 CA atoms for the
+    83-residue binder, and the target protomers likewise carry CA plus the conditioning histidine's
+    sidechain. ProteinMPNN's default featuriser needs N, CA, C and O, so it masked every binder
+    position and returned EIGHTY-THREE X's. The length assertion passed (83 == 83) and nothing else
+    looked wrong, so 240 complexes were folded against a binder with no sequence: constant pLDDT
+    0.7493-0.7497 across 210 scored designs, DockQ 0.013-0.075, lrms 30-40 A. That cost ~$6.70 and
+    read exactly like a real S1 failure.
+
+    protein_mpnn_run.py --ca_only loads ca_model_weights/ and is built for this case. It REFUSES
+    to combine with --use_soluble_model ("CA-SolubleMPNN is not available yet", sys.exit), so this
+    leg runs the vanilla CA weights -- a DECLARED deviation from the protocol's SolubleMPNN. The
+    established SolubleMPNN redesign still applies later, on the PREDICTED complex, which is what
+    the depth loop has always done; it cannot apply here because no prediction exists yet.
+    """
+    work = f"/tmp/armS_{tag}_mpnn"
+    shutil.rmtree(work, ignore_errors=True)
+    os.makedirs(f"{work}/in")
+    shutil.copy(pdb, f"{work}/in/parent.pdb")
+    r = lambda *c: subprocess.run(c, cwd=_rdr.MPNN, check=True, capture_output=True, text=True)
+    r(_rdr.MPNN_PY, "helper_scripts/parse_multiple_chains.py",
+      f"--input_path={work}/in", f"--output_path={work}/p.jsonl", "--ca_only")
+    r(_rdr.MPNN_PY, "helper_scripts/assign_fixed_chains.py",
+      f"--input_path={work}/p.jsonl", f"--output_path={work}/c.jsonl", "--chain_list", "D")
+    r(_rdr.MPNN_PY, "protein_mpnn_run.py", "--jsonl_path", f"{work}/p.jsonl",
+      "--chain_id_jsonl", f"{work}/c.jsonl", "--out_folder", work,
+      "--num_seq_per_target", str(nseq), "--sampling_temp", "0.1",
+      "--seed", "37", "--batch_size", "1", "--ca_only",
+      "--omit_AAs", "CX")
+    lines = [l.strip() for l in open(f"{work}/seqs/parent.fa") if l.strip()]
+    seqs = [l for l in lines if not l.startswith(">")][1:]
+    out = []
+    for q in seqs:
+        q = q.split("/")[-1]
+        if len(q) != blen:
+            sys.exit(f"{tag}: sequence length {len(q)} != binder {blen}")
+        # THE GUARD THIS FUNCTION EXISTS FOR. A masked backbone returns X and every other check
+        # passes, so poly-X is rejected explicitly rather than inferred from a downstream score.
+        nx = q.count("X")
+        if nx:
+            sys.exit(f"{tag}: {nx} X residue(s) survived -- the backbone was not featurised")
+        if "C" in q:
+            sys.exit(f"{tag}: cysteine survived the ban")
+        out.append(q)
+    if len(out) != nseq:
+        sys.exit(f"{tag}: {len(out)} sequences, expected {nseq}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("pdb_glob")
@@ -85,10 +137,9 @@ def main():
         if err:
             print(f"  REFUSED {stem}: {err}"); n_ref += 1; continue
         try:
-            seqs = _rdr.redesign(rl, f"{a.tag}_{stem}", a.nseq,
-                                 force_his=False, omit_acids=False)
+            seqs = ca_design(rl, f"{a.tag}_{stem}", a.nseq, blen)
         except SystemExit as e:
-            print(f"  REFUSED {stem}: redesign -- {e}"); n_ref += 1; continue
+            print(f"  REFUSED {stem}: design -- {e}"); n_ref += 1; continue
         n_ok += 1
         for k, s in enumerate(seqs):
             assert len(s) == blen, (len(s), blen)
