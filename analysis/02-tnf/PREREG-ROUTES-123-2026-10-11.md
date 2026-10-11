@@ -100,3 +100,45 @@ Nothing here lands a submittable design before **Mon Oct 12, 7:59 AM EDT**. Obje
 as not demonstrated regardless of outcome. A full S1–S4 pass would be a design with a measured hold
 and a *replicated predicted direction* — strictly more than anything in the submission, strictly
 less than a measured switch.
+
+---
+
+# AMENDMENT 1 — the quad's mouse leg, and the substitution rule, 2026-10-11 10:55 AM EDT
+
+Written BEFORE the mouse folds launch and before any mouse number exists.
+
+Arm M passed M1/M2/M3 and the quad `3_L0r4k0_quadH` cleared the liability screen (**pI 5.2**, clear of
+the 6.0–7.4 assay window; its single flag is 28% glutamate, carried identically by its parent and by
+the already-shipping `3_L4r5k2`). It is therefore a shipping candidate, which M1–M3 were not written
+to decide.
+
+**It cannot ship alongside its parent.** `3_L0r4k0_quadH` against `3_L0r4k0` is **79/83 = 0.9518
+identity**, over the organisers' `batch_duplicate` threshold of 0.95. The choice is substitution, not
+addition.
+
+`3_L0r4k0`'s strongest feature is its MOUSE margin (+7.581 against its human +6.967). The quad has
+never been folded against mouse, so the substitution is currently undecidable. 2 inputs x 5 seeds =
+**10 folds, ~$0.45**.
+
+| bar | threshold | meaning |
+|---|---|---|
+| **M4** | 5-seed mouse margin ≥ **+6.3473** | the quad engages mouse at all |
+
+## Substitution rule, fixed now
+
+Objective 3 is cross-reactivity, so the governing quantity is the **worse of the two species**, and
+the parent's is **+6.967** (human 6.967, mouse 7.581).
+
+- **Substitute the quad for `3_L0r4k0`** iff `min(human, mouse)` for the quad **> +6.967**, which
+  given the quad's measured human +7.1306 means **mouse > +6.967**.
+- **Otherwise keep `3_L0r4k0`** and the quad does not ship, whatever its pH properties, because a
+  worse cross-species binder is not improved by a pH story this project cannot measure.
+
+🔴 Note the asymmetry against the depth-arm selector argument, and that it is deliberate: the
+worse-of-two was the wrong **design selector** (arm B, LESSONS §§9-12) because it discarded human
+gains during optimisation. It is the right **shipping gate** because the assay measures both species
+and objective 3 asks for both. Selecting and shipping are different decisions.
+
+🔴 The quad's pH claim is unchanged by any mouse number: +3.064 kcal/mol is a predicted fold
+destabilisation and ESMFold2 is pH-agnostic. The +1.96 e charge gain across the window (−7.30 →
+−4.43, against the parent's +1.06 e) is a property of the sequence, not evidence of release.

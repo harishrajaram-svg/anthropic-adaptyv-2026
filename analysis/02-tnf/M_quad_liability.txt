@@ -1,0 +1,4 @@
+3_L0r4k0_quadH                      83aa  pI   5.2  GRAVY -0.87  q7.4   -7.3  q6.0  -4.43  1 FLAG(S)
+      - COMPOSITION E is 28% (problem 1 rank 1 was 30% Ala)
+3_L0r4k0_parent                     83aa  pI  4.83  GRAVY -0.52  q7.4  -7.45  q6.0  -6.39  1 FLAG(S)
+      - COMPOSITION E is 28% (problem 1 rank 1 was 30% Ala)
