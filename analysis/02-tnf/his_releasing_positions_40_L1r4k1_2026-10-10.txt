@@ -1,0 +1,23 @@
+chains (residue counts): {'A': 157, 'B': 157, 'C': 157, 'D': 83}
+binder chain = D (83 res); target = everything else
+
+target charged groups in reach: 99 cation atoms, 90 carboxylate atoms
+
+interface residues (side-chain tip within 5.0 A of target): 12 of 83
+
+ pos  aa  d_target  d_cation   d_acid   call
+  62   E      2.30      2.30     5.46   RELEASING candidate
+  53   K      4.08      4.31     4.08   tightening
+  50   D      3.73      5.05     6.68   RELEASING candidate
+  27   R      3.22      5.06     5.87   RELEASING candidate
+  61   H      2.35      5.11     2.35   tightening
+  20   Y      3.34      5.23     4.76   tightening
+  58   L      4.54      6.36     8.42   RELEASING candidate
+  54   T      2.78      6.97     9.54   RELEASING candidate
+  57   T      3.34      8.15     7.42   tightening
+  51   L      4.13      9.47     9.35   -
+  63   Q      2.55     10.64     5.91   tightening
+  47   E      4.70     12.41     6.69   tightening
+
+SUMMARY: 5 releasing candidates, 6 tightening, 1 neither
+current His positions in binder: [61]

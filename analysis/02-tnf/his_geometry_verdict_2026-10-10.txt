@@ -1,0 +1,15 @@
+design         His   pos  d_tgt  d_cat  d_acid  verdict
+40_L1r4k6        1    61   2.62   7.26    4.08  tightening (inverted)
+3_L0r4k0         0     -      -      -       -  NO HISTIDINE — cannot switch
+40_L5r5k5        1    61   2.43   4.94    2.43  tightening (inverted)
+40_L1r4k1        1    61   2.35   5.11    2.35  tightening (inverted)
+40_L1r2k1        1    61   2.18   4.73    2.18  tightening (inverted)
+40_L1r2k5        1    61   2.49   4.74    2.49  tightening (inverted)
+3_L4r5k2         0     -      -      -       -  NO HISTIDINE — cannot switch
+40_L1r4k2        1    61   2.36   4.73    2.36  tightening (inverted)
+3_L0r5k2         0     -      -      -       -  NO HISTIDINE — cannot switch
+40_L5r5k6        1    61   2.45   4.94    2.45  tightening (inverted)
+16_s2            0     -      -      -       -  NO HISTIDINE — cannot switch
+16_s1            0     -      -      -       -  NO HISTIDINE — cannot switch
+
+VERDICT over 12 designs: releasing 0 · tightening 7 · off-interface 0 · no histidine 5
