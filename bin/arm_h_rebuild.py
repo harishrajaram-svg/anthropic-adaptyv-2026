@@ -26,6 +26,13 @@ PARENTS = {
     "s3_22k4":   ("runs/S-margin-out/Smargin/tnfa_seam_s3_22k4/*.cif",            [6, 56, 61, 69, 82]),
 }
 
+# R3, 2026-10-11. The histidine positions to HOLD FIXED per parent. The unpinned run (arm H
+# confirmation) removed every histidine: His49 from the L49H line and all four buried ones from the
+# quadH line, so quadH_E3Q_k12 passes H1+H2 with ZERO titratable groups of its own and the quad's
+# +3.064 kcal/mol fold-destabilisation mechanism is gone. Pinning them tests the hypothesis that was
+# actually intended -- rebuild the hold AND keep the mechanism.
+PIN_HIS = {"L49H_E4Q": [49], "quadH_E3Q": [45, 53, 63, 64], "s3_22k4": []}
+
 
 def best_template(pattern):
     """Highest complex pLDDT -- a structural criterion, fixed in the prereg, not the outcome."""
@@ -40,7 +47,7 @@ def best_template(pattern):
     return best, bp
 
 
-def design(cif, tag, banned, nseq):
+def design(cif, tag, banned, nseq, pin=()):
     work = f"/tmp/armH_{tag}"
     shutil.rmtree(work, ignore_errors=True)
     os.makedirs(f"{work}/in")
@@ -57,11 +64,19 @@ def design(cif, tag, banned, nseq):
       f"--input_path={work}/p.jsonl", f"--output_path={work}/c.jsonl", "--chain_list", "D")
     cpath, items = mc.emit("parent", "D", banned, [], f"{work}/cons",
                            force_his=False, n_res=blen, omit_acids=True)
+    extra = []
+    if pin:
+        # make_fixed_positions_dict.py writes {name: {chain: [positions]}}; those positions keep
+        # their PARENT residue and are not redesigned.
+        r(_rdr.MPNN_PY, "helper_scripts/make_fixed_positions_dict.py",
+          f"--input_path={work}/p.jsonl", f"--output_path={work}/fixed.jsonl",
+          "--chain_list", "D", "--position_list", " ".join(str(x) for x in pin))
+        extra = ["--fixed_positions_jsonl", f"{work}/fixed.jsonl"]
     r(_rdr.MPNN_PY, "protein_mpnn_run.py", "--jsonl_path", f"{work}/p.jsonl",
       "--chain_id_jsonl", f"{work}/c.jsonl", "--out_folder", work,
       "--num_seq_per_target", str(nseq), "--sampling_temp", "0.1",
       "--seed", "37", "--batch_size", "1", "--use_soluble_model",
-      "--omit_AAs", "CX", "--omit_AA_jsonl", cpath)
+      "--omit_AAs", "CX", "--omit_AA_jsonl", cpath, *extra)
     lines = [l.strip() for l in open(f"{work}/seqs/parent.fa") if l.strip()]
     seqs = [l for l in lines if not l.startswith(">")][1:]
     out = []
@@ -75,6 +90,13 @@ def design(cif, tag, banned, nseq):
         if bad:
             sys.exit(f"{tag}: H4 FAILED -- acid at banned position(s) {bad} "
                      f"({[q[p-1] for p in bad]}); omit_AA_jsonl did not apply")
+        # H5, R3 only. fixed_positions_jsonl loads ONLY `if os.path.isfile(...)` and otherwise
+        # prints "fixed_positions_jsonl is NOT loaded" and designs every position -- the same silent
+        # failure as the omit file. Verified on the output, never assumed from the argument list.
+        lost = [p for p in pin if q[p - 1] != "H"]
+        if lost:
+            sys.exit(f"{tag}: H5 FAILED -- pinned position(s) {lost} came back "
+                     f"{[q[p-1] for p in lost]}, not H; fixed_positions_jsonl did not apply")
         out.append(q)
     if len(out) != nseq:
         sys.exit(f"{tag}: {len(out)} sequences, expected {nseq}")
@@ -85,6 +107,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--nseq", type=int, default=16)
     ap.add_argument("--out", default="runs/H-rebuild-in")
+    ap.add_argument("--pin-his", action="store_true")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     tnf = trimer()
@@ -93,7 +116,8 @@ def main():
         cif, pl = best_template(pat)
         if cif is None:
             print(f"  REFUSED {tag}: no template with scores"); continue
-        seqs, items = design(cif, tag, banned, a.nseq)
+        seqs, items = design(cif, tag, banned, a.nseq,
+                             pin=PIN_HIS.get(tag, []) if a.pin_his else ())
         print(f"  {tag}: template pLDDT {pl:.4f}, D/E banned at {banned}, "
               f"{len(seqs)} seqs, omit items {len(items)}")
         for k, s in enumerate(seqs):
