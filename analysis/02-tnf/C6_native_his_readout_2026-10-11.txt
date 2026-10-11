@@ -1,0 +1,49 @@
+C6 native-releasing-histidine readout, 2026-10-11 1:28 AM. 6 designs + 6 matched nulls, 5 seeds,
+60 folds, 3 shards, H100, ~$5. Pre-registered at c5c0204 before any C6 fold existed.
+Instrument: bin/pae_interface.py pae_if_mean, median over seeds. margin = null_med - design_med.
+Geometry: the his_geometry_verdict convention (side-chain tip, cation vs carboxylate) on each
+design's OWN five folds.
+
+design        His  partner  mouse   margin   B1(>=6.347)  B2(>=7.706)  B3 release >=3/5
+---------------------------------------------------------------------------------------------
+3_L2r9k1       28   R138     no     +5.051      fail         fail        PASS  5/5
+3_L2r9k5       28   R32     YES     +4.542      fail         fail        PASS  5/5
+3_L2r5k4       28   R138     no     +3.928      fail         fail        PASS  3/5
+40_r2p0k3      61   R32     YES     +3.742      fail         fail        PASS  5/5
+40_L3r3k1      61   R82     YES     +1.295      fail         fail        PASS  3/5
+3_L2r8k1       28   R138     no     +0.318      fail         fail        fail  2/5
+---------------------------------------------------------------------------------------------
+reference: non-binder median +6.347; shipped leader pooled +7.706; best binder in project +8.322
+
+RESULT, and it is the first pH result in this project that is not purely negative:
+
+B3 PASSES 5 of 6, three of them at 5 of 5 seeds. The releasing geometry is STRUCTURAL and
+REPRODUCIBLE. It did not have to be forced -- ProteinMPNN placed every one of these histidines of
+its own accord -- and unlike C4's target-histidine geometry (2 of 5 at best) it survives reseeding.
+Two of the 5/5 designs point at R32, which is CONSERVED IN MOUSE, so the arrangement is compatible
+with objective 3 as well.
+
+B1 FAILS 0 of 6. Best margin +5.051 against a floor of +6.347.
+
+=> THE GEOMETRY IS NOT THE PROBLEM. THE BINDING IS.
+The mechanism is installable without forcing and stable across seeds; what does not happen is a
+design that holds TNF-alpha while carrying it. Across every design in this project with a measured
+margin, releasing geometry never exceeds ~+5.1 (C6 best +5.051; the only previously measured
+releasing-His design sits near +5.1) while the best design without it reaches +8.322.
+
+The confound to check was "releasing-His designs are simply less optimised." It does not hold:
+lineage L2 on backbone 3 carried its His28 releasing geometry through rounds 5, 8 and NINE of
+margin-driven redesign and plateaued at +5.051, while lineages that never had one or lost it
+reached +8.322 in four to five rounds. Nine rounds of optimisation did not convert the geometry
+into a hold.
+
+Read with C3 (the margin is interface-localised, and Arg27 carries it), the picture is geometric:
+on this target the residues that carry binding and the positions where a protonatable histidine
+would push the interface apart are not the same places. That is a statement about TNF-alpha's
+inter-protomer site, not about our pipeline, and it is the best explanation this project has for
+why objective 2 is hard here.
+
+DECLARED, unchanged: ESMFold2 is pH-agnostic. B3 is a geometric arrangement in a predicted pose,
+not a pH measurement, and no histidine pKa was predicted -- PROPKA was retired on this project
+because its within-design noise exceeded its between-design signal. Nothing here is a demonstrated
+pH switch.
