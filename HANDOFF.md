@@ -1,8 +1,45 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-09 10:10 PM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-11 1:00 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
+
+---
+
+## 🟢 AS OF 2026-10-11 1:00 AM: THE SHIP SET CLEARS THE ORGANISERS' MONOMER FLOOR, THE HEADLINE MARGIN DEFLATED BELOW THE BINDER MEDIAN, AND THE INTERFACE IS PROVEN LOCALISED. Nothing running on C1/C2/C3.
+
+**Supersedes the Oct 9 block below on three points.** Pre-registered at `fd513b1` before any fold
+existed (`PREREG-CONFIDENCE-TRIAD-2026-10-11.md`). 282 folds, ~$15. Results in
+`C1_monomer_floor_2026-10-11.tsv`, `C2_pooled15_margins_2026-10-11.tsv`,
+`C3_interface_specificity_2026-10-11.tsv`.
+
+**WHAT SHIPS: `tnfa_corrected_40_L1r4k1` + `tnfa_corrected_3_L0r4k0`.** The backbone-3 slot moved
+off `3_L4r5k2` on the pre-registered rule, not after the fact.
+
+| | result | bar | verdict |
+|---|---|---|---|
+| **C1** monomer floor | **12 of 12** clear 0.70; ship set 0.885 / 0.910; median 0.885 vs the parents' 0.824 | M1 ≥ 0.70 | **PASS** |
+| **C2** fresh seeds 6-15 | leader +7.657 fresh, **pooled 15-seed +7.706** | R1 ≥ +7.8144 | **FAIL** |
+| | all four ≥ +6.347; order replicates at **Spearman +1.000** | R2, R3 | **PASS** |
+| **C3** Ala scan | interface drop **3.927** vs distal **0.406**, 9.7x, exact p **0.0043** | S1/S2/S3 | **PASS** |
+
+🔴 **Limitation 50 must be rescoped.** Its "no design in this submission clears the
+monomer-foldability floor… the strongest single reason to expect these designs not to bind" is the
+**Mosaic 35**, measured at 0 of 35. The depth-12 clear it 12 of 12, and both shipped designs sit
+above the median of the organisers' own 150 assayed designs (0.853). The cross-tool comparison stays
+order-of-magnitude placement per §8.5; the 12-vs-100-parents comparison is matched and firm.
+
+🔴 **No design clears the measured binder median any more.** +8.031 was a 5-seed draw; ten unseen
+seeds give +7.657 and the pooled 15 give +7.706, against the +7.8144 binder median. Per decision
+rule 1 the pooled number is now the reported figure everywhere, and the claim becomes "beats the
+median thing that did not bind, does not reach the median thing that did." The ordering, by
+contrast, is solid: Spearman +1.000 across ten unseen seeds.
+
+🟢 **The margin is interface-localised, with a matched distal control.** Six interface alanines drop
+the margin a mean 3.927; six distal alanines drop it 0.406. **R27 is the dominant anchor** — R27A
+reads +0.283, into null territory, a larger effect than His61's. E62A and K53A are not load-bearing.
+The in-run parent reproduced +8.031 at +8.015. This is the strongest mechanistic statement the
+project can make about its own design and it belongs in FIELD 2.
 
 ---
 
@@ -91,7 +128,7 @@ these twelve sequences. Read it; do not glob the run directories.**
 
 | # | task | who | time |
 |---|---|---|---|
-| 1 | ~~D1: pick what ships~~ — **ANSWERED 2026-10-11 12:20 AM: `40_L1r4k1` + `3_L4r5k2`**, two designs, one per surviving cluster. Detail + what FIELD 2 must now say: ROADMAP §'D1 — ANSWERED'. | Harish | ✅ |
+| 1 | ~~D1: pick what ships~~ — **ANSWERED, then REVISED 1:00 AM on C2 evidence: `40_L1r4k1` + `3_L0r4k0`.** The backbone-3 slot moved off `3_L4r5k2` under the pre-registered pooled-15-seed rule (+6.971 vs +6.424, and `3_L0r4k0` is also Glu-flag-free with the set's best monomer pLDDT). ROADMAP §'D1 — ANSWERED'. | Harish | ✅ |
 | 2 | Rewrite methodology box FIELD 2 -- still describes the 35 Mosaic designs | me | 90 min |
 | 3 | Upload, designate, attach | me | 30 min |
 
