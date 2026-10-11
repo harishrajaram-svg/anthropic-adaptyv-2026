@@ -32,8 +32,11 @@ case "$TAG"       in *[[:space:]]*) echo "[genie3] REFUSING: tag '$TAG' contains
   " the caller's shell did not split its arguments." >&2; exit 1;; esac
 case "$N_SAMPLE"  in ''|*[!0-9]*) echo "[genie3] REFUSING: n_sample '$N_SAMPLE' is not a number" >&2; exit 1;; esac
 case "$BINDER_LEN" in ''|*[!0-9]*) echo "[genie3] REFUSING: BINDER_LEN '$BINDER_LEN' is not a number" >&2; exit 1;; esac
-case "$STRATEGY" in hotspot|extended|common|region1) ;; *)
-  echo "[genie3] REFUSING: cond_strategy '$STRATEGY' is not one of hotspot|extended|common|region1" >&2
+# seam2/seam3 added 2026-10-11 for arm S: His73 on two and three protomers. build_genie3_problem.py
+# selftest M6 pins that they name His73 and nothing else, on 2 and 3 distinct protomers.
+case "$STRATEGY" in hotspot|extended|common|region1|seam2|seam3) ;; *)
+  echo "[genie3] REFUSING: cond_strategy '$STRATEGY' is not one of"\
+    " hotspot|extended|common|region1|seam2|seam3" >&2
   exit 1;; esac
 
 # Pre-flight, the way score-esmfold2.sh runs esmfold2_selftest.py. No GPU, no Modal account.
