@@ -118,3 +118,29 @@ M2. Parent 0.911; F29H 0.906, L75H 0.905, L49H 0.900, V5H 0.895, F48H 0.887, L55
 L79H 0.816. The core tolerates a histidine at every site tested. The prereg's top-3 rule selects
 F29H, L75H and L49H; the three M2 passers below them are a declared reserve and folding them would
 require a further amendment.
+
+---
+
+## AMENDMENT 3 — fresh seeds on L49H, written 2026-10-11 2:47 AM, before any stage-4 fold exists
+
+Stage 2 measured L49H at +7.151 on seeds 1-5 against the parent's +6.976 on the same seeds. C2
+measured a **0.33** shift between a five-seed draw and ten unseen seeds on the leader, so +0.175 is
+inside the noise that draw can carry, and the parent holds **15** seeds against L49H's 5. Replacing
+a 15-seed design with a 5-seed one is the error C2 exists to prevent.
+
+**Stage 4:** L49H and its matched null on **seeds 6-15**, human trimer, 2 shards, B200 = **20 folds,
+~$1**. The parent already carries seeds 1-15 from C2, so this makes the comparison 15 against 15.
+
+| bar | threshold | meaning |
+|---|---|---|
+| **C9-R1** | L49H pooled 15-seed ≥ **+6.971** | not worse than the parent on equal evidence |
+| **C9-R2** | ≥ **+6.347** | still holds at all |
+
+**Decision rules, fixed now.** R1 and R2 pass ⇒ L49H may take the backbone-3 slot in place of its
+parent, and the parent's measured numbers are reported as the in-silico control. R1 fails but R2
+holds ⇒ the parent keeps the slot on its stronger estimate, and L49H is reported as a measured
+equal-or-slightly-worse variant that carries the mechanism — a result either way. R2 fails ⇒ stage
+2's +7.151 was a seed artifact and C2's lesson is confirmed a third time.
+
+Whether the pair ships **together** is a separate question that this arm cannot settle, because the
+prescreen flags a one-residue pair as `batch_duplicate` on both members.
