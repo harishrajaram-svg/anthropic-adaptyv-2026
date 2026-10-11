@@ -1,0 +1,24 @@
+
+seamS3: 40 backbones scored, 0 refused, contact cutoff 8.0 A
+    0 H73 reached:    8  ( 20.0%)
+    1 H73 reached:   21  ( 52.5%)
+    2 H73 reached:    7  ( 17.5%)
+    3 H73 reached:    4  ( 10.0%)
+    >=2 H73 reached:   11  ( 27.5%)
+    nearest / 2nd-nearest H73 distance, median: 6.3 A / 9.4 A
+
+probe50: 50 backbones scored, 0 refused, contact cutoff 8.0 A
+    0 H73 reached:    0  (  0.0%)
+    1 H73 reached:   48  ( 96.0%)
+    2 H73 reached:    2  (  4.0%)
+    3 H73 reached:    0  (  0.0%)
+    >=2 H73 reached:    2  (  4.0%)
+    nearest / 2nd-nearest H73 distance, median: 5.7 A / 20.9 A
+
+phase0: 2 backbones scored, 0 refused, contact cutoff 8.0 A
+    0 H73 reached:    0  (  0.0%)
+    1 H73 reached:    2  (100.0%)
+    2 H73 reached:    0  (  0.0%)
+    3 H73 reached:    0  (  0.0%)
+    >=2 H73 reached:    0  (  0.0%)
+    nearest / 2nd-nearest H73 distance, median: 5.1 A / 22.9 A
