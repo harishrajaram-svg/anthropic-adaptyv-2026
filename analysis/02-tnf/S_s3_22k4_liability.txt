@@ -1,0 +1,2 @@
+seam_s3_22k4                        83aa  pI  4.89  GRAVY -1.49  q7.4  -7.44  q6.0  -6.32  1 FLAG(S)
+      - COMPOSITION E is 31% (problem 1 rank 1 was 30% Ala)

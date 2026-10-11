@@ -142,3 +142,33 @@ and objective 3 asks for both. Selecting and shipping are different decisions.
 🔴 The quad's pH claim is unchanged by any mouse number: +3.064 kcal/mol is a predicted fold
 destabilisation and ESMFold2 is pH-agnostic. The +1.96 e charge gain across the window (−7.30 →
 −4.43, against the parent's +1.06 e) is a property of the sequence, not evidence of release.
+
+---
+
+# AMENDMENT 2 — Amendment 1's substitution rule optimised the wrong quantity, 2026-10-11 11:20 AM EDT
+
+**Amendment 1's rule should not be acted on, and this is why.**
+
+It said: substitute `3_L0r4k0_quadH` for `3_L0r4k0` iff the quad's worse-of-two exceeds +6.9670. The
+quad's mouse came back +7.1851, worse-of-two +7.1306, and the rule fired.
+
+**But `3_L0r4k0` is not in the submission on its margin.** It is the **matched control** for row 1,
+`3_L0r4k0_L49H` — the two are one residue apart, 98.8% identical, and the methodology box states
+plainly that *"the pair IS the experiment, and submitting only the variant would leave any
+pH-dependent result with no in-assay control — the exact trap we fell into on problem 1, where a
+1.432x ratio looked like a switch until matched arms pinning a non-titratable residue switched at
+the same rate (4% vs 6%, p = 0.53)."*
+
+Substituting the quad for it would delete that control and reintroduce that trap. Amendment 1 ranked
+a control slot on affinity, which is a category error: **the control's job is to be identical except
+at one position, not to bind well.** The margin comparison it ran was real and the numbers stand;
+the decision it licensed does not.
+
+Correct framing, for the human to decide rather than a rule to fire: the quad is a **third member of
+the same scaffold family** — `3_L0r4k0` (0 buried His), `3_L0r4k0_L49H` (1), `3_L0r4k0_quadH` (4).
+Shipping all three converts a matched pair into a **buried-histidine titration series with a shared
+control**, which is a stronger experiment than the pair. It costs 4 of 20 slots and a **second**
+`batch_duplicate` flag against the same control (quad vs parent is 0.9518).
+
+Nothing is substituted or dropped on the strength of Amendment 1. The quad's bars M1-M4 all passed
+and that record is unchanged.
