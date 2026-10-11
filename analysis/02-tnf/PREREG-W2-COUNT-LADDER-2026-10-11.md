@@ -201,3 +201,38 @@ I add **one** step, and its selection rule is stated here before its fold exists
 
 Revised spend: 6 monomer inputs × 5 seeds = **30 folds**, then complex + null (10 folds) for each
 step clearing W2-1 and W2-2. Cap unchanged at 150.
+
+---
+
+# AMENDMENT 2 — the cost decomposition names a better molecule. 2026-10-11, BEFORE its folds exist.
+
+Arm T (`f7266f2`, concurrent, independent) landed while W2 was reading out and it closes the
+next step W2 was about to propose: relaxing both backbones does **not** rescue the ddG
+self-consistency — T3 fails by 16.4 kcal/mol against a 2.0 bar. So "relax and re-measure" is dead
+and is not proposed. Arm T's transferable finding is the useful one: **H45 is 81% of the quad's
+stability bill for 25% of its pH response**, and marginality and pH response are independent knobs.
+
+W2 measured the other half of that: the three *affordable* histidines. On `quadH`'s backbone
+I78H+I16H+L82H cost **+3.337 REU** for **+1.587 kcal/mol** of Σ, while H45 alone is worth about
+**−7.3** going backwards. Put together, the two arms specify one molecule neither of them built:
+
+**`W2_X6`** = `3_L0r4k0_quadH` **+ H45V** + I78H + I16H + L82H → **six** buried histidines
+(16, 53, 63, 64, 78, 82). It sheds the most expensive histidine in the family and keeps every
+cheap one. Additive Σ prediction **+3.797** (H7c's +4.572 less H45's +0.775), at a predicted net
+install cost **below `quadH`'s own**.
+
+Bars, fixed before any X6 number exists:
+
+| bar | threshold | why |
+|---|---|---|
+| **X1** | 5-seed monomer pLDDT **≥ 0.85** | strictly above both `quadH` (0.8169) and `W2_H7c` (0.8070) — the stability bought back has to be visible to an instrument that is not Rosetta |
+| **X2** | PROPKA Σ **≥ +3.60** | the remaining depressions survive losing H45, within 0.20 of the additive prediction |
+| **X3** | 5-seed human margin **≥ +6.3473** | the standing hold bar |
+| **X4** | Rosetta ΔΔG_install for `H45V,I78H,I16H,L82H` on `quadH`'s backbone, **reported either way**, predicted net **negative** | a one-sided ordering claim, not a free energy — W2's own antisymmetry failure is why no bar is set on its magnitude |
+
+X6 is **selected on a measured cost decomposition** (W2's per-position ΔΔG_install plus arm T's
+attribution), **not** on the failed binding-coupled gate, and it is **post-hoc-ordered** in the same
+sense `W2_H7c` is. X2 deliberately accepts a Σ **below** `W2_H7c`'s +4.572: if X1 passes, X6 trades
+0.775 kcal/mol of Σ for roughly 7 kcal/mol of pH-7.4 stability, which is the correct direction given
+arm T's finding that the shipped quad fails the pH 7.4 hold for every parent stability below
+10 kcal/mol. Spend: 5 monomer + 5 complex + 5 null = **15 folds**, bringing W2 to 85 of its 150 cap.
