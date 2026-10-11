@@ -1,0 +1,37 @@
+5 structures, 0 failed, 20 histidines scored
+
+  n_his                           20
+  n_designs                       1
+  pka_min                         2.36
+  pka_median                      4.05
+  pka_max                         4.68
+  delta_max_observed              0.04
+  delta_median                    0.01
+  his_switch                      0
+  his_weak                        0
+  his_inert                       20
+  designs_with_a_switch_his       0
+
+  express_qc_p2.py assumes every His sits at 5.98 (delta 0.452); ceiling is 0.667 at 6.7
+
+design	chain	resnum	pka	delta_protonation	class
+tnfa_corrected_3_L0r4k0_quadH_mono	A	53	4.68	0.044	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	64	4.61	0.038	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	64	4.55	0.033	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	64	4.55	0.033	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	64	4.53	0.031	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	64	4.51	0.030	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	53	4.42	0.025	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	53	4.38	0.022	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	53	4.37	0.022	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	53	4.29	0.018	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	63	3.81	0.006	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	63	3.79	0.006	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	63	3.79	0.006	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	63	3.79	0.006	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	63	3.55	0.003	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	45	2.45	0.000	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	45	2.45	0.000	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	45	2.43	0.000	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	45	2.40	0.000	inert
+tnfa_corrected_3_L0r4k0_quadH_mono	A	45	2.36	0.000	inert

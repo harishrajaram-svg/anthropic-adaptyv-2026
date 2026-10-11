@@ -1,0 +1,23 @@
+per-His SATURATION ceiling (pKa_folded -> -inf): +0.775 kcal/mol
+  so no amount of burial exceeds 0.775 per histidine; the lever is COUNT, not depth
+
+ pos  n  pKa quad (median)  pKa single   shift  destab quad  destab single
+  45  5               2.43        4.26   -1.83       +0.775         +0.765
+  53  5               4.38        4.58   -0.20       +0.762         +0.754
+  63  5               3.79        4.30   -0.51       +0.772         +0.764
+  64  5               4.55        5.03   -0.48       +0.756         +0.718
+ SUM                                                 +3.064         +3.001
+
+M2  bar >= +2.00 kcal/mol -> PASS  (+3.064)
+    additivity: singles predicted +3.001, quad delivers +3.064 (102.1% -- the depressions DEEPENED when combined)
+    fraction of the per-His ceiling reached: H45 100.0%, H53 98.3%, H63 99.5%, H64 97.4%
+
+for scale: the gate's best REPRODUCIBLE interface term (H73, 0.7986x) is +0.133 kcal/mol
+           so the quad core is 23x the best interface term
+
+histidines needed to reach a given destabilisation, at the 0.775 ceiling:
+   2 kcal/mol -> 3 buried His
+   3 kcal/mol -> 4 buried His
+   4 kcal/mol -> 6 buried His
+   6 kcal/mol -> 8 buried His
+   8 kcal/mol -> 11 buried His
