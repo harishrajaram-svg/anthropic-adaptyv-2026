@@ -1,0 +1,57 @@
+C8 frustrated-pair readout, 2026-10-11 2:16 AM. 5 designs + 5 matched nulls, 5 seeds, 50 folds,
+5 shards: 4 on H200, 1 on B200. ~$4. Pre-registered at 8514104 before any C8 fold existed.
+
+variant                    margin   design_med  null_med   cost vs parent   B1(>=6.347)
+---------------------------------------------------------------------------------------
+3_L0r4k0  (parent, in-run) +6.976      7.635     14.611         --            PASS
+3_L0r4k0_K31Q              +6.646      8.008     14.653        0.330          PASS
+3_L0r4k0_K31R              +6.516      7.980     14.496        0.460          PASS
+3_L0r4k0_K31A              +6.015      8.532     14.547        0.961          fail
+3_L0r4k0_K31H              +5.500      9.379     14.880       *1.476*         FAIL
+---------------------------------------------------------------------------------------
+B1 (hold, >= +6.347):   K31H FAILS at +5.500
+B2 (>= parent +6.971):  K31H FAILS
+B3 (geometry >= 3/5):   K31H PASSES, 3 of 5 seeds releasing (off/off/REL 4.4-5.3/REL 5.6-5.7/REL 3.6-4.3)
+
+CONTROL: the parent folded in-run reads +6.976 against its pooled 15-seed +6.971 -- agreement to
+0.005, so every number above is comparable within this run and to the submitted set.
+
+RESULT 1 -- THE PREMISE WAS WRONG, AND THE PRE-REGISTERED CONTROL IS WHAT SHOWED IT.
+The arm assumed K31's lysine faces LYS112 in a frustrated like-charge pair that costs the design
+something at pH 7.4, so that swapping it for a neutral histidine would be free or favourable.
+**K31Q removes the positive charge and still COSTS 0.330** rather than gaining. The pair was not
+costing anything: K31's lysine is net favourable despite sitting 4.86 A from a target lysine.
+Without the Q and R controls this would have read as "the histidine is expensive"; with them it
+reads as "the premise was false AND the histidine is expensive", which are different findings.
+
+RESULT 2 -- THE HISTIDINE IS WORSE THAN DELETING THE RESIDUE. K31H costs 1.476 against K31A's
+0.961. The imidazole is actively unfavourable at this position, not merely the absence of a lysine.
+Per the pre-registered interpretation, K31H << K31Q means the histidine specifically is badly
+accommodated -- the same pattern A3 and C3 found at E62, where ->Ala cost 0.507 and ->His cost 5.94.
+
+RESULT 3 -- THE MECHANISM INSTALLS AND THE HOLD STILL FAILS. B3 passes at 3 of 5 seeds; B1 fails by
+0.85. This is C6's split reproduced on a design that DOES hold, with a full non-titratable control
+series attached, which is the strongest form of the result this project can produce.
+
+THE GENERALISATION, four positions across two designs, each with a non-titratable control at the
+same position -- the extra cost of the histidine beyond the best control there:
+    D50 (40_L1r4k1)   His 4.097 vs Ala 3.706   ->  -0.39   FREE  (the only one)
+    K31 (3_L0r4k0)    His 5.500 vs Ala 6.015   ->  +0.52
+    T54 (40_L1r4k1)   His 0.463 vs Ala 2.707   ->  +2.24
+    E62 (40_L1r4k1)   His 1.566 vs Ala 7.508   ->  +5.94
+One interface position in four accommodates a histidine for free, and C7 showed that rebuilding
+around that one stabilises the pose with the histidine facing a carboxylate.
+
+=> Objective 2 closes for the seventh time. No design in this project holds TNF-alpha while
+carrying a releasing histidine, and the reason is now measured from four directions: the geometry
+is achievable (C6, 5/5 replication), the positions that carry binding are not titratable (C3), the
+repair that recovers binding inverts the geometry (C7), and the histidine costs more than any
+non-titratable substitution at the same position (C8).
+
+DECLARED, unchanged: ESMFold2 is pH-agnostic, no pKa was computed, and nothing here is a
+demonstrated pH switch in either direction.
+
+GPU NOTE: B200 ran this 554-residue complex at 16.1 s/fold against H200's 22.7-22.9 and H100's
+28.4-29.5 -- B200 is ~41% faster than H100 and ~29% faster than H200, same wrapper and settings.
+bin/score-esmfold2.sh estimates 94 s/fold at this size, so it overshoots by 3.3x on H100 and 5.8x
+on B200, which is why it has twice refused to launch runs that were in fact cheap.
