@@ -1,0 +1,11 @@
+file	product	n_sites	n_moved	ceiling	verdict	n_implausible	n_no_partner
+tnfa_H_quadH_E3Q_k14_seed1_sample_10	0.7716	77	1	25.12	ok	0	1
+tnfa_H_quadH_E3Q_k14_seed2_sample_11	0.9671	77	4	398107.17	ok	0	4
+tnfa_H_quadH_E3Q_k14_seed3_sample_12	0.8028	77	1	25.12	ok	0	1
+tnfa_H_quadH_E3Q_k14_seed4_sample_13	0.8559	77	4	398107.17	ok	0	3
+tnfa_H_quadH_E3Q_k14_seed5_sample_14	0.8233	76	2	630.96	ok	0	2
+tnfa_H_s3_22k4_k3_seed1_sample_15	38.932	72	9	3981071705535.0	ok	0	7
+tnfa_H_s3_22k4_k3_seed2_sample_16	1.5811	72	8	158489319246.11	ok	0	4
+tnfa_H_s3_22k4_k3_seed3_sample_17	0.5168	72	7	6309573444.8	ok	0	5
+tnfa_H_s3_22k4_k3_seed4_sample_18	1.5427	72	6	251188643.15	ok	0	4
+tnfa_H_s3_22k4_k3_seed5_sample_19	2.8413	71	6	251188643.15	ok	0	6
