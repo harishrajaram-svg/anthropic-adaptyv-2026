@@ -87,3 +87,31 @@ L49H against its own parent, every measured axis:
 +0.175 human gain is inside the 0.33 five-seed-to-fresh-seed shift C2 measured on the leader, and
 the parent carries 15 seeds against L49H's 5. Swapping a 15-seed design out for a 5-seed one is the
 error C2 exists to prevent, so fresh seeds on L49H come before any swap.
+
+STAGE 4 -- fresh seeds on L49H, 2026-10-11 2:53 AM. 20 folds, B200, ~$1.
+Bars from amendment 3: R1 pooled 15-seed >= +6.971 (the parent); R2 >= +6.347.
+
+design        seeds 1-5   seeds 6-15   POOLED 15
+3_L0r4k0        +6.967      +6.899      +6.971
+3_L0r4k0_L49H   +7.151      +7.226      +7.167
+                                        ^ R1 PASS, R2 PASS
+
+The gain did not deflate -- it grew, +0.184 on seeds 1-5 and +0.327 on the ten unseen seeds, for
++0.196 pooled on fifteen seeds each. This is the opposite of what happened to the leader in C2
+(+8.031 -> +7.706), and it is the test that distinguishes a real difference from a lucky draw.
+
+L49H AGAINST ITS PARENT ON EQUAL EVIDENCE:
+    human margin, 15 seeds each   +6.971  ->  +7.167   (+0.196, replicated on unseen seeds)
+    mouse trimer, 5 seeds each    +7.476  ->  +7.437   (-0.039)
+    monomer pLDDT                  0.911  ->   0.900   (-0.011)
+    pI                              4.83  ->    4.91   (both far below the 6.0-7.4 assay window)
+    organisers' prescreen      pass       ->  pass     (alongside 40_L1r4k1, cluster_size 1)
+    histidines                         0  ->   1, buried and non-interface in 5 of 5 seeds
+
+=> L49H dominates its own parent: better on the human margin with replication, equal on mouse,
+equal on fold, clean on the screen, and it carries a titratable residue. Per amendment 3's decision
+rule it may take the backbone-3 slot, with the parent's numbers reported as the in-silico control.
+
+What this does NOT change: no pH switch is demonstrated, the mechanism is fold destabilisation
+argued from established biophysics rather than from any model we ran, and its failure mode in the
+assay is indistinguishable from aggregation.
