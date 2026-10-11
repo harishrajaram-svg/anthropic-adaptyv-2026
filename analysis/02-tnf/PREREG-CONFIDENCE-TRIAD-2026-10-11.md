@@ -3,7 +3,7 @@ type: preregistration
 project: anthropic-adaptyv-2026
 problem: 02-tnf-alpha
 arm: C1/C2/C3 confidence triad
-status: PRE-REGISTERED — written 2026-10-11 12:50 AM EDT, BEFORE any C1/C2/C3 fold exists
+status: PRE-REGISTERED — written 2026-10-11 12:30 AM EDT, BEFORE any C1/C2/C3 fold exists
 ---
 
 # C1/C2/C3 — three runs that can change what ships, or deflate what we are about to claim

@@ -3,7 +3,7 @@ type: preregistration
 project: anthropic-adaptyv-2026
 problem: 02-tnf-alpha
 arm: C4 mechanism-B (target histidine)
-status: PRE-REGISTERED — written 2026-10-11 1:25 AM EDT, BEFORE any C4 fold exists
+status: PRE-REGISTERED — written 2026-10-11 12:54 AM EDT, BEFORE any C4 fold exists
 ---
 
 # C4 — put OUR cation against THEIR histidine
