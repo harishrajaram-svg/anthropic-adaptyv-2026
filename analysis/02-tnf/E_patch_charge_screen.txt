@@ -1,0 +1,19 @@
+tnfa_corrected_40_L3r2k2_seed5_sample_29.cif  target protomers ['A', 'B', 'C']
+
+patch radius 12 A, model pKa, net charge in e
+patch                   residues    pH 7.4    pH 6.0    delta
+seam2 (A73+C73)               19     +2.86     +4.58    +1.72
+                       composition: ARG 2, CYS 4, GLU 4, HIS 2, LYS 5, TYR 2
+seam3 (all H73)               21     +5.79     +8.31    +2.53
+                       composition: ARG 3, CYS 6, GLU 3, HIS 3, LYS 6
+single H73 (A)                13     +2.84     +3.79    +0.95
+                       composition: ARG 2, CYS 3, GLU 2, HIS 1, LYS 3, TYR 2
+GLU146 patch (A)               5     -0.00     +0.03    +0.03
+                       composition: ASP 1, GLU 1, LYS 2, TYR 1
+GLU127 patch (A)               9     +1.00     +1.05    +0.05
+                       composition: ARG 3, ASP 1, GLU 2, LYS 1, TYR 2
+
+BARS
+  E1c seam2 (A73+C73): net > 0 at BOTH pH -> PASS (+2.86 / +4.58)
+  E1c seam3 (all H73): net > 0 at BOTH pH -> PASS (+5.79 / +8.31)
+  E2c seam more positive than Glu146 patch at pH 6.0 -> PASS (+4.58 vs +0.03)
