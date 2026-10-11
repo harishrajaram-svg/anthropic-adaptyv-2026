@@ -1,0 +1,26 @@
+# C9 stage 6: histidine pKa vs burial across the 20 untested qualifying positions of 3_L0r4k0.
+# 100 monomer folds, B200, ~$2. PROPKA 3.5.1 via bin/propka_his.py, 5 seeds per position, medians.
+# delta = change in fraction protonated between pH 7.4 and 6.0; pre-declared bars 0.25 switch / 0.10 weak.
+# burial = binder heavy atoms within 8 A of the side-chain tip in the parent fold.
+# RESULT: 14 of 20 clear M1+P2 (fold intact AND a real switch). Spearman(burial, pKa) = -0.600.
+variant	pos	native	burial	pka_med	delta_med	class	plddt_med	M1	P2
+T36H	36	T	88	6.77	0.665	switch	0.906	1	1
+S76H	76	S	65	6.77	0.665	switch	0.910	1	1
+T38H	38	T	45	6.58	0.659	switch	0.903	1	1
+S65H	65	S	45	6.86	0.655	switch	0.905	1	1
+D47H	47	D	48	6.52	0.652	switch	0.909	1	1
+I46H	46	I	77	6.48	0.644	switch	0.902	1	1
+P67H	67	P	48	6.45	0.637	switch	0.909	1	1
+L66H	66	L	84	6.32	0.600	switch	0.898	1	1
+G54H	54	G	47	6.31	0.596	switch	0.912	1	1
+L44H	44	L	72	6.25	0.574	switch	0.910	1	1
+I50H	50	I	77	7.19	0.558	switch	0.908	1	1
+L82H	82	L	63	6.06	0.491	switch	0.908	1	1
+A60H	60	A	92	6.00	0.462	switch	0.839	1	1
+E41H	41	E	73	5.83	0.377	switch	0.898	1	1
+I16H	16	I	82	5.54	0.244	weak	0.908	1	0
+I78H	78	I	80	5.46	0.212	weak	0.904	1	0
+L64H	64	L	85	5.03	0.093	inert	0.886	1	0
+L53H	53	L	85	4.58	0.035	inert	0.856	1	0
+L63H	63	L	91	4.30	0.019	inert	0.894	1	0
+V45H	45	L	95	4.26	0.017	inert	0.869	1	0
