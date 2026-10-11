@@ -106,7 +106,7 @@ def set_problem(n):
 
 
 OVERRIDE = None
-"""Explicit (target_chains, binder_chain), set ONLY by main() and ONLY when BOTH flags are given.
+"""Explicit (target_chains, binder_chains), set ONLY by main() and ONLY when BOTH flags are given.
 
 ADDED 2026-10-11 for R1, the calibration arm, and deliberately opt-in. family() recognises four
 registered constructs and REFUSES everything else; that fail-closed behaviour is load-bearing -- it
@@ -134,17 +134,18 @@ def orient_multi(model):
     binder. Refuses anything that is not N target chains plus exactly one binder.
     """
     if OVERRIDE is not None:
-        tg, bd = OVERRIDE
+        tg, bd = OVERRIDE                      # bd is a LIST: a Fab binder is heavy + light
         have = {c.name for c in model}
-        missing = [x for x in list(tg) + [bd] if x not in have]
+        missing = [x for x in list(tg) + list(bd) if x not in have]
         if missing:
             return None, None, None, f'named chain(s) {missing} absent; model has {sorted(have)}'
-        if bd in tg:
-            return None, None, None, f'binder chain {bd!r} is also named as a target chain'
+        dup = [x for x in bd if x in tg]
+        if dup:
+            return None, None, None, f'chain(s) {dup} named as BOTH target and binder'
         # No registered family, so histidine labels are built from the structure itself.
         nm = {r.seqid.num: f'H{r.seqid.num}'
               for c in model if c.name in tg for r in c if r.name == 'HIS'}
-        return sorted(tg), bd, nm, None
+        return sorted(tg), sorted(bd), nm, None
     chains = list(model)
     matched, names = [], None
     for c in chains:
@@ -158,7 +159,8 @@ def orient_multi(model):
     if len(others) != 1:
         return None, None, None, (f'{len(matched)} target chain(s) {matched} and '
                                   f'{len(others)} non-target {others}; need exactly one binder')
-    return sorted(matched), others[0], names, None
+    # A 1-element list, so the fingerprint path and the override share one downstream shape.
+    return sorted(matched), [others[0]], names, None
 
 
 def _link(free, bound):
@@ -234,7 +236,7 @@ def score_pose(cif):
     try:
         st = gemmi.read_structure(cif); st.setup_entities()
         st.remove_ligands_and_waters(); st.setup_entities()
-        tgts, bnd, names, why = orient_multi(st[0])
+        tgts, bnds, names, why = orient_multi(st[0])
         if why:
             return {'file': os.path.basename(cif), 'error': why}
 
@@ -244,14 +246,17 @@ def score_pose(cif):
             for c in tgts:
                 for k, v in propka_his_and_acids(st, wd, f'cpx_t_{c}', c).items():
                     bound_t[(c,) + k] = v
-            bound_b = propka_his_and_acids(st, wd, 'cpx_b', bnd)
+            bound_b = {}
+            for c in bnds:
+                for k, v in propka_his_and_acids(st, wd, f'cpx_b_{c}', c).items():
+                    bound_b[(c,) + k] = v
 
             # FREE TARGET: delete the BINDER ONLY. On a homotrimer the sibling protomers stay,
             # because they are present in the assay and H73 titrates against them.
             a = gemmi.read_structure(cif); a.setup_entities()
             a.remove_ligands_and_waters(); a.setup_entities()
             for i in range(len(a[0]) - 1, -1, -1):
-                if a[0][i].name == bnd: del a[0][i]
+                if a[0][i].name in bnds: del a[0][i]
             a.setup_entities()
             assert len([c.name for c in a[0]]) == len(tgts), 'free-target leg lost a protomer'
             free_t = {}
@@ -263,9 +268,12 @@ def score_pose(cif):
             b = gemmi.read_structure(cif); b.setup_entities()
             b.remove_ligands_and_waters(); b.setup_entities()
             for i in range(len(b[0]) - 1, -1, -1):
-                if b[0][i].name != bnd: del b[0][i]
+                if b[0][i].name not in bnds: del b[0][i]
             b.setup_entities()
-            free_b = propka_his_and_acids(b, wd, 'apo_b', bnd)
+            free_b = {}
+            for c in bnds:
+                for k, v in propka_his_and_acids(b, wd, f'apo_b_{c}', c).items():
+                    free_b[(c,) + k] = v
 
         # COMPOSE OVER EVERY TITRATABLE SITE ON BOTH PARTNERS -- HIS, ASP and GLU.
         #
@@ -317,10 +325,15 @@ def score_pose(cif):
                 if rn == 'HIS' and num in names: continue      # already added under its name
                 add('target', f'{pre}{rn}{num}', rn, num,
                     free_t.get((c, rn, num)), bound_t.get((c, rn, num)), c)
-        # BINDER: every titratable residue, not a curated list
-        for (rn, num) in sorted(set(free_b) | set(bound_b)):
-            add('binder', f'{rn}{num}', rn, num,
-                free_b.get((rn, num)), bound_b.get((rn, num)), bnd)
+        # BINDER: every titratable residue, not a curated list. Keyed and labelled EXACTLY as
+        # the target side is -- chain in the key always, chain in the LABEL only when there is
+        # more than one binder chain -- so a single-chain binder's output is unchanged while a
+        # Fab's heavy and light chains cannot collide at the same residue number.
+        bmulti = len(bnds) > 1
+        for (cc, rn, num) in sorted(set(free_b) | set(bound_b)):
+            bpre = f'{cc}/' if bmulti else ''
+            add('binder', f'{bpre}{rn}{num}', rn, num,
+                free_b.get((cc, rn, num)), bound_b.get((cc, rn, num)), cc)
 
         if not sites:
             return {'file': os.path.basename(cif), 'error': 'no titratable site measured',
@@ -337,7 +350,7 @@ def score_pose(cif):
             # can sit on any protomer of a homotrimer, and taking only one would under-report
             # the partner and flag a real site `no_partner`.
             mine = v['chain']
-            others = [bnd] if v['partner'] == 'target' else list(tgts)
+            others = list(bnds) if v['partner'] == 'target' else list(tgts)
             ds = [cross_partner_distance(st[0], mine, v['resnum'], v['resname'], o)
                   for o in others]
             ds = [x for x in ds if x is not None]
@@ -360,7 +373,7 @@ def score_pose(cif):
         ceiling = ONE_PROTON_BOUND ** max(k_moved, 1)
         verdict = 'IMPOSSIBLE' if prod > ceiling * 1.001 else 'ok'
         contributing = {k: v for k, v in sites.items() if v['moved']}
-        return dict(file=os.path.basename(cif)[:-4], path=cif, target_chain='+'.join(tgts), binder_chain=bnd,
+        return dict(file=os.path.basename(cif)[:-4], path=cif, target_chain='+'.join(tgts), binder_chain='+'.join(bnds),
                     product=round(prod, 4),
                     product_his_only=round(prod_his, 4),
                     product_helpful_only_DO_NOT_USE=round(math.prod(helpful) if helpful else 1.0, 4),
@@ -483,13 +496,13 @@ def selftest():
     # problem 2: three protomers plus one binder
     tg, bd, nm, why = orient_multi([_C('A', tnf_hs), _C('B', tnf_hs),
                                     _C('C', tnf_hs), _C('D', [5, 40])])
-    assert why is None and tg == ['A', 'B', 'C'] and bd == 'D' and nm is TNF, (tg, bd, why)
+    assert why is None and tg == ['A', 'B', 'C'] and bd == ['D'] and nm is TNF, (tg, bd, why)
     # problem 1: one target plus one binder -- the case that must not change
     tg1, bd1, nm1, why1 = orient_multi([_C('A', [7]), _C('B', crop_hs)])
-    assert why1 is None and tg1 == ['B'] and bd1 == 'A' and nm1 is CROP, (tg1, bd1, why1)
+    assert why1 is None and tg1 == ['B'] and bd1 == ['A'] and nm1 is CROP, (tg1, bd1, why1)
     # and with the chain order reversed, because this project's poses do both
     tg2, bd2, _, why2 = orient_multi([_C('A', crop_hs), _C('B', [7])])
-    assert why2 is None and tg2 == ['A'] and bd2 == 'B', (tg2, bd2, why2)
+    assert why2 is None and tg2 == ['A'] and bd2 == ['B'], (tg2, bd2, why2)
     # MUTATION: no recognised family must REFUSE, not guess a target
     assert orient_multi([_C('A', [1, 2]), _C('B', [3, 4])])[3] == 'target family unrecognised'
     # MUTATION: two non-target chains must refuse -- a second binder, or a stray chain, would
@@ -506,22 +519,31 @@ def selftest():
     OVERRIDE = (['X'], 'Y')
     try:
         tgo, bdo, nmo, whyo = orient_multi([_C('X', [1, 2]), _C('Y', [3, 4])])
-        assert whyo is None and tgo == ['X'] and bdo == 'Y', (tgo, bdo, whyo)
+        assert whyo is None and tgo == ['X'] and bdo == ['Y'], (tgo, bdo, whyo)
         assert nmo == {1: 'H1', 2: 'H2'}, nmo
         assert 'absent' in orient_multi([_C('X', [1]), _C('Z', [2])])[3]
-        OVERRIDE = (['X'], 'X')
-        assert 'also named as a target' in orient_multi([_C('X', [1])])[3]
+        OVERRIDE = (['X'], ['X'])
+        assert 'BOTH target and binder' in orient_multi([_C('X', [1])])[3]
+        # M8 -- a MULTI-CHAIN binder, the R1 case: a Fab is heavy + light and must come back as
+        # one partner of two chains, with the fingerprint path still returning a 1-element list
+        # so both share one downstream shape.
+        OVERRIDE = (['A'], ['H', 'L'])
+        tgm, bdm, nmm, whym = orient_multi([_C('A', [73]), _C('H', [35]), _C('L', [91])])
+        assert whym is None and tgm == ['A'] and bdm == ['H', 'L'], (tgm, bdm, whym)
+        assert nmm == {73: 'H73'}, nmm        # labels from the TARGET chains only
+        OVERRIDE = (['A'], ['H', 'A'])
+        assert 'BOTH target and binder' in orient_multi([_C('A', [1]), _C('H', [2])])[3]
     finally:
         OVERRIDE = None
     assert orient_multi([_C('X', [1, 2]), _C('Y', [3, 4])])[3] == 'target family unrecognised'
-    print('  ok  MUTATION: the R1 chain override is opt-in and refuses absent/duplicate chains')
+    print('  ok  MUTATION: the R1 override is opt-in, multi-chain capable, and refuses overlaps')
     # MUTATION: the free-TARGET leg must delete the binder ONLY. Deleting every non-target
     # chain -- what the two-chain code did -- removes the sibling protomers, and H73 sits at
     # the inter-protomer seam, so its free pKa would come from a monomer that never exists.
     src = open(os.path.abspath(__file__)).read()
-    assert "if a[0][i].name == bnd: del a[0][i]" in src, 'free-target leg deletes by binder name'
+    assert "if a[0][i].name in bnds: del a[0][i]" in src, 'free-target leg deletes binder chains'
     assert "free-target leg lost a protomer" in src, 'the protomer count is not asserted'
-    assert "if b[0][i].name != bnd: del b[0][i]" in src, 'free-binder leg must keep only binder'
+    assert "if b[0][i].name not in bnds: del b[0][i]" in src, 'free-binder leg keeps only binder'
     print(f'  orientation: 3 protomers + binder -> {tg}/{bd}; 1+1 still {tg1}/{bd1} either order')
     print(f'  MUTATION: unrecognised family, 2 binders and 0 binders all refuse')
     print(f'  MUTATION: free-target leg deletes the binder only, protomer count asserted')
@@ -543,7 +565,8 @@ def main():
     ap.add_argument('--selftest', action='store_true')
     ap.add_argument('--target-chains', help='R1 only: comma-separated target chain ids. Requires '
                                             '--binder-chain. Bypasses the family fingerprint.')
-    ap.add_argument('--binder-chain', help='R1 only: the binder chain id. Requires --target-chains.')
+    ap.add_argument('--binder-chain', help='R1 only: comma-separated binder chain id(s) -- a Fab '
+                                           'binder is heavy AND light. Requires --target-chains.')
     ap.add_argument('--problem', type=int, default=1, choices=sorted(PROBLEMS),
                     help='1 = bind 6.5 / silent 7.4 (default, EGFR). '
                          '2 = bind 7.4 / silent 6.0 (TNF-alpha). Sets the pH pair, the '
@@ -558,9 +581,14 @@ def main():
         tg = [x.strip() for x in a.target_chains.split(',') if x.strip()]
         if not tg:
             raise SystemExit('REFUSE: --target-chains parsed to nothing')
-        OVERRIDE = (tg, a.binder_chain.strip())
+        bd = [x.strip() for x in a.binder_chain.split(',') if x.strip()]
+        if not bd:
+            raise SystemExit('REFUSE: --binder-chain parsed to nothing')
+        OVERRIDE = (tg, bd)
         print(f"  OVERRIDE ACTIVE: target chains {OVERRIDE[0]}, binder {OVERRIDE[1]!r} "
               f"-- the family fingerprint is BYPASSED for every structure in this run\n")
+        if len(OVERRIDE[1]) > 1:
+            print(f"  multi-chain binder: {len(OVERRIDE[1])} chains treated as ONE partner\n")
     set_problem(a.problem)
     print(f"problem {PROBLEM}: pH {PH_LO} vs {PH_HI}, one-proton ceiling "
           f"{ONE_PROTON_BOUND:.3f}x per site")
