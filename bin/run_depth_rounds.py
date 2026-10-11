@@ -668,29 +668,70 @@ def main():
     log(f"total folds {folds} (~${folds*0.0371:.2f}). cap was {MAX_FOLDS}.")
 
 
+PREREG = os.environ.get("DEPTH_PREREG", "").strip()
+# WHICH PRE-REGISTRATION GOVERNS THIS RUN. Added 2026-10-11.
+#
+# Unset keeps the 2026-10-09 pins byte-for-byte, including the refusal to run with any lineage
+# constrained. Set it and the pins come from that pre-registration instead -- but its FILE must
+# exist on disk, and the run must carry its own explicit fuse and wall stop. So "name the prereg"
+# means "the prereg is written", not "the pins are off". The property preserved is the one that
+# matters: a different configuration cannot run because someone forgot, only because someone
+# declared it, wrote the document, and set the stops.
+PREREG_FILES = {"C13": "analysis/02-tnf/PREREG-C13-TWO-ARMS-2026-10-11.md"}
+
+
 def selftest():
-    # Value pins, updated 2026-10-09 to PREREG-CONSTRAINED-RESTART s5. The old pins read
-    # (10, 400) and correctly FAILED when the constants moved, which is the test working.
-    assert dl.MAX_ROUNDS == 16, f"AMENDMENT 3 fixes 16 rounds, found {dl.MAX_ROUNDS}"
-    assert MAX_FOLDS == 1600, f"AMENDMENT 3 fixes a 1600-fold fuse, found {MAX_FOLDS}"
-    assert SEQS_PER_PARENT == 8, f"AMENDMENT 2 fixes 8 children/parent, found {SEQS_PER_PARENT}"
-    # 8 lineages x 4 children x 2 species = 64/round, and 12 rounds must FIT the fuse with
-    # headroom. If any of the four numbers drifts, this is the assertion that notices.
     N_LINEAGES = 6                   # AMENDMENT 2; was 7 (and 8 before that)
     _per_round = N_LINEAGES * SEQS_PER_PARENT * len(SPECIES)
-    assert _per_round == 96, _per_round
-    assert _per_round * dl.MAX_ROUNDS <= MAX_FOLDS, (
-        f"{dl.MAX_ROUNDS} rounds x {_per_round} folds = {_per_round*dl.MAX_ROUNDS} "
-        f"exceeds the {MAX_FOLDS}-fold fuse")
-    # The pin that was missing, and whose absence nearly cost 1,536 folds: with no env var set,
-    # EVERY lineage must come out UNCONSTRAINED, because that is what AMENDMENT 2/A3.4 specifies.
-    assert not FORCE_HIS, (
-        f"DEPTH_FORCE_HIS names {sorted(FORCE_HIS)}; the pre-registered arm is UNCONSTRAINED. "
-        "Naming a lineage here reproduces the D1 configuration (0 of 28 in the pose gate).")
-    assert not ACID_BAN, f"DEPTH_ACID_BAN names {sorted(ACID_BAN)}; the arm is UNCONSTRAINED."
-    print("  ok  constraints OFF by default: no lineage is forced-His or acid-banned")
-    print(f"  ok  prereg pins: {dl.MAX_ROUNDS} rounds x {_per_round} folds "
-          f"({dl.MAX_ROUNDS * _per_round}) fits the {MAX_FOLDS} fuse")
+    if PREREG:
+        f = PREREG_FILES.get(PREREG)
+        assert f, f"DEPTH_PREREG={PREREG!r} unknown; known: {sorted(PREREG_FILES)}"
+        assert os.path.exists(os.path.join(REPO, f)), (
+            f"DEPTH_PREREG={PREREG} but {f} is not on disk. Write the pre-registration first.")
+        assert os.environ.get("DEPTH_MAX_FOLDS"), f"{PREREG} must set DEPTH_MAX_FOLDS explicitly"
+        assert os.environ.get("DEPTH_WALL_STOP"), f"{PREREG} must set DEPTH_WALL_STOP explicitly"
+        assert MAX_FOLDS >= _per_round, (
+            f"fuse {MAX_FOLDS} is smaller than one round ({_per_round} folds)")
+        assert WALL_STOP > dt.datetime.now(), (
+            f"wall stop {WALL_STOP} is already past; the run would refuse every round")
+        assert SEQS_PER_PARENT == 8, f"C13 fixes 8 children/parent, found {SEQS_PER_PARENT}"
+        print(f"  ok  governed by {PREREG} ({f})")
+        print(f"  ok  fuse {MAX_FOLDS} folds, wall stop {WALL_STOP}, {_per_round} folds/round")
+        print(f"  ok  declared: force_his={sorted(FORCE_HIS) or 'none'}, "
+              f"acid_ban={sorted(ACID_BAN) or 'none'}, "
+              f"selector={os.environ.get('DEPTH_SELECT_SPECIES') or 'worse-of-two'}")
+    else:
+        # Value pins, updated 2026-10-09 to PREREG-CONSTRAINED-RESTART s5. The old pins read
+        # (10, 400) and correctly FAILED when the constants moved, which is the test working.
+        assert dl.MAX_ROUNDS == 16, f"AMENDMENT 3 fixes 16 rounds, found {dl.MAX_ROUNDS}"
+        assert MAX_FOLDS == 1600, f"AMENDMENT 3 fixes a 1600-fold fuse, found {MAX_FOLDS}"
+        assert SEQS_PER_PARENT == 8, (
+            f"AMENDMENT 2 fixes 8 children/parent, found {SEQS_PER_PARENT}")
+        assert _per_round == 96, _per_round
+        assert _per_round * dl.MAX_ROUNDS <= MAX_FOLDS, (
+            f"{dl.MAX_ROUNDS} rounds x {_per_round} folds = {_per_round*dl.MAX_ROUNDS} "
+            f"exceeds the {MAX_FOLDS}-fold fuse")
+        # The pin that was missing, and whose absence nearly cost 1,536 folds: with no env var
+        # set, EVERY lineage must come out UNCONSTRAINED, per AMENDMENT 2/A3.4.
+        assert not FORCE_HIS, (
+            f"DEPTH_FORCE_HIS names {sorted(FORCE_HIS)}; the pre-registered arm is UNCONSTRAINED. "
+            "Naming a lineage here reproduces the D1 configuration (0 of 28 in the pose gate). "
+            "A different configuration needs DEPTH_PREREG naming a written pre-registration.")
+        assert not ACID_BAN, (
+            f"DEPTH_ACID_BAN names {sorted(ACID_BAN)}; the arm is UNCONSTRAINED. "
+            "A different configuration needs DEPTH_PREREG naming a written pre-registration.")
+        print("  ok  constraints OFF by default: no lineage is forced-His or acid-banned")
+    _want = dl.MAX_ROUNDS * _per_round
+    if _want <= MAX_FOLDS:
+        print(f"  ok  prereg pins: {dl.MAX_ROUNDS} rounds x {_per_round} folds "
+              f"({_want}) fits the {MAX_FOLDS} fuse")
+    else:
+        # Not a failure: the per-round check in run_round() refuses to launch a round that would
+        # cross the fuse, so the run simply stops early. Said plainly because the old wording
+        # claimed a budget "fits" when it does not, and this log is read unattended.
+        print(f"  ok  {dl.MAX_ROUNDS} rounds x {_per_round} = {_want} folds EXCEEDS the "
+              f"{MAX_FOLDS} fuse, so the run will stop at ~{MAX_FOLDS // _per_round} rounds "
+              f"when the per-round fuse check refuses the next launch")
     t = tnf_target(); assert len(t) == 157
     mt = mouse_target(); assert len(mt) == 156
     assert t != mt, "human and mouse targets must not be the same sequence"
