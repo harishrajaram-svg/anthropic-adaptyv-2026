@@ -104,3 +104,17 @@ we predicted unfolding and did not predict a clean electrostatic release. **No C
 described as a demonstrated pH switch.**
 
 One launch per stage, ~$4 total, no continuation without a new decision.
+
+---
+
+## AMENDMENT 2 — arithmetic correction, written 2026-10-11 2:28 AM, before any stage-2 fold exists
+
+Stage 2 as specified said "top 3 survivors, each with a null, 5 seeds = **40 folds**". Three designs
+plus three nulls is **6 complexes x 5 seeds = 30 folds**, not 40. The fold count was wrong; the
+design is unchanged. Stage 2 runs 30 folds.
+
+**Stage 1 result, for the record, before stage 2 lands:** 8 of 8 variants clear M1 and 6 of 8 clear
+M2. Parent 0.911; F29H 0.906, L75H 0.905, L49H 0.900, V5H 0.895, F48H 0.887, L55H 0.887, L9H 0.859,
+L79H 0.816. The core tolerates a histidine at every site tested. The prereg's top-3 rule selects
+F29H, L75H and L49H; the three M2 passers below them are a declared reserve and folding them would
+require a further amendment.
