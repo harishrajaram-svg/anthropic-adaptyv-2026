@@ -31,6 +31,27 @@ rather than a carboxylate in the variant's **own** predicted pose. **No A3 resul
 as a demonstrated pH switch**, in the methods document or anywhere else. The geometric call is a
 hypothesis about pH 6.0, not a measurement of it.
 
+## ⚠️ Naming collision — read this before citing "A3"
+
+**This arm's "A3" is NOT the "A3" of `PREREG-CONSTRAINED-RESTART-2026-10-09.md`.** There, A1/A2/A3
+are **AMENDMENT 1/2/3** to a single prereg (the constrained restart, D2), all written Oct 9
+~14:00-14:30. None of them is a separate arm:
+
+- **Amendment 1** (7 lineages, 14 rounds, His control moved) was superseded ~15 min later and
+  **never ran**. Its premise -- forcing 1-2 histidines -- is what A2.1 measured as fatal.
+- **Amendment 2** (unconstrained continuation, 6 lineages / 4 backbones / 8 children) **is the v3
+  arm**. It ran Oct 9, stopped itself at round 10 of 16 on pose regression, and failed both bars.
+- **Amendment 3** only moved that same arm's round count to 16.
+
+This file's A3 is the pH series on `40_L1r4k1`: a post-hoc point substitution on a finished design.
+That route exists *because* A2.1 closed the other one -- it retired bar B4 with "objective 2 is not
+reachable through `omit_AA_jsonl` in this pipeline." Constraining the designer is dead; substituting
+into a design that already holds pose is untested, and is what this arm tests.
+
+Run names `A3bS1`..`A3bS6` and dirs `runs/A3b-phseries-S*`; the `b` distinguishes them from the
+8:41 PM singles-only staging in `runs/A3-phseries-S*-in`, which was superseded before launch and
+never folded.
+
 ## The design, and the fix applied before launch
 
 As first staged (8:41 PM) the arm was **5 singles that all retained His61** — one releasing His and
