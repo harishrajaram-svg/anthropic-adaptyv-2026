@@ -1,0 +1,12 @@
+# Shell-MATCHED nulls: a self-mutation (X->X) runs the identical packing/minimisation
+# path with the identical shell, so this row IS the noise floor for the row it matches.
+nullm_K17K	K17K
+nullm_E51E	E51E
+nullm_L32L	L32L
+nullm_F29F	F29F
+nullm_V45V	V45V
+nullm_L49L	L49L
+nullm_L53L	L53L
+nullm_L63L	L63L
+nullm_L64L	L64L
+nullm_quad	V45V,L53L,L63L,L64L

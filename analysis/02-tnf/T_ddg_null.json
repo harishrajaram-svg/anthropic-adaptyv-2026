@@ -1,0 +1,472 @@
+[
+ {
+  "name": "nullm_K17K",
+  "muts": "K17K",
+  "n_shell": 10,
+  "n_inputs": 5,
+  "ddg_mean": 0.181,
+  "ddg_sd": 0.281,
+  "ddg_min": -0.009,
+  "ddg_max": 0.659,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 10,
+    "wt": -206.534,
+    "mut": -206.517,
+    "ddg": 0.017
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 10,
+    "wt": -209.115,
+    "mut": -209.125,
+    "ddg": -0.009
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 10,
+    "wt": -205.632,
+    "mut": -205.423,
+    "ddg": 0.209
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 10,
+    "wt": -209.636,
+    "mut": -208.977,
+    "ddg": 0.659
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 10,
+    "wt": -191.469,
+    "mut": -191.438,
+    "ddg": 0.03
+   }
+  ]
+ },
+ {
+  "name": "nullm_E51E",
+  "muts": "E51E",
+  "n_shell": 13,
+  "n_inputs": 5,
+  "ddg_mean": -0.001,
+  "ddg_sd": 0.024,
+  "ddg_min": -0.041,
+  "ddg_max": 0.022,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 13,
+    "wt": -209.188,
+    "mut": -209.228,
+    "ddg": -0.041
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 12,
+    "wt": -199.165,
+    "mut": -199.143,
+    "ddg": 0.022
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 13,
+    "wt": -198.85,
+    "mut": -198.84,
+    "ddg": 0.009
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 13,
+    "wt": -206.471,
+    "mut": -206.473,
+    "ddg": -0.002
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 12,
+    "wt": -191.255,
+    "mut": -191.25,
+    "ddg": 0.005
+   }
+  ]
+ },
+ {
+  "name": "nullm_L32L",
+  "muts": "L32L",
+  "n_shell": 21,
+  "n_inputs": 5,
+  "ddg_mean": -0.083,
+  "ddg_sd": 0.915,
+  "ddg_min": -1.46,
+  "ddg_max": 1.117,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 21,
+    "wt": -221.813,
+    "mut": -223.273,
+    "ddg": -1.46
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 21,
+    "wt": -214.563,
+    "mut": -214.62,
+    "ddg": -0.058
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 21,
+    "wt": -217.265,
+    "mut": -217.277,
+    "ddg": -0.012
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 21,
+    "wt": -229.47,
+    "mut": -228.353,
+    "ddg": 1.117
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 21,
+    "wt": -212.125,
+    "mut": -212.128,
+    "ddg": -0.003
+   }
+  ]
+ },
+ {
+  "name": "nullm_F29F",
+  "muts": "F29F",
+  "n_shell": 24,
+  "n_inputs": 5,
+  "ddg_mean": -0.004,
+  "ddg_sd": 0.011,
+  "ddg_min": -0.022,
+  "ddg_max": 0.005,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 24,
+    "wt": -222.718,
+    "mut": -222.72,
+    "ddg": -0.003
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 24,
+    "wt": -216.185,
+    "mut": -216.207,
+    "ddg": -0.022
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 24,
+    "wt": -220.588,
+    "mut": -220.583,
+    "ddg": 0.005
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 24,
+    "wt": -223.621,
+    "mut": -223.629,
+    "ddg": -0.008
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 24,
+    "wt": -206.179,
+    "mut": -206.173,
+    "ddg": 0.005
+   }
+  ]
+ },
+ {
+  "name": "nullm_V45V",
+  "muts": "V45V",
+  "n_shell": 22,
+  "n_inputs": 5,
+  "ddg_mean": 0.021,
+  "ddg_sd": 0.019,
+  "ddg_min": -0.001,
+  "ddg_max": 0.048,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 22,
+    "wt": -223.001,
+    "mut": -223.003,
+    "ddg": -0.001
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 22,
+    "wt": -214.148,
+    "mut": -214.1,
+    "ddg": 0.048
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 22,
+    "wt": -212.788,
+    "mut": -212.778,
+    "ddg": 0.01
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 22,
+    "wt": -227.08,
+    "mut": -227.048,
+    "ddg": 0.032
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 22,
+    "wt": -203.887,
+    "mut": -203.871,
+    "ddg": 0.016
+   }
+  ]
+ },
+ {
+  "name": "nullm_L49L",
+  "muts": "L49L",
+  "n_shell": 22,
+  "n_inputs": 5,
+  "ddg_mean": 0.002,
+  "ddg_sd": 0.011,
+  "ddg_min": -0.007,
+  "ddg_max": 0.019,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 22,
+    "wt": -222.4,
+    "mut": -222.393,
+    "ddg": 0.007
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 22,
+    "wt": -212.967,
+    "mut": -212.973,
+    "ddg": -0.006
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 22,
+    "wt": -212.308,
+    "mut": -212.289,
+    "ddg": 0.019
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 22,
+    "wt": -220.028,
+    "mut": -220.033,
+    "ddg": -0.005
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 22,
+    "wt": -206.034,
+    "mut": -206.041,
+    "ddg": -0.007
+   }
+  ]
+ },
+ {
+  "name": "nullm_L53L",
+  "muts": "L53L",
+  "n_shell": 18,
+  "n_inputs": 5,
+  "ddg_mean": 0.003,
+  "ddg_sd": 0.017,
+  "ddg_min": -0.015,
+  "ddg_max": 0.031,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 18,
+    "wt": -216.876,
+    "mut": -216.874,
+    "ddg": 0.002
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 18,
+    "wt": -203.862,
+    "mut": -203.868,
+    "ddg": -0.006
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 18,
+    "wt": -202.611,
+    "mut": -202.626,
+    "ddg": -0.015
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 18,
+    "wt": -210.185,
+    "mut": -210.154,
+    "ddg": 0.031
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 18,
+    "wt": -194.835,
+    "mut": -194.832,
+    "ddg": 0.003
+   }
+  ]
+ },
+ {
+  "name": "nullm_L63L",
+  "muts": "L63L",
+  "n_shell": 20,
+  "n_inputs": 5,
+  "ddg_mean": 0.178,
+  "ddg_sd": 0.392,
+  "ddg_min": 0.001,
+  "ddg_max": 0.878,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 20,
+    "wt": -219.028,
+    "mut": -219.025,
+    "ddg": 0.002
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 20,
+    "wt": -211.227,
+    "mut": -211.226,
+    "ddg": 0.001
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 20,
+    "wt": -210.525,
+    "mut": -210.523,
+    "ddg": 0.003
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 20,
+    "wt": -218.478,
+    "mut": -218.473,
+    "ddg": 0.005
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 20,
+    "wt": -206.54,
+    "mut": -205.662,
+    "ddg": 0.878
+   }
+  ]
+ },
+ {
+  "name": "nullm_L64L",
+  "muts": "L64L",
+  "n_shell": 15,
+  "n_inputs": 5,
+  "ddg_mean": -0.001,
+  "ddg_sd": 0.023,
+  "ddg_min": -0.039,
+  "ddg_max": 0.017,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 15,
+    "wt": -214.475,
+    "mut": -214.458,
+    "ddg": 0.017
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 15,
+    "wt": -204.22,
+    "mut": -204.259,
+    "ddg": -0.039
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 15,
+    "wt": -205.32,
+    "mut": -205.306,
+    "ddg": 0.014
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 15,
+    "wt": -213.283,
+    "mut": -213.281,
+    "ddg": 0.002
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 15,
+    "wt": -196.445,
+    "mut": -196.444,
+    "ddg": 0.001
+   }
+  ]
+ },
+ {
+  "name": "nullm_quad",
+  "muts": "V45V,L53L,L63L,L64L",
+  "n_shell": 42,
+  "n_inputs": 5,
+  "ddg_mean": -0.494,
+  "ddg_sd": 0.772,
+  "ddg_min": -1.742,
+  "ddg_max": 0.048,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 42,
+    "wt": -251.338,
+    "mut": -252.09,
+    "ddg": -0.752
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 42,
+    "wt": -239.875,
+    "mut": -239.827,
+    "ddg": 0.048
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 42,
+    "wt": -237.871,
+    "mut": -237.872,
+    "ddg": -0.001
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 42,
+    "wt": -251.036,
+    "mut": -251.055,
+    "ddg": -0.02
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 42,
+    "wt": -231.687,
+    "mut": -233.429,
+    "ddg": -1.742
+   }
+  ]
+ }
+]

@@ -1,0 +1,566 @@
+[
+ {
+  "name": "null_WT",
+  "muts": "-",
+  "n_shell": 11,
+  "n_inputs": 5,
+  "ddg_mean": 0.832,
+  "ddg_sd": 1.384,
+  "ddg_min": 0.0,
+  "ddg_max": 3.19,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 11,
+    "wt": -218.717,
+    "mut": -218.717,
+    "ddg": 0.0
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 11,
+    "wt": -206.042,
+    "mut": -206.042,
+    "ddg": 0.0
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 11,
+    "wt": -207.081,
+    "mut": -206.111,
+    "ddg": 0.97
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 11,
+    "wt": -217.172,
+    "mut": -217.172,
+    "ddg": 0.0
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 11,
+    "wt": -210.168,
+    "mut": -206.978,
+    "ddg": 3.19
+   }
+  ]
+ },
+ {
+  "name": "neg_K17R",
+  "muts": "K17R",
+  "n_shell": 10,
+  "n_inputs": 5,
+  "ddg_mean": 0.83,
+  "ddg_sd": 0.492,
+  "ddg_min": 0.293,
+  "ddg_max": 1.537,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 10,
+    "wt": -206.534,
+    "mut": -206.062,
+    "ddg": 0.473
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 10,
+    "wt": -209.115,
+    "mut": -208.823,
+    "ddg": 0.293
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 10,
+    "wt": -205.632,
+    "mut": -204.574,
+    "ddg": 1.058
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 10,
+    "wt": -208.985,
+    "mut": -208.197,
+    "ddg": 0.788
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 10,
+    "wt": -191.469,
+    "mut": -189.932,
+    "ddg": 1.537
+   }
+  ]
+ },
+ {
+  "name": "neg_E51Q",
+  "muts": "E51Q",
+  "n_shell": 13,
+  "n_inputs": 5,
+  "ddg_mean": 0.281,
+  "ddg_sd": 0.12,
+  "ddg_min": 0.153,
+  "ddg_max": 0.442,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 13,
+    "wt": -209.188,
+    "mut": -208.819,
+    "ddg": 0.368
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 12,
+    "wt": -199.165,
+    "mut": -198.943,
+    "ddg": 0.222
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 13,
+    "wt": -198.85,
+    "mut": -198.407,
+    "ddg": 0.442
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 13,
+    "wt": -206.471,
+    "mut": -206.252,
+    "ddg": 0.219
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 12,
+    "wt": -191.255,
+    "mut": -191.102,
+    "ddg": 0.153
+   }
+  ]
+ },
+ {
+  "name": "pos_L32A",
+  "muts": "L32A",
+  "n_shell": 21,
+  "n_inputs": 5,
+  "ddg_mean": 4.885,
+  "ddg_sd": 0.962,
+  "ddg_min": 3.804,
+  "ddg_max": 6.341,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 21,
+    "wt": -223.271,
+    "mut": -218.148,
+    "ddg": 5.123
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 21,
+    "wt": -214.563,
+    "mut": -209.692,
+    "ddg": 4.87
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 21,
+    "wt": -218.445,
+    "mut": -212.104,
+    "ddg": 6.341
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 21,
+    "wt": -228.342,
+    "mut": -224.054,
+    "ddg": 4.289
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 21,
+    "wt": -212.125,
+    "mut": -208.321,
+    "ddg": 3.804
+   }
+  ]
+ },
+ {
+  "name": "pos_F29A",
+  "muts": "F29A",
+  "n_shell": 24,
+  "n_inputs": 5,
+  "ddg_mean": 7.134,
+  "ddg_sd": 0.1,
+  "ddg_min": 7.011,
+  "ddg_max": 7.233,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 24,
+    "wt": -222.718,
+    "mut": -215.485,
+    "ddg": 7.233
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 24,
+    "wt": -216.185,
+    "mut": -209.052,
+    "ddg": 7.133
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 24,
+    "wt": -220.588,
+    "mut": -213.527,
+    "ddg": 7.062
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 24,
+    "wt": -223.621,
+    "mut": -216.39,
+    "ddg": 7.231
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 24,
+    "wt": -206.179,
+    "mut": -199.168,
+    "ddg": 7.011
+   }
+  ]
+ },
+ {
+  "name": "pos_V45A",
+  "muts": "V45A",
+  "n_shell": 22,
+  "n_inputs": 5,
+  "ddg_mean": 5.707,
+  "ddg_sd": 0.549,
+  "ddg_min": 5.378,
+  "ddg_max": 6.678,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 22,
+    "wt": -223.001,
+    "mut": -217.451,
+    "ddg": 5.55
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 22,
+    "wt": -214.148,
+    "mut": -207.47,
+    "ddg": 6.678
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 22,
+    "wt": -212.788,
+    "mut": -207.253,
+    "ddg": 5.536
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 22,
+    "wt": -227.08,
+    "mut": -221.687,
+    "ddg": 5.393
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 22,
+    "wt": -203.887,
+    "mut": -198.51,
+    "ddg": 5.378
+   }
+  ]
+ },
+ {
+  "name": "L49H",
+  "muts": "L49H",
+  "n_shell": 22,
+  "n_inputs": 5,
+  "ddg_mean": 7.998,
+  "ddg_sd": 0.658,
+  "ddg_min": 7.172,
+  "ddg_max": 8.655,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 22,
+    "wt": -222.4,
+    "mut": -214.974,
+    "ddg": 7.426
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 22,
+    "wt": -212.967,
+    "mut": -204.687,
+    "ddg": 8.279
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 22,
+    "wt": -212.308,
+    "mut": -205.136,
+    "ddg": 7.172
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 22,
+    "wt": -220.028,
+    "mut": -211.567,
+    "ddg": 8.46
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 22,
+    "wt": -206.034,
+    "mut": -197.379,
+    "ddg": 8.655
+   }
+  ]
+ },
+ {
+  "name": "V45H",
+  "muts": "V45H",
+  "n_shell": 22,
+  "n_inputs": 5,
+  "ddg_mean": 12.235,
+  "ddg_sd": 0.981,
+  "ddg_min": 11.21,
+  "ddg_max": 13.321,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 22,
+    "wt": -223.001,
+    "mut": -209.68,
+    "ddg": 13.321
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 22,
+    "wt": -214.148,
+    "mut": -201.699,
+    "ddg": 12.449
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 22,
+    "wt": -212.788,
+    "mut": -199.814,
+    "ddg": 12.974
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 22,
+    "wt": -227.08,
+    "mut": -215.859,
+    "ddg": 11.221
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 22,
+    "wt": -203.887,
+    "mut": -192.677,
+    "ddg": 11.21
+   }
+  ]
+ },
+ {
+  "name": "L53H",
+  "muts": "L53H",
+  "n_shell": 18,
+  "n_inputs": 5,
+  "ddg_mean": 4.097,
+  "ddg_sd": 0.568,
+  "ddg_min": 3.096,
+  "ddg_max": 4.506,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 18,
+    "wt": -216.876,
+    "mut": -212.626,
+    "ddg": 4.25
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 18,
+    "wt": -203.862,
+    "mut": -199.559,
+    "ddg": 4.303
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 18,
+    "wt": -202.611,
+    "mut": -198.105,
+    "ddg": 4.506
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 18,
+    "wt": -210.185,
+    "mut": -205.853,
+    "ddg": 4.332
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 18,
+    "wt": -194.835,
+    "mut": -191.739,
+    "ddg": 3.096
+   }
+  ]
+ },
+ {
+  "name": "L63H",
+  "muts": "L63H",
+  "n_shell": 20,
+  "n_inputs": 5,
+  "ddg_mean": 7.03,
+  "ddg_sd": 1.879,
+  "ddg_min": 4.83,
+  "ddg_max": 9.263,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 20,
+    "wt": -219.028,
+    "mut": -211.187,
+    "ddg": 7.84
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 20,
+    "wt": -211.227,
+    "mut": -203.337,
+    "ddg": 7.889
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 20,
+    "wt": -210.525,
+    "mut": -201.263,
+    "ddg": 9.263
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 20,
+    "wt": -218.478,
+    "mut": -213.648,
+    "ddg": 4.83
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 20,
+    "wt": -205.667,
+    "mut": -200.339,
+    "ddg": 5.328
+   }
+  ]
+ },
+ {
+  "name": "L64H",
+  "muts": "L64H",
+  "n_shell": 15,
+  "n_inputs": 5,
+  "ddg_mean": 7.878,
+  "ddg_sd": 0.876,
+  "ddg_min": 6.417,
+  "ddg_max": 8.45,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 15,
+    "wt": -214.475,
+    "mut": -206.067,
+    "ddg": 8.408
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 15,
+    "wt": -204.22,
+    "mut": -197.803,
+    "ddg": 6.417
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 15,
+    "wt": -205.32,
+    "mut": -196.9,
+    "ddg": 8.42
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 15,
+    "wt": -213.283,
+    "mut": -204.833,
+    "ddg": 8.45
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 15,
+    "wt": -196.445,
+    "mut": -188.75,
+    "ddg": 7.695
+   }
+  ]
+ },
+ {
+  "name": "quadH",
+  "muts": "V45H,L53H,L63H,L64H",
+  "n_shell": 42,
+  "n_inputs": 5,
+  "ddg_mean": 23.48,
+  "ddg_sd": 1.557,
+  "ddg_min": 21.904,
+  "ddg_max": 25.546,
+  "per_input": [
+   {
+    "pdb": "parent_seed1.pdb",
+    "shell": 42,
+    "wt": -249.364,
+    "mut": -225.64,
+    "ddg": 23.724
+   },
+   {
+    "pdb": "parent_seed2.pdb",
+    "shell": 42,
+    "wt": -238.898,
+    "mut": -216.927,
+    "ddg": 21.971
+   },
+   {
+    "pdb": "parent_seed3.pdb",
+    "shell": 42,
+    "wt": -236.935,
+    "mut": -211.389,
+    "ddg": 25.546
+   },
+   {
+    "pdb": "parent_seed4.pdb",
+    "shell": 42,
+    "wt": -251.036,
+    "mut": -229.132,
+    "ddg": 21.904
+   },
+   {
+    "pdb": "parent_seed5.pdb",
+    "shell": 42,
+    "wt": -231.687,
+    "mut": -207.43,
+    "ddg": 24.257
+   }
+  ]
+ }
+]

@@ -1,0 +1,25 @@
+=== T4: independent bracket. FULL-POSE FastRelax, each sequence on its OWN
+=== ESMFold backbone. No frozen shell, no mutation, no hysteresis path.
+  parent parent_seed1.pdb   relaxed=  -307.61  per-res=-3.706
+  parent parent_seed2.pdb   relaxed=  -302.41  per-res=-3.643
+  parent parent_seed3.pdb   relaxed=  -303.94  per-res=-3.662
+  parent parent_seed4.pdb   relaxed=  -305.16  per-res=-3.677
+  parent parent_seed5.pdb   relaxed=  -312.65  per-res=-3.767
+    quad quad_seed1.pdb     relaxed=  -292.76  per-res=-3.527
+    quad quad_seed2.pdb     relaxed=  -290.32  per-res=-3.498
+    quad quad_seed3.pdb     relaxed=  -281.99  per-res=-3.397
+    quad quad_seed4.pdb     relaxed=  -298.92  per-res=-3.601
+    quad quad_seed5.pdb     relaxed=  -293.99  per-res=-3.542
+
+  parent mean -306.36 REU (SD 4.00)  per-res -3.691
+  quad   mean -291.59 REU (SD 6.22)  per-res -3.513
+  >>> T4 bracket: ddG(parent->quad) = +14.76 REU, each on its own relaxed backbone
+
+=== T5: did ESMFold keep the four histidines buried?
+  parent:  {'V45': 0.0, 'L49': 0.0, 'L53': 7.9, 'L63': 1.0, 'L64': 21.9}
+  quad:  {'H45': 0.5, 'L49': 0.0, 'H53': 13.2, 'H63': 1.3, 'H64': 29.5}
+
+=== T6: backbone RMSD quad vs parent (did the fold move?)
+  CA RMSD = 0.641 A over 83 residues
+
+[exited with code 0]

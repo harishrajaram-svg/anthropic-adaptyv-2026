@@ -1,0 +1,15 @@
+# T2 controls first, then the T1 series. Controls chosen on measured SASA (parent seed1):
+#   K17 SASA 191.7, E51 SASA 146.1  -> exposed, negative controls, bar |ddG| <= 1.0
+#   L32 SASA   0.0, F29 SASA   0.5  -> buried, ->ALA positive controls, bar ddG >= +1.5
+null_WT	-
+neg_K17R	K17R
+neg_E51Q	E51Q
+pos_L32A	L32A
+pos_F29A	F29A
+pos_V45A	V45A
+L49H	L49H
+V45H	V45H
+L53H	L53H
+L63H	L63H
+L64H	L64H
+quadH	V45H,L53H,L63H,L64H

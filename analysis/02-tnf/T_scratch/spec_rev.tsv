@@ -1,0 +1,8 @@
+# T3 self-consistency: the SAME parent<->quad difference computed backward, on the
+# quad's own ESMFold structure. Should be the negative of the forward ddG.
+rev_nullm_quad	H45H,H53H,H63H,H64H
+rev_quad_to_parent	H45V,H53L,H63L,H64L
+rev_H45V	H45V
+rev_H53L	H53L
+rev_H63L	H63L
+rev_H64L	H64L

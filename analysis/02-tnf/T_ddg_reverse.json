@@ -1,0 +1,284 @@
+[
+ {
+  "name": "rev_nullm_quad",
+  "muts": "H45H,H53H,H63H,H64H",
+  "n_shell": 42,
+  "n_inputs": 5,
+  "ddg_mean": 0.355,
+  "ddg_sd": 0.686,
+  "ddg_min": -0.434,
+  "ddg_max": 1.17,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 42,
+    "wt": -229.083,
+    "mut": -229.092,
+    "ddg": -0.009
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 42,
+    "wt": -212.213,
+    "mut": -212.142,
+    "ddg": 0.072
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 42,
+    "wt": -216.997,
+    "mut": -217.431,
+    "ddg": -0.434
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 42,
+    "wt": -224.404,
+    "mut": -223.43,
+    "ddg": 0.975
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 42,
+    "wt": -220.302,
+    "mut": -219.133,
+    "ddg": 1.17
+   }
+  ]
+ },
+ {
+  "name": "rev_quad_to_parent",
+  "muts": "H45V,H53L,H63L,H64L",
+  "n_shell": 42,
+  "n_inputs": 5,
+  "ddg_mean": -7.05,
+  "ddg_sd": 1.53,
+  "ddg_min": -8.479,
+  "ddg_max": -4.47,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 42,
+    "wt": -229.083,
+    "mut": -236.812,
+    "ddg": -7.728
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 42,
+    "wt": -212.213,
+    "mut": -216.683,
+    "ddg": -4.47
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 42,
+    "wt": -216.982,
+    "mut": -224.058,
+    "ddg": -7.077
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 42,
+    "wt": -224.404,
+    "mut": -231.902,
+    "ddg": -7.498
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 42,
+    "wt": -221.889,
+    "mut": -230.368,
+    "ddg": -8.479
+   }
+  ]
+ },
+ {
+  "name": "rev_H45V",
+  "muts": "H45V",
+  "n_shell": 23,
+  "n_inputs": 5,
+  "ddg_mean": -5.715,
+  "ddg_sd": 2.258,
+  "ddg_min": -9.503,
+  "ddg_max": -3.485,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 23,
+    "wt": -190.382,
+    "mut": -195.918,
+    "ddg": -5.536
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 23,
+    "wt": -185.738,
+    "mut": -189.223,
+    "ddg": -3.485
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 23,
+    "wt": -188.772,
+    "mut": -193.578,
+    "ddg": -4.806
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 23,
+    "wt": -190.112,
+    "mut": -199.615,
+    "ddg": -9.503
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 22,
+    "wt": -191.703,
+    "mut": -196.948,
+    "ddg": -5.245
+   }
+  ]
+ },
+ {
+  "name": "rev_H53L",
+  "muts": "H53L",
+  "n_shell": 18,
+  "n_inputs": 5,
+  "ddg_mean": -2.207,
+  "ddg_sd": 2.57,
+  "ddg_min": -6.589,
+  "ddg_max": 0.234,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 18,
+    "wt": -192.333,
+    "mut": -192.099,
+    "ddg": 0.234
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 18,
+    "wt": -168.407,
+    "mut": -174.996,
+    "ddg": -6.589
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 18,
+    "wt": -177.244,
+    "mut": -178.883,
+    "ddg": -1.639
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 19,
+    "wt": -179.166,
+    "mut": -180.661,
+    "ddg": -1.496
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 18,
+    "wt": -178.856,
+    "mut": -180.401,
+    "ddg": -1.545
+   }
+  ]
+ },
+ {
+  "name": "rev_H63L",
+  "muts": "H63L",
+  "n_shell": 20,
+  "n_inputs": 5,
+  "ddg_mean": 0.626,
+  "ddg_sd": 1.286,
+  "ddg_min": -0.637,
+  "ddg_max": 2.661,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 20,
+    "wt": -191.1,
+    "mut": -190.209,
+    "ddg": 0.892
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 20,
+    "wt": -174.312,
+    "mut": -173.842,
+    "ddg": 0.47
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 20,
+    "wt": -186.273,
+    "mut": -183.612,
+    "ddg": 2.661
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 20,
+    "wt": -171.329,
+    "mut": -171.587,
+    "ddg": -0.258
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 20,
+    "wt": -189.142,
+    "mut": -189.779,
+    "ddg": -0.637
+   }
+  ]
+ },
+ {
+  "name": "rev_H64L",
+  "muts": "H64L",
+  "n_shell": 14,
+  "n_inputs": 5,
+  "ddg_mean": 0.068,
+  "ddg_sd": 1.14,
+  "ddg_min": -1.706,
+  "ddg_max": 1.084,
+  "per_input": [
+   {
+    "pdb": "quad_seed1.pdb",
+    "shell": 14,
+    "wt": -168.381,
+    "mut": -170.087,
+    "ddg": -1.706
+   },
+   {
+    "pdb": "quad_seed2.pdb",
+    "shell": 14,
+    "wt": -167.693,
+    "mut": -167.64,
+    "ddg": 0.053
+   },
+   {
+    "pdb": "quad_seed3.pdb",
+    "shell": 14,
+    "wt": -175.868,
+    "mut": -174.815,
+    "ddg": 1.054
+   },
+   {
+    "pdb": "quad_seed4.pdb",
+    "shell": 14,
+    "wt": -167.036,
+    "mut": -165.952,
+    "ddg": 1.084
+   },
+   {
+    "pdb": "quad_seed5.pdb",
+    "shell": 14,
+    "wt": -178.734,
+    "mut": -178.877,
+    "ddg": -0.143
+   }
+  ]
+ }
+]
