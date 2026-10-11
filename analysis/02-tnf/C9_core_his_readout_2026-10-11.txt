@@ -51,3 +51,39 @@ STILL UNMEASURED before any of these could ship:
   - the organisers' pre-submission / prior-art screen on the variant sequences
   - the mouse trimer leg (the parent reads +7.581; a buried substitution should not change it, but
     "should not" is not a measurement)
+
+STAGE 3 -- the two checks that were still unmeasured, 2026-10-11 2:44 AM.
+
+MOUSE TRIMER (3 x 156), 5 seeds, parent folded in-run:
+    3_L0r4k0        +7.476     (Oct 9 recorded +7.581 -- reproduces within 0.105)
+    3_L0r4k0_L49H   +7.437     (-0.039 against the parent)
+Both clear +6.347. The buried histidine is free on mouse as well as human.
+
+ORGANISERS' PRE-SUBMISSION SCREEN (tools/binder-prescreen, PLAbDab/THERA-SAbDab/proteinbase_public
+arms unavailable and recorded as such, as on Oct 9):
+
+  the three-design set  40_L1r4k1 + 3_L0r4k0 + 3_L0r4k0_L49H
+      40_L1r4k1        pass
+      3_L0r4k0         batch_duplicate   cluster_size 2
+      3_L0r4k0_L49H    batch_duplicate   cluster_size 2
+  the two-design set    40_L1r4k1 + 3_L0r4k0_L49H
+      40_L1r4k1        pass              cluster_size 1
+      3_L0r4k0_L49H    pass              cluster_size 1
+
+🔴 THE MATCHED PAIR TRIPS `batch_duplicate` BY CONSTRUCTION. The pair differs by one residue, and
+the flag fires at 0.95 identity / 0.80 coverage within a batch. It is rank 8 of 10 in the spec's
+disqualification order -- above only `no_reference_signal` and `pass` -- and firing it is the POINT
+of a matched control, but whether the organisers' pipeline silently de-duplicates is not something
+this tool can tell us. Found before upload rather than after.
+
+L49H against its own parent, every measured axis:
+    human margin   parent +6.976  ->  L49H +7.151   (+0.175)
+    mouse margin   parent +7.476  ->  L49H +7.437   (-0.039)
+    monomer pLDDT  parent  0.911  ->  L49H  0.900   (-0.011)
+    pI             parent   4.83  ->  L49H   4.91
+    prescreen      pass (alongside 40_L1r4k1)
+    histidines     0 -> 1, buried and non-interface in 5 of 5 seeds
+=> L49H is NOT WORSE than its parent on any axis measured. It is not established as BETTER: the
++0.175 human gain is inside the 0.33 five-seed-to-fresh-seed shift C2 measured on the leader, and
+the parent carries 15 seeds against L49H's 5. Swapping a 15-seed design out for a 5-seed one is the
+error C2 exists to prevent, so fresh seeds on L49H come before any swap.
