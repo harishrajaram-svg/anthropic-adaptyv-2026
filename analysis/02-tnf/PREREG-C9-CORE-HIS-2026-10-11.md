@@ -144,3 +144,39 @@ equal-or-slightly-worse variant that carries the mechanism — a result either w
 
 Whether the pair ships **together** is a separate question that this arm cannot settle, because the
 prescreen flags a one-residue pair as `batch_duplicate` on both members.
+
+---
+
+## AMENDMENT 4 — the partially buried sites, written 2026-10-11 3:07 AM, before any stage-6 fold exists
+
+Stage 5 measured His49 at pKa **4.81-4.82**, delta_protonation **0.058**, INERT — below the
+pre-declared weak threshold of 0.10. The cause is the arm's own premise: burial suppresses the pKa
+(model compound 5.98; this project's pre-registration records 1.5-2.5 units lost on burial), so the
+desolvation that would make a buried imidazolium destabilising is what stops it forming.
+
+**All eight sites folded in stage 1 were deeply buried (82-104 neighbours within 8 Å).** Of the 28
+qualifying positions on `3_L0r4k0`, twenty were never tested, and several sit at **45-48
+neighbours** — partially buried, where the pKa may survive nearer 6.0 while protonation still costs
+the fold something. That is the narrow window this mechanism needs, and it has not been looked at.
+
+**Stage 6:** all twenty remaining positions, one His substitution each, binder alone, seeds 1-5 =
+**100 monomer folds, ~$2**, B200. Then `bin/propka_his.py` on every resulting structure.
+
+Positions: 16, 36, 38, 41, 44, 45, 46, 47, 50, 53, 54, 60, 63, 64, 65, 66, 67, 76, 78, 82.
+Gly54 and Pro67 are included knowing a substitution there may break the backbone; the fold screen
+is what catches that, and it costs the same as any other site.
+
+| bar | threshold | meaning |
+|---|---|---|
+| **C9-M1** | binder-alone pLDDT ≥ **0.70** | the fold survives |
+| **C9-P1** | delta_protonation ≥ **0.10** | the histidine titrates measurably across 7.4 → 6.0 |
+| **C9-P2** | delta_protonation ≥ **0.25** | a real switch by the instrument's own pre-declared bar |
+
+**M1 AND P1 is the minimum for a site to be worth folding in complex.** If no site clears P1, the
+buried-histidine mechanism is closed on this molecule by measurement rather than by argument, and
+the pKa-versus-burial relationship across 28 positions is itself the reportable result.
+
+**Declared in advance:** PROPKA gating was retired on this project for noise, and a buried histidine
+is its hardest case, so P1 and P2 are screens, not measurements. A site clearing them would still
+need a complex fold, a mouse leg and the prescreen before it could ship. One launch, ~$2, no
+continuation without a new decision.
