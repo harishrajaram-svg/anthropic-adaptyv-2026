@@ -1,0 +1,66 @@
+C10 -- the binding-coupled pH measurement PK specified, 2026-10-11 3:45 AM. $0, local, no GPU.
+Instrument: bin/ph_gate_multisite.py --problem 2 (pH 7.4 vs 6.0). Free leg by deleting the partner
+IN PLACE, holding every other coordinate fixed; composed over ALL 78-79 titratable sites on both
+partners, not over the helping ones. Five guards. Self-test passes and includes the mutation test
+that reproduces this project's own historical error (9.102x helping-only against 6.581x all-sites).
+
+WHY IT WAS RUN: PK's fifth reply, 2026-10-09, filed tonight after 33 hours in Gmail only --
+"The key is the change in protonation between the free partners and the complex." C9's pKa work
+scored a SINGLE STATE, which bin/propka_his.py's own docstring also warns is not the mechanism
+quantity. This is the quantity.
+
+DIRECTION OF MERIT, problem 2: ratio < 1 = protonation WEAKENS the complex = release at pH 6.0.
+                               ratio > 1 = protonation TIGHTENS it = the inverted switch.
+
+molecule   n   ratio med    min      max    sites moved
+PARENT     5      2.874   1.284    4.258        4/78
+L49H       5      2.107   1.512    4.061        6/79
+T36H       5      3.368   1.494   16.969        5/78
+D47H       5      4.271   1.512    6.809        5/79
+S65H       5      5.057   1.517   15.421        5/79
+S76H       5      5.141   1.501    6.571        5/79
+
+🔴 RESULT: 30 OF 30 POSES POINT THE WRONG WAY. Every pose of every molecule, including the parent,
+is above 1.0 -- min 1.284, max 16.969. These designs are predicted to bind TIGHTER at pH 6.0, which
+is the opposite of what this problem asks for.
+
+The magnitude is unusable and we say so: 1.5 to 17 across seeds on the same molecule is why this
+gate class was retired here. THE SIGN IS NOT NOISE. 30 of 30 poses, 6 molecules, every seed.
+What is reportable is the direction, not the ratio.
+
+Adding a histidine did not fix it and in four of five cases made it worse: T36H 3.368, D47H 4.271,
+S65H 5.057, S76H 5.141 against the parent's 2.874. Only L49H improved on the parent (2.107) and it
+is still inverted.
+
+THE CAUSE, LOCALISED, AND CONSISTENT ACROSS POSES -- which is step one of PK's focused experiment:
+
+  site                  median ratio   seen in
+  binder:GLU28             1.432x       30/30 poses
+  binder:GLU20             1.476x       27/30
+  binder:GLU7              1.349x       29/30
+  target:B/GLU110          1.118x       23/30
+
+Three BINDER glutamates drive the inversion and they are present in essentially every pose. That is
+PK's "the acid-rich interface is a plausible explanation" -- now measured rather than assumed, with
+the residues named and their involvement shown consistent across plausible poses, which is exactly
+the consistency check he asked for.
+
+Sites that help, for completeness: target H73 at 0.790x in 23/30 poses (the same histidine C4 found
+and closed because it has no mouse counterpart), and binder:HIS36 at 0.704x in 5/30 but flagged by
+the guard as having NO COUNTER-CHARGE within 6 A (nearest 13.31 A).
+
+WHAT THIS MEANS FOR THE SUBMISSION: objective 2 is not merely unaddressed. On the correct quantity,
+these designs are predicted to do the OPPOSITE, and that is now a measurement rather than an
+inference. It belongs in FIELD 2 as the objective-2 result, replacing the weaker "we make no pH
+claim" with "we measured the coupled quantity and it is inverted, here is the cause, here is the
+test that would confirm the cause."
+
+NEXT, AND NOW FULLY SPECIFIED -- PK's focused experiment, in silico:
+  implicated residue  binder GLU28 (30/30 consistency, 1.432x)
+  substitution        E28Q, which is precisely the Glu-to-Gln he named
+  matched control     a comparable substitution at an uninvolved exposed Glu that never appears in
+                      the contributing list
+  readout             re-run this gate: does the composed ratio fall toward 1 for E28Q and NOT for
+                      the control, while the margin and fold survive
+  cost                2 variants + 2 nulls, 5 seeds = 20 folds, ~$2, plus the gate at $0
+The bench version -- binding at both pH values with folding and solubility checks -- is the lab's.
