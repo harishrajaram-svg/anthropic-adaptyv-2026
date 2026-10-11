@@ -1,0 +1,30 @@
+R1 CORRECTED after the W1 audit (5HYS and 9X1H re-paired to contacting chains)
+
+pdb    class want          pub       gate  call
+1BRS   pos   release    1200.0     3.8334  miss
+3SQO   neg   flat          1.3     8.1101  miss
+3WD5   pos   release       9.0     3.2715  miss
+4K71   pos   tighten     760.0  6873.0912  HIT
+4N0U   pos   tighten     170.0    12.5429  HIT
+5B71   pos   release    1105.0     0.0145  HIT
+5HYS   neg   flat          1.3     2.6084  miss
+5I5K   pos   release      21.0     3.2917  miss
+5TRU   neg   flat          1.1     1.1734  HIT
+6FGB   neg   flat          1.3     4.5803  miss
+7Q15   pos   tighten      20.0     2.7318  HIT
+7SU0   pos   tighten      77.0   140.3163  HIT
+7SU1   pos   tighten      20.0     6.3872  HIT
+8J6F   neg   flat          2.2    45.4182  miss
+8TBQ   pos   tighten    1000.0     0.1045  miss
+9MI6   neg   flat          1.8     1.9220  HIT
+9S60   neg   flat          1.6     5.4442  miss
+9X1H   pos   release     120.0     1.9088  miss
+
+direction accuracy: 8/18 = 44.4%   (was 10/18 = 56% before the fix)
+ratio > 1.0 in 16/18 = 88.9%   (was 14/18 = 78%)   median 3.563
+  release  n=5  correct 1
+  tighten  n=6  correct 5
+  flat     n=7  correct 2
+
+K1 Mann-Whitney p = 0.1288  -> FAIL   (was 0.1288)
+negatives (measured 1.1-2.2x) now span 1.1734 to 45.4182

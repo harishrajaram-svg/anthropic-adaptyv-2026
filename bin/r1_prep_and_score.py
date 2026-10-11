@@ -24,7 +24,9 @@ SET = {
     '1BRS': (['A'], ['D'],      'pos', 1200.0, 'release', 'barnase / barstar, titrating acid pKa 6.4'),
     '5B71': (['E'], ['A', 'B'], 'pos', 1105.0, 'release', 'SKY59 crovalimab / C5 MG1'),
     '5I5K': (['B'], ['H', 'L'], 'pos', 21.0,   'release', 'eculizumab / C5'),
-    '9X1H': (['B'], ['H', 'L'], 'pos', 120.0,  'release', 'RAY121 / C1s CUB'),
+    # CORRECTED 2026-10-11 after the W1 audit: B+H,L is 9.42 A apart with zero contacts. The two
+    # copies pair A<->H,L (407 pairs) and B<->I,M (394 pairs); A+H,L is used.
+    '9X1H': (['A'], ['H', 'L'], 'pos', 120.0,  'release', 'RAY121 / C1s CUB'),
     # --- POSITIVES running the OTHER way: tighter at acidic -> expect ratio > 1
     '7SU0': (['C'], ['H', 'L'], 'pos', 77.0,   'tighten', 'Ipi.105 / CTLA-4'),
     '7SU1': (['C'], ['H', 'L'], 'pos', 20.0,   'tighten', 'Ipi.106 / CTLA-4'),
@@ -33,7 +35,11 @@ SET = {
     # --- NEGATIVES: measured flat -> expect ratio near 1
     '5TRU': (['C'], ['H', 'L'], 'neg', 1.1,    'flat', 'ipilimumab / CTLA-4, 8-point series'),
     '6FGB': (['A', 'B'], ['H', 'L'], 'neg', 1.34, 'flat', 'rozanolixizumab / FcRn + b2m'),
-    '5HYS': (['G'], ['H', 'L'], 'neg', 1.31,   'flat', 'omalizumab / IgE-Fc'),
+    # CORRECTED 2026-10-11 after the W1 audit: G+H,L has ZERO heavy-atom pairs within 5 A and sits
+    # 14.30 A apart - H/L is an unliganded Fab copy in the asymmetric unit. G contacts A+B (434
+    # pairs, min 2.59 A). The original pairing scored a non-complex, so its free and bound legs were
+    # physically identical and its '1.0000 hit' was a non-measurement.
+    '5HYS': (['G'], ['A', 'B'], 'neg', 1.31,   'flat', 'omalizumab / IgE-Fc'),
     '3SQO': (['A', 'P'], ['H', 'L'], 'neg', 1.3, 'flat', 'J16 / PCSK9 + prodomain'),
     '8J6F': (['I'], ['H', 'L'], 'neg', 2.2,    'flat', 'tocilizumab / IL-6R'),
     '9MI6': (['A', 'B'], ['H', 'L'], 'neg', 1.8, 'flat', 'nipocalimab / FcRn + b2m'),
@@ -59,6 +65,17 @@ def prep(pdb, tg, bd, out):
     got = sorted(c.name for c in st[0])
     if got != sorted(keep):
         return f'after stripping, chains are {got}, wanted {sorted(keep)}'
+    # GUARD, added 2026-10-11 after the W1 audit caught two non-complexes among 18. A PDB entry
+    # often holds several copies, and a target chain can sit 14 A from a binder copy it never
+    # touches. Scoring that makes the free and bound legs identical and returns a ratio of exactly
+    # 1.0 that looks like a confident 'flat' call. Contact is now REQUIRED, not assumed.
+    tp = [a.pos for c in st[0] if c.name in tg for r in c for a in r]
+    bp = [a.pos for c in st[0] if c.name in bd for r in c for a in r]
+    n = sum(1 for x in tp for y in bp if x.dist(y) <= 5.0)
+    if n < 50:
+        md = min((x.dist(y) for x in tp for y in bp), default=float('inf'))
+        return (f'NOT A COMPLEX: {n} heavy-atom pairs within 5 A between target {tg} and '
+                f'binder {bd}, closest approach {md:.2f} A')
     st.make_mmcif_document().write_file(out)
     return None
 
