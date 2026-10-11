@@ -1,0 +1,6 @@
+file	product	n_sites	n_moved	ceiling	verdict	n_implausible	n_no_partner
+tnfa_seam_s3_22k4_seed1_sample_25	0.5454	80	8	158489319246.11	ok	0	4
+tnfa_seam_s3_22k4_seed2_sample_26	0.8097	79	6	251188643.15	ok	0	3
+tnfa_seam_s3_22k4_seed3_sample_27	2.0897	80	9	3981071705535.0	ok	0	6
+tnfa_seam_s3_22k4_seed4_sample_28	1.2237	80	6	251188643.15	ok	0	1
+tnfa_seam_s3_22k4_seed5_sample_29	0.6982	80	7	6309573444.8	ok	0	4
