@@ -91,7 +91,7 @@ these twelve sequences. Read it; do not glob the run directories.**
 
 | # | task | who | time |
 |---|---|---|---|
-| 1 | **D1: pick what ships** | **Harish** | 20 min |
+| 1 | ~~D1: pick what ships~~ — **ANSWERED 2026-10-11 12:20 AM: `40_L1r4k1` + `3_L4r5k2`**, two designs, one per surviving cluster. Detail + what FIELD 2 must now say: ROADMAP §'D1 — ANSWERED'. | Harish | ✅ |
 | 2 | Rewrite methodology box FIELD 2 -- still describes the 35 Mosaic designs | me | 90 min |
 | 3 | Upload, designate, attach | me | 30 min |
 
