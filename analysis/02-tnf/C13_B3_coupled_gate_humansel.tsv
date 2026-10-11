@@ -1,0 +1,10 @@
+file	product	n_sites	n_moved	ceiling	verdict	n_implausible	n_no_partner
+tnfa_corrected_40_L1r1k5_seed42_sample_3	7.3304	76	6	251188643.15	ok	0	2
+tnfa_corrected_40_L2r1k3_seed42_sample_4	22.2036	76	6	251188643.15	ok	0	2
+tnfa_corrected_40_L2r2k3_seed42_sample_4	15.6154	76	6	251188643.15	ok	0	2
+tnfa_corrected_40_L2r2k4_seed42_sample_5	9.0229	78	6	251188643.15	ok	0	1
+tnfa_corrected_40_L2r2k5_seed42_sample_5	4.9272	79	5	10000000.0	ok	0	1
+tnfa_corrected_40_L2r3k0_seed42_sample_4	157.6022	76	6	251188643.15	ok	0	2
+tnfa_corrected_40_L2r3k1_seed42_sample_4	72.7563	77	6	251188643.15	ok	0	2
+tnfa_corrected_40_L2r3k2_seed42_sample_4	9.279	76	5	10000000.0	ok	0	0
+tnfa_corrected_40_L2r3k6_seed42_sample_5	10.3715	77	5	10000000.0	ok	0	0
