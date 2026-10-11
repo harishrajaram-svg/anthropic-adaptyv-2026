@@ -1,0 +1,59 @@
+C7 shell-rebuild readout, 2026-10-11 2:00 AM. 12 designs + 12 matched nulls, 5 seeds, 120 folds,
+6 shards split across H200 (S1-3) and H100 (S4-6), ~$8. Pre-registered at 497d623 with amendment 1
+at the following commit, both before any C7 fold existed.
+Generation: local SolubleMPNN, fixed positions 20/27/54 (C3 anchors) + His50 + His61 (arm A),
+11-residue shell redesigned, 256 samples across temps 0.1/0.2/0.3, ALL 256 verified byte-for-byte
+outside the shell with both histidines retained and cysteine banned.
+
+design     arm   margin   design_med  null_med   B1(>=6.347)  B3 release >=3/5   shell substitutions
+---------------------------------------------------------------------------------------------------
+C7A_06      A    +5.433      9.050     14.483       fail          fail 0/5       G43L R46K L51E K53N L76R
+C7A_05      A    +5.137      9.344     14.481       fail          fail 0/5       G43L R46K K53D L76R
+C7A_08      A    +5.022      9.441     14.463       fail          fail 1/5       G43R L51D K53D L76R
+C7A_01      A    +4.877      9.460     14.337       fail          fail 0/5       K53D L76R
+C7A_03      A    +4.823      9.647     14.470       fail          fail 0/5       G43A L51E K53D L76R
+C7A_04      A    +4.016     10.197     14.213       fail          fail 0/5       L51E K53N L76R
+C7A_07      A    +2.214     12.479     14.693       fail          --             G43L L51A K53D L76R
+C7B_12      B    +1.819     12.896     14.715       fail          fail 2/5       K53H
+C7A_02      A    +0.970     13.631     14.601       fail          --             G43R K53N L76R
+C7B_11      B    +0.750     14.357     15.107       fail          --             L51E
+C7B_09      B    +0.634     14.043     14.678       fail          fail 1/5       K53R
+C7B_10      B    +0.296     14.517     14.812       fail          --             L51E K53R
+---------------------------------------------------------------------------------------------------
+references: relD50H (the template) +4.097 · parent 40_L1r4k1 +8.015 in-run / +7.706 pooled 15-seed
+            non-binder median +6.347 · binder median +7.8144
+
+RESULT: BOTH BARS FAIL. 0 of 12 clear B1, 0 of 12 clear B3. The arm is a negative.
+
+But it is a quantitative negative in two directions, and the second one is the finding.
+
+1. THE REPAIR HYPOTHESIS WAS DIRECTIONALLY RIGHT AND UNDER-POWERED. The template relD50H sits at
+   +4.097. The best rebuild reaches +5.433 -- a gain of +1.336, about 59% of the +2.25 deficit,
+   from changing two to five residues. Local repacking DOES recover binding lost to a histidine
+   substitution. It recovered more than half of it here and still fell 0.91 short of the floor.
+   A consistent repair motif appears in every recovering design: K53 -> D or N, and L76 -> R.
+
+2. THE REPAIR THAT RECOVERS BINDING STABILISES THE WRONG GEOMETRY. The template's His50 was
+   unstable across seeds (4.39 / 7.94 / 15.68 / 16.36 / 14.00 A to the nearest cation). After the
+   rebuild the pose is MORE stable -- design-side PAE improves from ~10.6 to 9.05-9.65 -- and it
+   stabilises with His50 facing a target CARBOXYLATE in nearly every seed: the six best designs
+   read tightening 0/5, 0/5, 1/5, 0/5, 0/5, 0/5 on the releasing call.
+   Checked and NOT supported: that MPNN achieved this by introducing acids near the histidine.
+   Spearman(margin recovered, new acids placed in the shell) = +0.063 over 12 designs. The acids
+   are not the mechanism; the pose the optimiser found is.
+
+3. ARM B CONFIRMS THE COST OF THE CLEAN MECHANISM. Removing the tightening His61 costs 7.1 units
+   (A3's ctrlH61Q) and the shell cannot pay it back: arm B's best is +1.819 against arm A's +5.433.
+   The only molecule in which the mechanism is unambiguous is the one that does not bind.
+
+=> Objective 2 closes for the SIXTH time, and C7 is the first closure that explains itself at the
+residue level: on this target, recovering the binding a histidine costs and keeping that histidine
+pointed at a cation are competing objectives in the same shell. That is consistent with C6 (48
+designs carry the geometry, none holds above +5.05) and with C3 (the margin is carried by Arg27,
+Thr54 and Tyr20 -- none of them titratable).
+
+DECLARED, unchanged: ESMFold2 is pH-agnostic; no pKa was predicted; nothing here is a demonstrated
+pH switch, in either direction.
+
+GPU NOTE, measured here for the first time in this project: H200 ran this 554-residue complex at
+24.1 s/fold against H100's 28.4-29.5 s/fold, about 18% faster, same wrapper and settings.
