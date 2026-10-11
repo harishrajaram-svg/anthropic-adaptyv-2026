@@ -60,6 +60,14 @@ _BB_PROCESSED = {
                  ("B133", "F"), ("B134", "A"), ("B135", "E"), ("D62", "H"), ("D64", "L"),
                  ("D66", "T"), ("D68", "T"), ("D81", "N"), ("D84", "S"), ("D86", "I"),
                  ("D124", "E"), ("D126", "N")],
+    # Added 2026-10-11 for route 1. Processed 62 is mature 73 -- the H73 that the binding-coupled
+    # gate finds helping in 829 of 1,200 poses at median 0.7986x, the ONLY proton-linkage term in
+    # this problem that replicates across refolds (5 of 5, R1). Every existing strategy names at
+    # most ONE of the trimer's three H73 sites, and 0 of 1,200 folded poses engage more than one.
+    # H73-H73 is 21.6-22.1 A CA-CA against the 83-mer's 35.3 A span, so two are reachable; Glu146,
+    # the dominant opposing term, is 20.1-20.6 A off that axis. Two sites multiply to 0.638x.
+    "seam2":    [("B62", "H"), ("D62", "H")],
+    "seam3":    [("B62", "H"), ("C62", "H"), ("D62", "H")],
 }
 
 # Region I -- this project's own epitope from section 47, ALREADY in our mature numbering. The
@@ -148,7 +156,8 @@ def interface(mode, chains, offset=None):
 
 def build(out_path, binder_len=83):
     chains = check_target()
-    modes = {m: interface(m, chains) for m in ("hotspot", "extended", "common", "region1")}
+    modes = {m: interface(m, chains)
+             for m in ("hotspot", "extended", "common", "region1", "seam2", "seam3")}
     problem = {
         "key": "tnfa_corrected",
         "name": "TNFa (canonical trimer, Asp143)",
@@ -181,7 +190,7 @@ def selftest():
     chains = check_target()
     print(f"  ok  target reads as 3 chains, {len(chains['A'])} residues each, "
           f"Asp{SENTINEL[0]} in all three")
-    for m in ("hotspot", "extended", "common", "region1"):
+    for m in ("hotspot", "extended", "common", "region1", "seam2", "seam3"):
         lst = interface(m, chains)
         print(f"  ok  {m}: {len(lst)} residues, every pinned identity matches")
     # M2 -- a wrong offset must be caught by identity, not pass silently
@@ -211,7 +220,18 @@ def selftest():
     assert len({e[0] for e in r}) == 2, r
     assert len({e[0] for e in interface("hotspot", chains)}) == 2
     print("  ok  MUTATION: region1 AND BinderBench's hotspot both span two protomers")
-    print("\nself-tests passed: 9")
+    # M6 -- the seam strategies must name H73 and NOTHING else, on 2 and 3 distinct protomers.
+    # Added 2026-10-11. If either ever picks up a non-H73 residue the arm is no longer testing
+    # multi-H73 engagement, which is its entire premise.
+    for mode, nchain in (("seam2", 2), ("seam3", 3)):
+        lst = interface(mode, chains)          # ["A73", "C73"] -- identity already verified above
+        assert len(lst) == nchain, (mode, lst)
+        assert len({e[0] for e in lst}) == nchain, (mode, lst)
+        assert {int(e[1:]) for e in lst} == {73}, (mode, lst)
+    assert len({e[0] for e in interface("seam2", chains)}
+               & {e[0] for e in interface("seam3", chains)}) == 2
+    print("  ok  MUTATION: seam2/seam3 name only His73, on 2 and 3 distinct protomers")
+    print("\nself-tests passed: 10")
 
 
 if __name__ == "__main__":
