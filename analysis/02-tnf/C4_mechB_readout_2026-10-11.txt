@@ -39,3 +39,11 @@ than its pooled 15-seed +7.706. Three caveats, stated rather than buried:
       monomer floor, or a mouse leg. None of that is known.
 It comes out of the v3 arm's discarded human-side tree -- the designs the worse-of-two selector
 built and then threw away. That lesson now has a number attached.
+
+ADDENDUM, 1:06 AM -- mechanism B was objective-3 dead anyway, found while staging C5.
+The mouse construct's histidines sit at 15, 20, 77; the human construct's at 15, 73, 78. The ONLY
+interface-accessible human target histidine, H73, has no mouse counterpart at the equivalent
+position. So even had the geometry replicated, a target-histidine switch would have been
+human-only, against a spec that requires mouse cross-reactivity. The negative is therefore
+over-determined: the geometry is a single-seed artifact AND the residue it depends on is not
+conserved in the second required species.
