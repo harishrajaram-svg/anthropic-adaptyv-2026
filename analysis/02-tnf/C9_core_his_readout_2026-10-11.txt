@@ -1,0 +1,53 @@
+C9 buried-core-histidine readout, 2026-10-11 2:36 AM. Pre-registered at 3d7eaa4, amended at c5078ce,
+both before the folds of the stage they govern. Stage 1: 45 monomer folds, B200, ~$1.
+Stage 2: 30 complex folds, 3 shards, B200, ~$2.
+
+STAGE 1 -- does the core tolerate a histidine? 8 of 8 clear M1 (>=0.70), 6 of 8 clear M2 (within
+0.05 of the parent). Parent 0.911. F29H 0.906 · L75H 0.905 · L49H 0.900 · V5H 0.895 · F48H 0.887 ·
+L55H 0.887 · L9H 0.859 · L79H 0.816.
+
+STAGE 2 -- the prereg's top three, against the human trimer with matched nulls:
+
+variant   margin   vs parent   monomer pLDDT   B1(>=6.347)  B2(>=6.971)  B3 buried+non-iface
+--------------------------------------------------------------------------------------------
+L49H      +7.151    +0.175        0.900           PASS         PASS       PASS  5/5
+L75H      +7.074    +0.098        0.905           PASS         PASS       PASS  5/5
+F29H      +7.032    +0.056        0.906           PASS         PASS       PASS  5/5
+--------------------------------------------------------------------------------------------
+parent 3_L0r4k0: +6.976 in-run (C8, seeds 1-5, same path) · +6.971 pooled 15-seed
+non-binder median +6.347 · binder median +7.8144
+
+B3 detail, per seed, in the COMPLEX pose rather than the design template:
+  L49H  d_target 15.3-15.9 A · 87-88 binder neighbours within 8 A · nearest polar partner 7.1 A
+  L75H  d_target 12.5-12.9 A · 94-95 neighbours · nearest polar 6.2 A
+  F29H  d_target 12.6-13.3 A · 89-90 neighbours · nearest polar 5.9 A
+Every seed of every variant: buried, more than 11 A from the target, no polar partner inside 5.8 A.
+
+RESULT: ALL THREE BARS PASS ON ALL THREE DESIGNS. For the first time in this project a design holds
+TNF-alpha while carrying a titratable residue -- and the histidine is FREE on both axes, costing
+0.005-0.011 of monomer pLDDT and GAINING 0.056-0.175 of margin against its own parent.
+
+WHY THIS WORKED WHERE SEVEN ROUTES FAILED: the histidine is not at the interface, so it does not
+compete with the residues that carry the binding. C3 measured that competition directly (the margin
+is carried by Arg27, Thr54 and Tyr20, none titratable; six distal alanines moved it 0.198-0.569),
+and C9 is that measurement used as a design principle rather than as a diagnosis.
+
+WHAT IS CLAIMED: a matched pair differing by one buried histidine, where the variant binds at least
+as well as the parent and folds as well.
+
+WHAT IS NOT CLAIMED, and this is the part a reviewer must not be allowed to misread:
+  - NO pH switch is demonstrated. ESMFold2 is pH-agnostic; no pKa was computed; PROPKA was retired
+    on this project because its within-design noise exceeded its between-design signal.
+  - The predicted mechanism is FOLD DESTABILISATION at pH 6.0 -- a desolvated imidazolium with no
+    polar partner -- argued from established biophysics (influenza HA, diphtheria T-domain), NOT
+    from anything we ran.
+  - That mechanism's failure mode at pH 6.0 is LOSS OF STRUCTURE, which the assay cannot distinguish
+    from aggregation. We predict unfolding, not a clean electrostatic release, and the methods
+    document says so outright.
+  - The magnitude is unknown: burial in an 83-residue bundle may not shift the pKa enough to titrate
+    between 7.4 and 6.0.
+
+STILL UNMEASURED before any of these could ship:
+  - the organisers' pre-submission / prior-art screen on the variant sequences
+  - the mouse trimer leg (the parent reads +7.581; a buried substitution should not change it, but
+    "should not" is not a measurement)
