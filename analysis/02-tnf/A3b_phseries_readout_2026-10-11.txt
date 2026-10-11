@@ -1,0 +1,29 @@
+
+variant                  set        margin   design     null   B1  B2  vs parent
+--------------------------------------------------------------------------------------
+relD50H                  single      4.097   10.616   14.713    ✗   ✗   -3.934
+relD50H + H61Q           double      1.959   12.621   14.580    ✗   ✗   -6.072
+relE62H                  single      1.566   13.546   15.112    ✗   ✗   -6.465
+relL58H + H61Q           double      1.357   14.250   15.607    ✗   ✗   -6.674
+relE62H + H61Q           double      1.189   13.606   14.795    ✗   ✗   -6.842
+ctrl H61Q (no His)       control     0.916   13.856   14.772    ✗   ✗   -7.115
+relL58H                  single      0.844   13.980   14.824    ✗   ✗   -7.187
+relR27H + H61Q           double      0.637   14.290   14.927    ✗   ✗   -7.394
+relT54H + H61Q           double      0.602   14.095   14.697    ✗   ✗   -7.429
+relT54H                  single      0.463   14.233   14.696    ✗   ✗   -7.568
+relR27H                  single      0.270   14.272   14.542    ✗   ✗   -7.761
+--------------------------------------------------------------------------------------
+
+B1 (>= +6.347, hold retained):  0 of 11
+B2 (>= +7.8144, slot candidate): 0 of 11
+parent 40_L1r4k1 reference:    +8.031 (5-seed, measured 2026-10-09)
+
+C1  ctrlH61Q margin +0.916 -> His61 is LOAD-BEARING for binding; the releasing-His program on this backbone is dead regardless of the doubles (prereg: report and stop)
+
+C2  single (His61 retained) vs double (His61 removed):
+    position        single    double     delta
+    T54H            0.463     0.602    +0.139
+    L58H            0.844     1.357    +0.513
+    R27H            0.270     0.637    +0.367
+    D50H            4.097     1.959    -2.138
+    E62H            1.566     1.189    -0.377
