@@ -54,7 +54,9 @@ mc = importlib.util.module_from_spec(_mc_spec)
 _mc_spec.loader.exec_module(mc)
 
 MAX_ROUNDS = dl.MAX_ROUNDS            # 10
-MAX_FOLDS = 1600                      # spend fuse, ~$71. 400 -> 800 -> 1600 on
+MAX_FOLDS = int(os.environ.get("DEPTH_MAX_FOLDS", "1600"))   # spend fuse, ~$71 at 1600 on
+                                      # L40S rates; env-overridable 2026-10-11 so an arm can
+                                      # carry its own pre-registered fuse. 400 -> 800 -> 1600 on
                                       # 2026-10-09. AMENDMENT 3: 16 rounds x 6
                                       # lineages x 8 children x 2 SPECIES = 1536,
                                       # leaving 64 folds of headroom. The fuse is an
@@ -62,7 +64,11 @@ MAX_FOLDS = 1600                      # spend fuse, ~$71. 400 -> 800 -> 1600 on
                                       # B3 end the arm if the blend does not improve
                                       # over 4 consecutive rounds, so the extra
                                       # rounds are only bought if still climbing.
-WALL_STOP = dt.datetime(2026, 10, 10, 18, 0, 0)
+WALL_STOP = dt.datetime(*(int(x) for x in os.environ["DEPTH_WALL_STOP"].split(","))) \
+    if os.environ.get("DEPTH_WALL_STOP") else dt.datetime(2026, 10, 10, 18, 0, 0)
+# Env-overridable 2026-10-11 (format "Y,M,D,H,M,S"). The hardcoded default is the ORIGINAL
+# pre-registered stop and is now in the past, so an unset env var refuses to launch rather than
+# running unbounded -- which is the safe direction for a constant whose whole job is to stop.
 SEQS_PER_PARENT = 8                   # 8 -> 4 -> 8 on 2026-10-09. AMENDMENT 2: the
                                       # constrained restart is dead, so the arm is an
                                       # UNCONSTRAINED continuation and best-of-4 is a

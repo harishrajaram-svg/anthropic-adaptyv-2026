@@ -120,8 +120,21 @@ def ipsae_for(cif, target="ABC", binder="D"):
     return vals.get(IPSAE_RULE)
 
 
+PRIMARY_SPECIES = os.environ.get("DEPTH_SELECT_SPECIES", "").strip()
+"""Env-gated, added 2026-10-11. Unset (the default) keeps the pre-registered worse-of-two
+selector untouched. Set to a species name and combine_species selects on THAT species while
+still recording every species and still refusing a partial join.
+
+WHY IT EXISTS: the v3 arm (2026-10-09) selected on min(human, mouse) when mouse scored uniformly
+~0.2 below human, so the selector was mouse almost always and the arm discarded its human gains --
+human ca_sc_dockq reached 0.7776, better than anything this project has made, while the selector's
+ceiling was 0.5427 and 30 designs cleared 0.60 on human against ZERO on the worse-of-two.
+LESSONS-FOR-NEXT-PROBLEM §§9-12: primary species as the selector, secondary as an END GATE."""
+
+
 def combine_species(per_species, key=SELECTOR_KEY):
-    """One row per design carrying the WORSE of each species' `key`.
+    """One row per design carrying the WORSE of each species' `key`, or the PRIMARY species'
+    value when DEPTH_SELECT_SPECIES names one.
 
     PREREG s3 step 3. Refuses rather than falls back when a design is missing from any species:
     a silent fall-back to the species that happens to be present is indistinguishable from
@@ -151,11 +164,19 @@ def combine_species(per_species, key=SELECTOR_KEY):
     for did in sorted(ids):
         rows = {sp: index[sp][did] for sp in species}
         worst_sp = min(species, key=lambda sp: float(rows[sp][key]))
-        merged = dict(rows[worst_sp])
-        merged["worse_species"] = worst_sp
+        if PRIMARY_SPECIES:
+            if PRIMARY_SPECIES not in rows:
+                raise SystemExit(f"REFUSED: DEPTH_SELECT_SPECIES={PRIMARY_SPECIES!r} is not "
+                                 f"among the folded species {species}")
+            sel_sp = PRIMARY_SPECIES
+        else:
+            sel_sp = worst_sp
+        merged = dict(rows[sel_sp])
+        merged["worse_species"] = worst_sp          # still recorded, whichever we select on
+        merged["selected_species"] = sel_sp
         for sp in species:
             merged[f"{key}_{sp}"] = float(rows[sp][key])
-        merged[key] = float(rows[worst_sp][key])
+        merged[key] = float(rows[sel_sp][key])
         out.append(merged)
     return out
 
