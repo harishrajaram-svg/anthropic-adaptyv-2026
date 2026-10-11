@@ -180,3 +180,34 @@ the pKa-versus-burial relationship across 28 positions is itself the reportable 
 is its hardest case, so P1 and P2 are screens, not measurements. A site clearing them would still
 need a complex fold, a mouse leg and the prescreen before it could ship. One launch, ~$2, no
 continuation without a new decision.
+
+---
+
+## AMENDMENT 5 — complex folds on the titrating sites, written 2026-10-11 3:18 AM, pre-fold
+
+Stage 6 measured 14 of 20 positions clearing M1 and P2, with pKa 6.0-7.2 against row 1's His49 at
+4.81. Spearman(burial, pKa) = **-0.600**: the stage-1 rule (deep burial AND no polar partner within
+4 Å) selected exactly the sites where the proton never binds, and the sites that titrate are
+moderately buried and often polar.
+
+**Stage 7:** the four highest-delta sites that also fold well — **T36H, S76H, S65H, D47H** — against
+the human trimer with composition-matched nulls, 5 seeds, 4 shards, B200 = **40 folds, ~$3**.
+I46H (delta 0.644) is held in reserve rather than folded, to keep the launch at four.
+
+| bar | threshold | meaning |
+|---|---|---|
+| **C9-B1** | median margin ≥ **+6.347** | it still holds |
+| **C9-B2** | ≥ **+6.971** | the substitution is free, matching the parent |
+| **C9-B4** | pKa re-measured **in the complex**, delta ≥ **0.25** | the titration survives the bound state, not just the monomer |
+| **C9-B5** | the position stays **>11 Å from the target** in the complex, 5/5 seeds | it is not secretly an interface residue |
+
+**B1 AND B4 AND B5 is the minimum for a pH candidate.** B2 as well would make it a free swap like
+L49H was. Free screens first: `express_qc_p2` with pI required below 6.0 — D47H removes an aspartate
+and so raises pI more than the others, which is checked before it folds, not after.
+
+🔴 **What stage 7 still cannot establish.** PROPKA says the proton binds in the window; nothing in
+this stack says protonation **destabilises** the fold, and the sites that titrate best are the ones
+most able to accommodate a charge, so the destabilisation may be small. A pass here means "binds,
+folds, and carries a histidine predicted half-protonated mid-assay" — one leg of the mechanism
+measured, not two. **No result from this arm may be called a demonstrated pH switch.**
+One launch, ~$3, no continuation without a new decision.
