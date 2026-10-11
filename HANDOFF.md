@@ -1,8 +1,44 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-11 1:00 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-11 2:55 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
+
+---
+
+## 🟢 AS OF 2026-10-11 2:55 AM: THREE DESIGNS SHIP, AND ONE OF THEM CARRIES A TITRATABLE RESIDUE AT NO COST. Nothing running.
+
+**Supersedes the 1:00 AM block below.** C9 (`PREREG-C9-CORE-HIS-2026-10-11.md`, 3 amendments, all
+pre-fold) put a histidine in the binder's **own buried core** instead of at the interface, where it
+cannot compete with the residues that carry the binding. Readout:
+`C9_core_his_readout_2026-10-11.txt`.
+
+**WHAT SHIPS, ranked:**
+
+| # | design | human (15 seeds) | mouse | monomer | pI | His | prescreen |
+|--:|---|--:|--:|--:|--:|--:|---|
+| 1 | `tnfa_corrected_3_L0r4k0_L49H` | **+7.167** | 7.437 | 0.900 | 4.91 | **1, buried 5/5** | batch_duplicate |
+| 2 | `tnfa_corrected_40_L1r4k1` | +7.706 | 7.207 | 0.885 | 4.65 | 1 (interface, inverted) | pass |
+| 3 | `tnfa_corrected_3_L0r4k0` | +6.971 | 7.476 | 0.911 | 4.83 | 0 | batch_duplicate |
+
+Rows 1 and 3 are a **matched pair one residue apart**. Row 1 is ranked first because the organisers
+rank pH-selectivity first and affinity third, and it is the only design carrying a mechanism; the
+order is a declared nomination priority, not an affinity prediction.
+
+🔴 **The pair trips `batch_duplicate` on both members** (0.95 identity / 0.80 coverage within a
+batch; rank 8 of 10 in the prescreen's own disqualification order). `40_L1r4k1` + `L49H` alone both
+read `pass`. Harish took the flag knowingly at 2:55 AM to get the in-assay control that problem 1
+did without. **This must be declared in the methods, not left for the reviewer to find.**
+
+**Why C9 worked where seven arms failed:** the histidine is buried 12-16 Å from the target with no
+polar partner inside 7 Å, so it never competes with Arg27/Thr54/Tyr20. L49H beat its parent on
+**fifteen seeds each** (+7.167 vs +6.971), and the gain **grew** on ten unseen seeds (+0.33) rather
+than deflating as the leader's did in C2.
+
+**What is NOT claimed:** no pH switch is demonstrated. ESMFold2 is pH-agnostic, no pKa was computed,
+and the predicted mechanism is **fold destabilisation at pH 6.0** argued from established biophysics
+(influenza HA, diphtheria T-domain). Its failure mode is **loss of structure, which the assay cannot
+distinguish from aggregation** — the methods document says so outright.
 
 ---
 
@@ -66,7 +102,7 @@ Three structural clusters; **backbone 16 fails on both species and drops.** With
 
 10 of 12 clear the non-binder median on BOTH species; 1 of 12 clears the binder median (human only).
 Suggested: `40_L1r4k1` plus one from backbone 3 -- `3_L4r5k2` for the strongest mouse number in the
-set, or `3_L0r4k0` (6.967/7.581, clean) to avoid its Glu-composition flag. Fewer than 20 is
+set, or `3_L0r4k0` (6.967/7.581). ⚠️ **CORRECTION 2026-10-11 1:10 AM: this line said `3_L0r4k0` was "clean" and avoided the Glu flag. It is not. `depth12_liability_2026-10-09.tsv` records n_flags=1 for BOTH — E at 28% in `3_L0r4k0` and 27% in `3_L4r5k2`. Re-run confirms. The liability axis is a TIE between them, and this prose was carried into a D1 decision table before it was checked against the committed artifact.** Fewer than 20 is
 explicitly fine. **`3_L0r5k2` is the trap: best cross-species minimum and the only liability failure.**
 
 ### The v3 arm, in one paragraph
@@ -128,7 +164,7 @@ these twelve sequences. Read it; do not glob the run directories.**
 
 | # | task | who | time |
 |---|---|---|---|
-| 1 | ~~D1: pick what ships~~ — **ANSWERED, then REVISED 1:00 AM on C2 evidence: `40_L1r4k1` + `3_L0r4k0`.** The backbone-3 slot moved off `3_L4r5k2` under the pre-registered pooled-15-seed rule (+6.971 vs +6.424, and `3_L0r4k0` is also Glu-flag-free with the set's best monomer pLDDT). ROADMAP §'D1 — ANSWERED'. | Harish | ✅ |
+| 1 | ~~D1: pick what ships~~ — **FINAL 2:55 AM: THREE designs — `40_L1r4k1` + `3_L0r4k0` + `3_L0r4k0_L49H`**, the last two a matched pair one buried histidine apart. Harish accepted the `batch_duplicate` flag on the pair to put the control in the lab. Earlier: revised 1:00 AM on C2 evidence from `3_L4r5k2` to `3_L0r4k0`.** The backbone-3 slot moved off `3_L4r5k2` under the pre-registered pooled-15-seed rule (+6.971 vs +6.424, and `3_L0r4k0` is also Glu-flag-free with the set's best monomer pLDDT). ROADMAP §'D1 — ANSWERED'. | Harish | ✅ |
 | 2 | Rewrite methodology box FIELD 2 -- still describes the 35 Mosaic designs | me | 90 min |
 | 3 | Upload, designate, attach | me | 30 min |
 
