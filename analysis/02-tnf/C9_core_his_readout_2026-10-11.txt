@@ -115,3 +115,46 @@ rule it may take the backbone-3 slot, with the parent's numbers reported as the 
 What this does NOT change: no pH switch is demonstrated, the mechanism is fold destabilisation
 argued from established biophysics rather than from any model we ran, and its failure mode in the
 assay is indistinguishable from aggregation.
+
+STAGE 5 -- PROPKA on row 1's histidine, 2026-10-11 3:05 AM. $0, local.
+Instrument: bin/propka_his.py (PROPKA 3.5.1, pre-registered at PREREGISTRATION.md:51), run on the
+submitted variant's own complex folds, chain D.
+
+design                        resnum   pKa    delta_protonation   class
+3_L0r4k0_L49H  (seed 2)         49     4.82        0.059          INERT
+3_L0r4k0_L49H  (seed 3)         49     4.81        0.058          INERT
+
+Thresholds, pre-declared in propka_his.py: SWITCH_DELTA 0.25, WEAK_DELTA 0.10. delta is the change
+in fraction protonated between pH 7.4 and pH 6.0, exact arithmetic once the pKa is known, ceiling
+0.667 at pKa 6.7.
+
+🔴 RESULT: HIS49 IS PREDICTED INERT ACROSS THE ASSAY WINDOW. delta 0.058 is below even the "weak"
+threshold. Its protonation state barely changes between the two pH values the lab measures at, so
+the destabilisation the mechanism depends on is predicted not to happen.
+
+AND THE REASON IS THE MECHANISM'S OWN PREMISE. Burial suppresses a histidine's pKa: the model
+compound sits at 5.98 and His49 reads 4.81-4.82, a drop of ~1.2 units, consistent with this
+project's own pre-registration recording 1.5-2.5 units lost on burial (PREREGISTRATION.md:165).
+The desolvation that would make a buried imidazolium destabilising is the same desolvation that
+stops it forming. Those two requirements fight each other directly, and on this molecule the
+suppression wins.
+
+HOW MUCH WEIGHT THIS CARRIES, stated honestly in both directions:
+  AGAINST trusting it -- PROPKA-based gating was retired on this project because its within-design
+  noise exceeded its between-design signal; the binder is unrelaxed; and propka_his.py's own
+  docstring says a buried histidine is PROPKA's hardest case, so a single value is a screen.
+  FOR trusting it -- two seeds agree to 0.01; the direction is predicted independently by
+  first-principles desolvation; and the magnitude matches this project's own pre-registered burial
+  shift. Three lines pointing the same way is more than a noisy instrument on its own.
+
+CONSEQUENCE: no pH claim should be made for row 1. It remains a better binder than its parent
+(+7.167 against +6.971 on fifteen seeds each, clean on every screen), but the buried-histidine
+mechanism is predicted NOT to fire, and the matched pair therefore buys much less than it did an
+hour ago -- which matters, because the pair is what the `batch_duplicate` flag is being paid for.
+
+NOT YET TESTED: whether a PARTIALLY buried position exists where the pKa survives near 6 while
+protonation still destabilises. The eight sites folded in stage 1 were all deeply buried (82-104
+neighbours). Of the 28 qualifying positions, several sit at 45-48 neighbours and were never tested.
+Monomer folds run at ~1.5 s each on B200, so screening the remaining 20 positions and running
+PROPKA on each costs roughly $2 and 20 minutes. The window is narrow by construction and may be
+empty.
