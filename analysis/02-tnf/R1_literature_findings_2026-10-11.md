@@ -137,3 +137,77 @@ a threshold.
 The **IgG-Fc / FcRn** slice never arrived — only this albumin addendum did. That leaves the canonical
 pH-dependent interaction unrepresented, and wild-type Fc/FcRn is usually reported as "no detectable
 binding at pH 7.4", i.e. one-sided, so it may not be recoverable as a two-value entry anyway.
+
+---
+
+# ADDENDUM 2, 1:15 PM EDT — the negative set lands with structures, and three of my records were wrong
+
+## In-band negatives WITH a verified complex structure (the half that was missing)
+
+| molecule | target | pH pair | fold | PDB |
+|---|---|---|--:|---|
+| **ipilimumab Fab** | CTLA-4 | 6.0 / 7.4 (**8-point series**) | **1.1×**, replicated twice more at 1.02× and 1.1× | **5TRU** |
+| **rozanolixizumab Fab′** | FcRn + β2m | 6.0 / 7.4 | 1.34× | **6FGB** |
+| **omalizumab** | IgE-Fc | 6.0 / 7.4 | 1.31× | **5HYS** |
+| **J16 IgG** | PCSK9 | 6.0 / 7.4 | 1.3× | **3SQO** |
+| **tocilizumab** | IL-6R | 6.0 / 7.4 | 2.2× | **8J6F** |
+| **nipocalimab Fab** | FcRn + β2m | 6.0 / 7.4 | ~1.8×, both bounded | **9MI6** |
+| **DARPin 4m3** | cathepsin B | 6.0 / **7.0** | 1.65× | **9S60** |
+
+Caveated: `40G5c` (9T46 is a Fab + 10-residue peptide, not the heterodimer measured), `H10-03-6`
+(5KWG at 4.3 Å, too coarse for side chains).
+
+**With the positives from the first two searches, the set is roughly 16 molecules with usable
+structures in both classes.** Still under the pre-registered 20, so the pilot fallback stands — but
+both classes are now structurally represented, which they were not an hour ago.
+
+## 🔴 Three corrections to what I had already recorded
+
+1. **`bH1-Fab` parent is NOT a negative.** I logged it as one in Addendum 1. By SPR against
+   recombinant HER2 ectodomain it is a **4.3× reverse switch** (3.0 nM at pH 7.4 → 13 nM at pH 5.0).
+   The null I recorded was the **bivalent cell-binding** format, where avidity flattens it. **Remove
+   it from the negative set.**
+2. **Wild-type adalimumab is NOT a negative either** — koff ratio pH 6.0/7.4 is **9×**.
+3. **Barnase–barstar is a POSITIVE, not a negative.** Free barnase carries a titrating acid at
+   **pKa 6.4**, mid-window, with Ki 1.3e-14 M at pH 8 → 1.6e-11 M at pH 5 and complex **1BRS** at
+   high resolution. It anchors the positive end rather than the negative one.
+
+## 🔴 Independent corroboration of His73, from a published attribution
+
+Wild-type adalimumab's 9× pH dependence is attributed by its authors to **CDR-H1 His35, CDR-H2
+His56 and TNF-α His73**. Our gate independently finds **His73 as the only target site whose median
+helps** (0.799× over 829 poses, 5 of 5 refolds). A published antibody study and our calculation
+land on the same TNF-α residue by completely different routes. That is worth stating in FIELD 2.
+
+## 🔴 Four things that will break a naive calibration
+
+1. **A bare fold-change cutoff cannot separate the classes.** J17 — a clinically validated switch —
+   is **2.6×** on cyno PCSK9. Neo2_pH, published *as* pH-sensitive, is 2.4×. Wild-type tocilizumab,
+   a negative, is **2.2×**. The 2–4× band is genuinely ambiguous. Suggested instead:
+   **cross-ortholog consistency** — J16 reads 1.3/1.4/1.7 across three species while J17 reads
+   2.6/3.8/9.2, and the spread discriminates better than the value.
+2. **Avidity manufactures false negatives.** Protein A is 1.5× against whole IgG and **84×** against
+   isolated Fc in the same paper. Prefer monovalent measurements; record valency where you cannot.
+3. **Assay family dominates.** D11 vs α-cobratoxin has five published koff pairs from one group
+   spanning 0.49× to 2.5×, **including a direction reversal**, and four pH-7.4 K_D values spanning
+   0.032 to 4.7 nM. Pick one assay family and stay in it.
+4. **No natural, non-antibody protein–protein complex in the whole sweep satisfies all four
+   requirements.** The in-band structural negatives are concentrated in antibody/receptor interfaces
+   with no titratable group at the interface — narrower than a general predictor wants.
+
+## Highest-value remaining gaps, all document-access rather than science
+
+`cAb-RN05` (the textbook pH-independent anti-RNase A VHH, with 1BZQ and 2P49 — but **no per-pH
+numbers published anywhere**), `HyHEL-10`–HEL (3HFM; pH data exists only as an unlabelled figure),
+and hirudin–thrombin (4HTC; flat kon stated, no OA copy). Also: SKEMPI 2.0 has **no pH column** —
+pH appears in free text in 147 of 7,085 rows, tracing to two references — and PDBbind and the
+Affinity Benchmark carry one pH per complex by construction, so **no existing database can supply
+same-pair two-pH records.** That is why this had to be assembled by hand.
+
+## Provenance caveat carried from the search
+
+A safety classifier blocked that agent's own shell and full-text tools partway through, so its
+numbers were extracted by a delegated agent and reported with verbatim provenance rather than
+re-verified first-hand. The PCSK9/J16 table, the ipilimumab series, omalizumab, and the 5TRU/3BE1
+structure checks were each confirmed by two independent agents; **single-sourced rows are the ones
+to spot-check before use.**
