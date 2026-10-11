@@ -1,0 +1,29 @@
+# C3 interface-vs-distal alanine scan on tnfa_corrected_40_L1r4k1, 2026-10-11.
+# 6 interface + 6 distal single X->Ala, plus the unmutated parent folded IN-RUN, each with its own
+# composition-matched null (random.Random(20261006) shuffle). 26 complexes x 5 seeds = 130 folds.
+# Interface = side-chain tip within 5.0 A of target (his_releasing_positions_40_L1r4k1_2026-10-10.txt);
+# distal = tip > 11 A. His61 excluded: A3 already measured it (+8.031 -> +0.916).
+# CONTROL: the in-run parent reads +8.015 against Oct 9's +8.031 -- reproduces to 0.016.
+# Bars: S1 mean interface drop >= 3.0; S2 mean distal drop <= 1.5; S3 exact one-sided
+#   Mann-Whitney on the two sets of 6 drops, p <= 0.05.
+# RESULT: S1 PASS (3.927), S2 PASS (0.406), ratio 9.7x, S3 PASS (U = 34/36, p = 4/924 = 0.0043).
+#   => the margin is INTERFACE-LOCALISED. R27 is the dominant anchor (-7.732, to +0.283, i.e. into
+#   null territory), ahead of His61. Two of six interface positions are NOT load-bearing (E62A
+#   -0.507, K53A -0.846), which is reported rather than smoothed.
+# DECLARED: this measures where ESMFold2's interface PAE signal lives. It is not binding, not
+#   affinity, not pH. Two control mismatches declared before launch: no distal threonine exists
+#   (T54/T57 are both interface) so that slot uses N17, and the only distal aspartate is N-terminal D1.
+variant	set	d_target_A	margin	drop_vs_parent
+tnfa_corrected_40_L1r4k1	parent	--	8.015	0.000
+tnfa_corrected_40_L1r4k1_if_R27A	interface	3.22	0.283	7.732
+tnfa_corrected_40_L1r4k1_if_T54A	interface	2.78	2.707	5.308
+tnfa_corrected_40_L1r4k1_if_Y20A	interface	3.34	3.158	4.857
+tnfa_corrected_40_L1r4k1_if_D50A	interface	3.73	3.706	4.309
+tnfa_corrected_40_L1r4k1_if_K53A	interface	4.08	7.169	0.846
+tnfa_corrected_40_L1r4k1_if_E62A	interface	2.30	7.508	0.507
+tnfa_corrected_40_L1r4k1_ds_N17A	distal	12.39	7.446	0.569
+tnfa_corrected_40_L1r4k1_ds_Y35A	distal	16.75	7.489	0.526
+tnfa_corrected_40_L1r4k1_ds_D1A	distal	21.68	7.559	0.456
+tnfa_corrected_40_L1r4k1_ds_R71A	distal	20.11	7.654	0.361
+tnfa_corrected_40_L1r4k1_ds_E67A	distal	16.82	7.691	0.324
+tnfa_corrected_40_L1r4k1_ds_K15A	distal	21.41	7.817	0.198

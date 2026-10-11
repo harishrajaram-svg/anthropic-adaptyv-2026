@@ -1,0 +1,17 @@
+# C2 fresh-seed replication, 2026-10-11. Seeds 6-15, ten seeds never used on these designs.
+# Inputs copied BYTE-FOR-BYTE from runs/R-seedrep-H{1,2,3,4}-in, so the molecules are provably
+# the ones scored on Oct 9; only the seeds differ. 8 complexes x 10 seeds = 80 folds.
+# Instrument: bin/pae_interface.py pae_if_mean, seeds collapsed by MEDIAN before any join.
+# CONTROL: the seeds 1-5 column below recomputes the Oct 9 table through this same path and
+#   reproduces it exactly (+8.031 / +7.415 / +6.967 / +6.378).
+# Bars: R1 leader >= +7.8144 (binder median); R2 >= +6.347 (non-binder median);
+#   R3 Spearman(5-seed order, 10-seed order) >= 0.6.
+# RESULT: R1 FAILS (+7.657 on fresh seeds, pooled +7.706, both below +7.8144).
+#         R2 PASSES for all four. R3 PASSES at Spearman +1.000 -- the ORDER replicates perfectly.
+# Per pre-registered decision rule 1, the POOLED 15-seed median is now the reported number, and
+# nothing in the submission says any design clears the measured binder median.
+design	seeds_1_5	seeds_6_15	pooled_15	clears_6.347	clears_7.8144
+tnfa_corrected_40_L1r4k1	8.031	7.657	7.706	1	0
+tnfa_corrected_40_L1r4k6	7.415	7.603	7.600	1	0
+tnfa_corrected_3_L0r4k0	6.967	6.899	6.971	1	0
+tnfa_corrected_3_L4r5k2	6.378	6.562	6.424	1	0

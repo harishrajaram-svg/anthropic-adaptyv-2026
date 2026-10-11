@@ -1,0 +1,22 @@
+# C1 monomer floor, 2026-10-11. Binder ALONE, ESMFold2, the same path that produced
+# genie3_monomer_floor_2026-10-08.tsv and the 98/100 parent figure. 12 designs x 6 seeds = 72 folds.
+# plddt is the mean per-residue pLDDT of the binder chain, 0-1. med_1_5 is the primary readout
+# (seed 42 reported separately because the 100 parents were measured at seed 42 only).
+# Bars (PREREG-CONFIDENCE-TRIAD-2026-10-11.md): M1 >= 0.70 (organisers' default floor,
+# reference/anthropic-binder-design-protocol.md:100); M2 >= 0.656 (worst of the 100 parents).
+# RESULT: 12 of 12 clear M1. Parent pool for comparison: min 0.656, median 0.824, max 0.897, 98/100.
+# The depth loop did not degrade monomer foldability -- the children's median (0.885) is ABOVE the
+# parents' (0.824), on the same path, despite monomer pLDDT never being in the selection objective.
+design	med_1_5	seed42	min	max	M1_pass	M2_pass	ships
+tnfa_corrected_3_L0r4k0	0.910	0.910	0.910	0.911	1	1	candidate
+tnfa_corrected_3_L4r5k2	0.909	0.908	0.908	0.910	1	1	yes
+tnfa_corrected_3_L0r5k2	0.905	0.905	0.904	0.906	1	1	no (pI 6.63)
+tnfa_corrected_40_L5r5k6	0.901	0.901	0.900	0.903	1	1	no
+tnfa_corrected_40_L1r4k6	0.892	0.891	0.890	0.893	1	1	no
+tnfa_corrected_40_L1r4k1	0.885	0.884	0.883	0.886	1	1	yes
+tnfa_corrected_40_L5r5k5	0.884	0.882	0.882	0.884	1	1	no
+tnfa_corrected_40_L1r4k2	0.878	0.878	0.877	0.879	1	1	no
+tnfa_corrected_40_L1r2k5	0.863	0.863	0.862	0.864	1	1	no
+tnfa_corrected_40_L1r2k1	0.841	0.841	0.840	0.842	1	1	no
+tnfa_corrected_16_s2	0.824	0.824	0.820	0.826	1	1	no (bb16 fails margin)
+tnfa_corrected_16_s1	0.810	0.805	0.805	0.814	1	1	no (bb16 fails margin)
