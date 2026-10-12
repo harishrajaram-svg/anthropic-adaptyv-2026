@@ -112,7 +112,7 @@ def main():
     fields = ["name", "sequence", "molecule_class", "rank", "margin_worse_of_two",
               "margin_human", "margin_mouse", "seed_basis_human", "seed_basis_mouse",
               "buried_his_count", "esmfold2_lrms_A", "esmfold2_n_folds",
-              "chai1_lrms_A_1sample", "two_oracle_gate_1sample"]
+              "chai1_lrms_A_1sample", "two_oracle_gate_1sample_WITHDRAWN"]
     if have_d8:
         fields += ["chai1_lrms_A_median_5samples", "chai1_samples_in_gate_of_5"]
     fields += ["prescreen_verdict", "assessment"]
@@ -134,11 +134,19 @@ def main():
             s = sq[did]
             nh = s.count("H")
             a = NOTE_NOPH + NOTE_ORACLE
-            if c4[did]["gate"] == "FAIL":
-                a += ("TWO-ORACLE DISAGREEMENT ON THIS DESIGN: Chai-1 places the binder "
-                      f"{float(c4[did]['chai_lrms']):.1f} A from its designed backbone where "
-                      f"ESMFold2 places it {float(c4[did]['esm_lrms']):.2f} A "
-                      f"(median of {c4[did]['n']} folds). Weight accordingly. ")
+            # WITHDRAWN 2026-10-12 after D8. The single-sample two-oracle "failure" language
+            # that stood here is retracted: 5-sample Chai-1 scatters on EVERY design in this set,
+            # controls included (42.1 / 23.2 / 40.5 / 41.7 A), so one draw is not a pose check.
+            # What is reportable is the sample count, descriptively, with no verdict attached.
+            if have_d8:
+                a += (f"SECOND-PREDICTOR SAMPLING: Chai-1 places this binder within 10 A of its "
+                      f"designed backbone in {d8[did]['ingate']} diffusion samples "
+                      f"(median {float(d8[did]['med']):.2f} A). Read descriptively, NOT as a pose "
+                      f"verdict: Chai-1 scatters on every design in this set including the ones it "
+                      f"agrees with ESMFold2 on, so single-draw disagreement was withdrawn as "
+                      f"evidence. ESMFold2 places it "
+                      f"{float(c4[did]['esm_lrms']):.2f} A (median of {c4[did]['n']} existing "
+                      f"folds). ")
             if rank in SERIES:
                 a += NOTE_SERIES
             if nh == 0 and "quadH" in did:
@@ -155,7 +163,7 @@ def main():
                        esmfold2_lrms_A=c4[did]["esm_lrms"],
                        esmfold2_n_folds=c4[did]["n"],
                        chai1_lrms_A_1sample=c4[did]["chai_lrms"],
-                       two_oracle_gate_1sample=c4[did]["gate"],
+                       two_oracle_gate_1sample_WITHDRAWN=c4[did]["gate"],
                        prescreen_verdict=ps[did]["verdict"], assessment=a)
             if have_d8:
                 row["chai1_lrms_A_median_5samples"] = d8[did]["med"]
