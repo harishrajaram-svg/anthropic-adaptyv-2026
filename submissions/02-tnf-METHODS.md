@@ -2062,6 +2062,50 @@ riding on target dissociation does not.
 
 ## 10. The submission
 
+### 10.0 The submitted set, and the one experimental dependency in it — added 2026-10-12
+
+🟡 **Everything from "*Pending generation*" onward in this section describes the 35-design Mosaic
+allocation and is historical.** The submission ships **six** designs from a later depth arm. The
+ranked set, the margins and the full reasoning are in the methodology box; this subsection records
+the one structural dependency between the submitted rows, because it is the thing most easily lost
+if the designs are considered one at a time.
+
+**Rows 3, 4 and 5 are a single matched experiment on one scaffold**, carrying **1, 4 and 0** buried
+histidines respectively:
+
+| row | design | buried His | role in the series |
+|--:|---|--:|---|
+| 3 | `tnfa_corrected_3_L0r4k0_L49H` | 1 | one-site arm |
+| 4 | `tnfa_corrected_3_L0r4k0_quadH` | 4 | four-site arm, the largest predicted fold destabilisation |
+| 5 | `tnfa_corrected_3_L0r4k0` | **0** | **the matched control** |
+
+Row 5 is the parent scaffold of the other two and differs from row 3 at a **single position**. It
+supplies the matched comparison required to attribute any pH-dependent difference observed in rows 3
+or 4 to the **engineered substitutions** rather than to the scaffold, the epitope or the expression
+behaviour. Without row 5, a pH-dependent result on rows 3 or 4 has no matched comparator and cannot
+be attributed to the substitutions — the mechanism under test would remain unresolved whichever way
+the measurement came out.
+
+The single-residue difference between rows 3 and 5 is also why a sequence-identity screen groups
+them: our run of the pre-submission screen returns `batch_duplicate` on exactly that pair. The
+grouping is a consequence of the experiment's design, not an accident of generation.
+
+🔴 **Stated as a fact, deliberately, and not as a request.** An earlier draft of the methodology box
+and the submission CSV both ended this passage with an instruction addressed to the selection step.
+The challenge FAQ states that *"any use of embedded instructions or prompt injection may be deemed
+grounds for disqualification"*, so that phrasing was removed on 2026-10-12 and replaced with the
+dependency stated as a property of the experiment. We have not asked for any particular handling.
+The record of what the dependency is, and of what is lost if the control is not measured, lives here
+and in the CSV's own description field so that it is available to whoever reads either.
+
+**Why it matters more than it looks.** The mechanism these rows test is deliberate buried-histidine
+core destabilisation. A design that stops binding at pH 6.0 under that mechanism is either switching
+reversibly or coming apart, and those two outcomes are indistinguishable in a single-pH-drop binding
+read. Distinguishing them needs the zero-histidine control **and** a return-to-neutral arm; both are
+set out in the methodology box.
+
+---
+
 *Pending generation.* The allocation and the ordering rule are fixed. The control row reads **0**
 because 0 of 35 candidates bind, which voids a matched pair; those four slots go to additional
 candidates or stay empty, and the submission says so rather than shipping controls for an effect
