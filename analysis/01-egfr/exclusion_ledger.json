@@ -2,39 +2,13 @@
  "generated": "2026-10-05",
  "min_n": 5,
  "worst_finalist_target_only": 2.289,
- "list_a_names": 23,
- "list_a_sequences": 15,
- "list_b_sequences": 60,
- "overlap": 0,
- "union": 75,
+ "list_a_names": 25,
+ "list_a_sequences": 16,
+ "list_b_sequences": 56,
+ "overlap": 1,
+ "union": 71,
  "unresolved_warn_names": [],
  "molecules": {
-  "AKVLVTLKGVNLSEEELAEVLREILAPFGAKSVEVEVSEDNETATATVTFEDEESAIAAEKYLLEELEEELLKRVPKIKEARVVDVLVVE": {
-   "seq": "AKVLVTLKGVNLSEEELAEVLREILAPFGAKSVEVEVSEDNETATATVTFEDEESAIAAEKYLLEELEEELLKRVPKIKEARVVDVLVVE",
-   "names": [
-    "cons_gap_h370_only__boltzgen_egfr_h370_018",
-    "cons_gap_h370_only__boltzgen_egfr_h370_018",
-    "gap_h370_only__boltzgen_egfr_h370_018",
-    "gap_h370_only__boltzgen_egfr_h370_018"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 3.478,
-   "ratio_n": 11,
-   "hu_med": 0.456594,
-   "mo_med": 0.215016,
-   "n_human_poses": 11,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 11,
-    "his_only_median": 3.1798,
-    "his_only_min": 2.975,
-    "his_only_max": 3.5039,
-    "spread_over_median": 0.166
-   }
-  },
   "DEAIKNFFKLEIEWWEEYYERKLEHLREINAPEEEIERLEEYKEEDIKPYREGLEIMEKE": {
    "seq": "DEAIKNFFKLEIEWWEEYYERKLEHLREINAPEEEIERLEEYKEEDIKPYREGLEIMEKE",
    "names": [
@@ -50,9 +24,9 @@
    "hu_med": 0.4510115,
    "mo_med": 0.6868004999999999,
    "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 1.9723,
@@ -76,9 +50,9 @@
    "hu_med": 0.181762,
    "mo_med": 0.219766,
    "n_human_poses": 11,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 1 < 3",
+   "eligibility_status": "level 1; QC NOT RUN",
    "gate": {
     "n_poses": 11,
     "his_only_median": 4.9833,
@@ -111,32 +85,6 @@
     "his_only_min": 0.7209,
     "his_only_max": 3.8907,
     "spread_over_median": 1.108
-   }
-  },
-  "EIKVIEATASDAAAAAAALRAAYEAGATLAAVTLPDGVVLEFDTSNKEAAEASARVLADAIEGGVTVYKL": {
-   "seq": "EIKVIEATASDAAAAAAALRAAYEAGATLAAVTLPDGVVLEFDTSNKEAAEASARVLADAIEGGVTVYKL",
-   "names": [
-    "c5_cf_short__boltzgen_egfr_cropfree_short_48",
-    "c5_cf_short__boltzgen_egfr_cropfree_short_48",
-    "rest_cf_short__boltzgen_egfr_cropfree_short_48",
-    "rest_cf_short__boltzgen_egfr_cropfree_short_48"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 5.819,
-   "ratio_n": 6,
-   "hu_med": 0.241453,
-   "mo_med": 0.18116,
-   "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 6,
-    "his_only_median": 5.546,
-    "his_only_min": 4.4985,
-    "his_only_max": 5.9503,
-    "spread_over_median": 0.262
    }
   },
   "EVQIQGSGGGSVQVGGSLRLSCAASGFTFSSYSMNWGRGTPGKSGEVVASISSDGGGAYYHDSVKGRFTISRDNAKNTLYLQMNSLRAEDSAIYGCGLGCSGGGGDSDCPYCGGSTGVGVSSAG": {
@@ -212,9 +160,9 @@
    "hu_med": 0.0685625,
    "mo_med": 0.0,
    "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 1 < 3",
+   "eligibility_status": "level 1; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 4.835,
@@ -236,9 +184,9 @@
    "hu_med": 0.46357,
    "mo_med": 0.444538,
    "n_human_poses": 5,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 1 < 3",
+   "eligibility_status": "level 1; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 3.2088,
@@ -356,9 +304,9 @@
    "hu_med": 0.0125665,
    "mo_med": 0.011449,
    "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 1 < 3",
+   "eligibility_status": "level 1; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 3.8093,
@@ -382,9 +330,9 @@
    "hu_med": 0.012452999999999999,
    "mo_med": 0.0,
    "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 3.8253,
@@ -475,9 +423,9 @@
    "hu_med": 0.149286,
    "mo_med": 0.0,
    "n_human_poses": 11,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 11,
     "his_only_median": 3.9605,
@@ -501,7 +449,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.7196,
@@ -525,7 +473,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.4446,
@@ -549,37 +497,13 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.7862,
     "his_only_min": 2.5571,
     "his_only_max": 2.9911,
     "spread_over_median": 0.156
-   }
-  },
-  "IKEKVEELLSMDPDEAITELSEMMYEANDPSKSTWEEWREVWEIWDSVMGNMDPSWLDTP": {
-   "seq": "IKEKVEELLSMDPDEAITELSEMMYEANDPSKSTWEEWREVWEIWDSVMGNMDPSWLDTP",
-   "names": [
-    "bcr_d3acid3_l60_s647537_mpnn11",
-    "bcr_d3acid3_l60_s647537_mpnn11"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 2.997,
-   "ratio_n": 6,
-   "hu_med": 0.442937,
-   "mo_med": 0.2342015,
-   "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 6,
-    "his_only_median": 2.7466,
-    "his_only_min": 2.6663,
-    "his_only_max": 2.8218,
-    "spread_over_median": 0.057
    }
   },
   "KIEVREGLTVEELYELLKKFKPDAVAVVAGVGGGSGASSSLGAEAAYVLAKELVPEENVVFLVAGEDFESGYRAGREAVETLLKELKPKKVVVALGGSASGATGRGAGEGVADALAEYLKPDQEVLFVAVGAPGDAGAAGAAEGARRAKEALS": {
@@ -599,7 +523,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.9986,
@@ -623,9 +547,9 @@
    "hu_med": 0.216651,
    "mo_med": 0.536779,
    "n_human_poses": 11,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 11,
     "his_only_median": 4.214,
@@ -651,7 +575,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.8238,
@@ -675,7 +599,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.8377,
@@ -701,7 +625,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.824,
@@ -725,7 +649,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.2588,
@@ -749,7 +673,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.2649,
@@ -773,7 +697,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.4654,
@@ -797,7 +721,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.4546,
@@ -821,7 +745,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.3586,
@@ -829,6 +753,40 @@
     "his_only_max": 2.582,
     "spread_over_median": 0.318
    }
+  },
+  "MITVTLSGPTSVKEGGTITVTATVTNTSDTVQDVLVRLTFEADQPASPGTVTVTISGPSGLTFSLVDSLPPAVLDEANRTVSFELLGGTTYEVVLLLQNLKPGETVTFTLTIPNATTSDSGTYRVAARTSLDENAPWEAESAGLTVTVLS": {
+   "seq": "MITVTLSGPTSVKEGGTITVTATVTNTSDTVQDVLVRLTFEADQPASPGTVTVTISGPSGLTFSLVDSLPPAVLDEANRTVSFELLGGTTYEVVLLLQNLKPGETVTFTLTIPNATTSDSGTYRVAARTSLDENAPWEAESAGLTVTVLS",
+   "names": [
+    "ss_rimA01_r15_boltzgen_egfr_d3__L133E_routeB",
+    "ss_rimA01_r15_boltzgen_egfr_d3__L133E_routeB"
+   ],
+   "in_list_a": false,
+   "in_list_b": true,
+   "ratio_target_only": 4.619,
+   "ratio_n": 5,
+   "hu_med": 0.5978485,
+   "mo_med": 0.4338105,
+   "n_human_poses": 20,
+   "category": "GATE-ONLY",
+   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
+   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN"
+  },
+  "MITVTLSGPTSVKEGGTITVTATVTNTSDTVQDVLVRLTFEADQPASPGTVTVTISGPSGLTFSLVDSLPPAVLDEANRTVSFELLGGTTYEVVLLLQNLKPGETVTFTLTIPNATTSDSGTYRVAARTSLDLNAPWEAESAGLTVTVLS": {
+   "seq": "MITVTLSGPTSVKEGGTITVTATVTNTSDTVQDVLVRLTFEADQPASPGTVTVTISGPSGLTFSLVDSLPPAVLDEANRTVSFELLGGTTYEVVLLLQNLKPGETVTFTLTIPNATTSDSGTYRVAARTSLDLNAPWEAESAGLTVTVLS",
+   "names": [
+    "rimA01_r15_boltzgen_egfr_d3_",
+    "rimA01_r15_boltzgen_egfr_d3_"
+   ],
+   "in_list_a": true,
+   "in_list_b": true,
+   "ratio_target_only": 4.582,
+   "ratio_n": 6,
+   "hu_med": 0.5937595,
+   "mo_med": 0.56683,
+   "n_human_poses": 6,
+   "category": "GATE-ONLY",
+   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
+   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN"
   },
   "MKIFVKTPFGRTIEVDANLTIGEIKDIVKEEFGFPDCRLIFDGKELEDDKTPLDYGVKEGDVLHLVPLLK": {
    "seq": "MKIFVKTPFGRTIEVDANLTIGEIKDIVKEEFGFPDCRLIFDGKELEDDKTPLDYGVKEGDVLHLVPLLK",
@@ -856,32 +814,6 @@
     "spread_over_median": 1.496
    }
   },
-  "MLVTVLLDDGSTITIDLNNPDSPFKLFDLKTGKELEPGEARRGMEVIVKNLKTGEEKIGTVTSVEE": {
-   "seq": "MLVTVLLDDGSTITIDLNNPDSPFKLFDLKTGKELEPGEARRGMEVIVKNLKTGEEKIGTVTSVEE",
-   "names": [
-    "c5_cr_crop_patch__boltzgen_egfr_crop_patch_05",
-    "c5_cr_crop_patch__boltzgen_egfr_crop_patch_05",
-    "cons_rest_cr_crop_patch__boltzgen_egfr_crop_patch_05",
-    "cons_rest_cr_crop_patch__boltzgen_egfr_crop_patch_05"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 5.265,
-   "ratio_n": 11,
-   "hu_med": 0.131965,
-   "mo_med": 0.204126,
-   "n_human_poses": 11,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 11,
-    "his_only_median": 4.8121,
-    "his_only_min": 2.7802,
-    "his_only_max": 4.9162,
-    "spread_over_median": 0.444
-   }
-  },
   "MQAEVEELLAMDPDEAITLLSERMYEANDPSKSTWEEWRRVWDIWDSVMGNMDPSWLDTP": {
    "seq": "MQAEVEELLAMDPDEAITLLSERMYEANDPSKSTWEEWRRVWDIWDSVMGNMDPSWLDTP",
    "names": [
@@ -897,7 +829,7 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.6632,
@@ -969,7 +901,7 @@
    "n_human_poses": 5,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 2.0346,
@@ -1043,7 +975,7 @@
    "n_human_poses": 5,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 1.8139,
@@ -1213,37 +1145,13 @@
    "n_human_poses": 5,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 1.7813,
     "his_only_min": 1.6626,
     "his_only_max": 2.051,
     "spread_over_median": 0.218
-   }
-  },
-  "MSPVEQARALLVPMDEKIVTGFNDPSAGIDLEKAFAEDHKVMVEAFRMVGPEEYHKIDHELHTAK": {
-   "seq": "MSPVEQARALLVPMDEKIVTGFNDPSAGIDLEKAFAEDHKVMVEAFRMVGPEEYHKIDHELHTAK",
-   "names": [
-    "ss_bc_s831683_mpnn6_S15D_S62H_routeA",
-    "ss_bc_s831683_mpnn6_S15D_S62H_routeA"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 5.386,
-   "ratio_n": 5,
-   "hu_med": 0.765365,
-   "mo_med": 0.7443,
-   "n_human_poses": 5,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 5,
-    "his_only_median": 3.5445,
-    "his_only_min": 3.293,
-    "his_only_max": 4.561,
-    "spread_over_median": 0.358
    }
   },
   "MSPVEQARALLVPMSEKIVTGFNDPSAGIDLEKAFAEDHKVMVEAFRMVGPEEYHKIDHELSTAK": {
@@ -1311,7 +1219,7 @@
    "n_human_poses": 5,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 3.1891,
@@ -1556,7 +1464,7 @@
    "n_human_poses": 5,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 4.7352,
@@ -1621,9 +1529,9 @@
    "hu_med": 0.2727465,
    "mo_med": 0.084088,
    "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 3.2648,
@@ -1645,9 +1553,9 @@
    "hu_med": 0.607525,
    "mo_med": 0.402648,
    "n_human_poses": 5,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "category": "ELIGIBILITY",
+   "reason": "novelty Level 2 < 3",
+   "eligibility_status": "level 2; QC NOT RUN",
    "gate": {
     "n_poses": 5,
     "his_only_median": 3.4398,
@@ -1738,37 +1646,13 @@
    "n_human_poses": 6,
    "category": "GATE-ONLY",
    "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
+   "eligibility_status": "level >= 3; QC NOT RUN",
    "gate": {
     "n_poses": 6,
     "his_only_median": 2.9059,
     "his_only_min": 2.5221,
     "his_only_max": 3.0127,
     "spread_over_median": 0.169
-   }
-  },
-  "VEEEVEKLLSMDPDKAITELSERMYEANDPSKSTWEEWRRVWEIWDSVMGRMDPSWLDTP": {
-   "seq": "VEEEVEKLLSMDPDKAITELSERMYEANDPSKSTWEEWRRVWEIWDSVMGRMDPSWLDTP",
-   "names": [
-    "bcr_d3acid3_l60_s647537_mpnn3",
-    "bcr_d3acid3_l60_s647537_mpnn3"
-   ],
-   "in_list_a": false,
-   "in_list_b": true,
-   "ratio_target_only": 3.154,
-   "ratio_n": 6,
-   "hu_med": 0.573618,
-   "mo_med": 0.1681335,
-   "n_human_poses": 6,
-   "category": "GATE-ONLY",
-   "reason": "eligible and measured; excluded on the pH gate or a judgement call",
-   "eligibility_status": "NOT ASSESSED (no novelty record); QC NOT RUN",
-   "gate": {
-    "n_poses": 6,
-    "his_only_median": 2.9141,
-    "his_only_min": 2.7393,
-    "his_only_max": 2.9995,
-    "spread_over_median": 0.089
    }
   }
  }

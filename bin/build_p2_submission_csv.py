@@ -119,6 +119,12 @@ def main():
     have_d8 = len(d8) == 6
     print(f"D8 columns: {'present' if have_d8 else 'NOT YET -- run bin/d8_score.py first'}")
 
+    # molecule_class: the LIVE SUBMISSION FORM (proteinbase.com/.../rounds/2/submit, read
+    # 2026-10-12) permits single_chain | nanobody | scfv | fab_kappa | fab_lambda. The challenge
+    # page's FAQ 5 instead lists "protein" for the first of those. They disagree; the form is what
+    # validates the upload, so single_chain it is. Changed to "protein" on the FAQ's wording earlier
+    # today and changed back after reading the form -- which is exactly why the reviewer said to
+    # verify against the live schema rather than the FAQ.
     fields = ["name", "sequence", "molecule_class", "rank", "margin_worse_of_two",
               "margin_human", "margin_mouse", "seed_basis_human", "seed_basis_mouse",
               "buried_his_count", "esmfold2_lrms_A", "esmfold2_n_folds",
@@ -165,7 +171,7 @@ def main():
             a += ("Computational candidate, not shown to bind. 83 aa de novo miniprotein. "
                   f"{nh} histidine(s). Ranked on worse-of-two-species interface-PAE margin, the "
                   "only instrument here with an external calibration.")
-            row = dict(name=did, sequence=s, molecule_class="protein", rank=rank,
+            row = dict(name=did, sequence=s, molecule_class="single_chain", rank=rank,
                        margin_worse_of_two=f"{WORSE[rank]:.3f}",
                        margin_human=f"{hu:.3f}", margin_mouse=f"{mo:.3f}",
                        seed_basis_human=sbh, seed_basis_mouse=sbm,
