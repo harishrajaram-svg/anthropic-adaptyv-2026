@@ -3,7 +3,7 @@ type: preregistration
 project: anthropic-adaptyv-2026
 problem: 02-tnf-alpha
 arm: CORR — the corrective two-oracle re-run of rounds 4 and 5
-status: PRE-REGISTERED — written 2026-10-11 7:30 PM EDT. Everything below is frozen BEFORE any
+status: PRE-REGISTERED — written 2026-10-11 8:39 PM EDT (commit 26dcc20, which is the checkable bound). Everything below is frozen BEFORE any
         corrective fold exists and BEFORE any new result is inspected.
 ---
 
