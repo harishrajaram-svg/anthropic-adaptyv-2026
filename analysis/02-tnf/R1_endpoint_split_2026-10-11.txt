@@ -1,0 +1,53 @@
+  ok  S1 reproduces the committed figures: 8/18 direction, 16/18 above 1.0
+  ok  S2 all 18 rows carry pHs, endpoint, and chain assignments
+  ok  S3 exactly one pure-kinetic row: 3WD5
+selftest: 3/3
+
+====================================================================================================
+PER-COMPLEX TABLE (reviewer request: pHs, endpoint, chain assignments, related variants)
+====================================================================================================
+
+pdb    pHs          endpoint               tgt      bdr    class want           pub        gate call  variant
+1BRS   8.0/5.0      Ki                     A        D      pos   release     1200.0      3.8334 miss  -
+3SQO   7.4/6.0      KD + kd                A+P      H+L    neg   flat           1.3      8.1101 miss  -
+3WD5   7.4/6.0      koff ratio             A        H+L    pos   release        9.0      3.2715 miss  -
+4K71   7.4/6.0      KD + ka/kd             B+C      A      pos   tighten      760.0   6873.0912 HIT   -
+4N0U   7.4/5.8      KD (switchSENSE)       A+B      E      pos   tighten      170.0     12.5429 HIT   V1
+5B71   7.4/5.8      KD                     E        A+B    pos   release     1105.0      0.0145 HIT   -
+5HYS   7.4/6.0      KD                     G        A+B    neg   flat           1.3      2.6084 miss  -
+5I5K   7.4/6.0      KD                     B        H+L    pos   release       21.0      3.2917 miss  -
+5TRU   7.4/6.0      KD, 8-point series     C        H+L    neg   flat           1.1      1.1734 HIT   -
+6FGB   7.4/6.0      KD + ka/kd             A+B      H+L    neg   flat           1.3      4.5803 miss  -
+7Q15   7.4/6.0      KD (SPR)               A+B      E      pos   tighten       20.0      2.7318 HIT   V1
+7SU0   7.4/6.0      KD                     C        H+L    pos   tighten       77.0    140.3163 HIT   -
+7SU1   7.4/6.0      KD                     C        H+L    pos   tighten       20.0      6.3872 HIT   -
+8J6F   7.4/6.0      KD and kd              I        H+L    neg   flat           2.2     45.4182 miss  -
+8TBQ   7.4/5.8      KD, range endpoints    P        H+L    pos   tighten     1000.0      0.1045 miss  -
+9MI6   7.4/6.0      KD, both bounded       A+B      H+L    neg   flat           1.8      1.9220 HIT   -
+9S60   7.0/6.0      KD (ITC)               A        B      neg   flat           1.6      5.4442 miss  -
+9X1H   7.4/6.0      KD                     A        H+L    pos   release      120.0      1.9088 miss  -
+
+Variant pairs detected from deposited binder chains (identity >= 0.90):
+  4N0U ~ 7Q15   binder identity 0.990  ->  NOT independent observations
+
+====================================================================================================
+ACCURACY BY SUBSET  (reviewer: separate kinetic and affinity endpoints)
+====================================================================================================
+all rows, as reported                                n=18  direction  8/18 = 44.4%   ratio>1 16/18 = 88.9%
+affinity endpoints only (drops the rate-ratio row)   n=17  direction  8/17 = 47.1%   ratio>1 15/17 = 88.2%
+pure-kinetic rows                                    n= 1  direction  0/1  =  0.0%   ratio>1  1/1  = 100.0%
+exact 6.0/7.4 pair, any endpoint                     n=13  direction  6/13 = 46.2%   ratio>1 13/13 = 100.0%
+exact 6.0/7.4 pair AND affinity endpoint             n=12  direction  6/12 = 50.0%   ratio>1 12/12 = 100.0%
+...and one row per molecule (variants collapsed)     n=12  direction  6/12 = 50.0%   ratio>1 12/12 = 100.0%
+
+What a constant predictor scores on each subset, for comparison:
+  all rows             always-answer-the-commonest-label: 7/18 = 38.9%
+  6.0/7.4 + affinity   always-answer-the-commonest-label: 6/12 = 50.0%
+
+Rows excluded from the matched subset, and why:
+  1BRS: pH pair 8.0/5.0, not 7.4/6.0
+  3WD5: rate ratio, not an equilibrium ratio
+  4N0U: pH pair 7.4/5.8, not 7.4/6.0
+  5B71: pH pair 7.4/5.8, not 7.4/6.0
+  8TBQ: pH pair 7.4/5.8, not 7.4/6.0
+  9S60: pH pair 7.0/6.0, not 7.4/6.0
