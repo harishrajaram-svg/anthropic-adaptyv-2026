@@ -135,3 +135,38 @@ threshold *easier* to pass than the configuration first launched — the sample 
 match the ESMFold2 arm and to eliminate the model-index freedom, not to clear the gate, and it was
 fixed while no timing existed to shop against. A reader who thinks 120 s was set too loosely should
 discount the gate, not the measurement.
+
+## AMENDMENT A2 — 2026-10-11, 8:05 PM EDT: the round-4 parent set was wrong in the body above
+
+The body derived the checkpoints **mechanically** — best CA sc_DockQ per lineage in `round3.tsv` —
+which yields L0, L1, L2 and **L3** (backbone 9, 0.0311, lrms 27.245). That is not the parent set the
+original arm carried into round 4, so reproducing it would not reproduce the original selection.
+
+`run_depth_rounds.main()`'s `--parents` hook records what actually happened, verbatim: *"Used
+2026-10-09 to retire L3 (backbone 9) after three rounds with 0 of 8 children inside the pose gate,
+and to reseed its slot as L4 from backbone 3's second-best round-3 child, backbone 3 being the only
+lineage still advancing."* The original round-4 table confirms it: lineages **L0, L1, L2, L4**, with
+L4 on backbone 3 and no backbone 9 anywhere.
+
+That retirement happened **before** round 4 and is part of the compliant round-3 → round-4
+transition, so the corrective run inherits it rather than re-deciding it.
+
+**FROZEN, replacing the body's table — the four round-4 parents:**
+
+| lineage | checkpoint | backbone | round-3 CA sc_DockQ | lrms | role |
+|---|---|--:|--:|--:|---|
+| L0 | `tnfa_corrected_3_L0r3k2` | 3 | 0.6037 | 2.576 | shipped lineage (`3_L0r4k0`) |
+| L1 | `tnfa_corrected_40_L1r3k5` | 40 | 0.6148 | 1.789 | shipped lineage (`40_L1r4k1`, `40_L1r4k6`) |
+| L2 | `tnfa_corrected_40_L2r3k2` | 40 | 0.4464 | 4.513 | carried, as originally |
+| L4 | `tnfa_corrected_3_L0r3k7` | 3 | 0.6007 | 2.607 | **reseeded slot**, replacing retired L3 |
+
+**L3 (backbone 9) is not carried**, exactly as in the original. The body's claim that L2 and L3 were
+"carried for comparability and expected to fail the pose gate, as they did originally" was wrong on
+L3: L3 never entered round 4. Spending a quarter of the fold budget on it would have burned the
+budget on a lineage the original arm had already retired, and would have left the reseeded L4 — one
+of two backbone-3 lineages feeding the shipped designs — out of the corrective run entirely.
+
+Nothing else changes: the dual-oracle pose gate, the minimum-sc_DockQ selector, 8 children per
+parent, seeds, the 160-fold fuse and the wall stop all stand as written. **Human only**, as the
+original untagged rounds 4–5 were (`round4.tsv` and `round5.tsv` carry no mouse column), which is
+what the body's 32-folds-per-oracle-per-round arithmetic already assumed.
