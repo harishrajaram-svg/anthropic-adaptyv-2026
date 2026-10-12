@@ -1,0 +1,31 @@
+ # design                         role      in-gate  med lrms lrms samples (A)                          med dq
+ 1 tnfa_corrected_40_L1r4k6       tested        0/5    19.169   26.06   17.77   19.17   30.82   18.40   0.0591
+ 2 tnfa_corrected_40_L1r4k1       tested        0/5    19.340   35.90   18.31   19.34   36.26   18.58   0.0593
+ 3 tnfa_corrected_3_L0r4k0_L49H   CONTROL       4/5     2.772    2.89    2.38   42.05    2.64    2.77   0.5142
+ 4 tnfa_corrected_3_L0r4k0_quadH  CONTROL       3/5     2.708    2.37   23.22   40.47    2.18    2.71   0.5210
+ 5 tnfa_corrected_3_L0r4k0        CONTROL       4/5     2.876    2.90    2.50   41.67    2.65    2.88   0.5214
+ 6 tnfa_H_quadH_E3Q_k12           tested        2/5    25.033   34.69    1.66    2.14   27.34   25.03   0.0539
+
+--- D8b: does sample 0 at seed 42 reproduce C4's single draw? ---
+  row 1: sample0   26.058  C4   26.134  delta  0.076  ok
+  row 2: sample0   35.902  C4   35.871  delta  0.031  ok
+  row 3: sample0    2.892  C4    2.890  delta  0.002  ok
+  row 4: sample0    2.368  C4    2.365  delta  0.003  ok
+  row 5: sample0    2.900  C4    2.920  delta  0.020  ok
+  row 6: sample0   34.693  C4   36.661  delta  1.968  DRIFT
+  D8b FAIL
+
+--- D8c: do the CONTROL rows hold (>=4 of 5 inside the gate)? ---
+  row 3: 4/5 inside 10.0 A  ok
+  row 4: 3/5 inside 10.0 A  SCATTERED
+  row 5: 4/5 inside 10.0 A  ok
+  D8c FAIL -- the control scattered, see prereg outcome 3
+
+--- D8a: the three C4 failures, sampled ---
+  row 1: 0/5 inside the gate, median 19.169 A, range 17.77-30.82
+  row 2: 0/5 inside the gate, median 19.340 A, range 18.31-36.26
+  row 6: 2/5 inside the gate, median 25.033 A, range 1.66-34.69
+
+=== PRE-REGISTERED VERDICT ===
+OUTCOME 3: the control scattered. C4 is WITHDRAWN as evidence about the designs
+  and becomes a statement about the predictor. Submission text changes accordingly.
