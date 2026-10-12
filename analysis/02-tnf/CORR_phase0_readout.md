@@ -82,3 +82,56 @@ designs survive the two-oracle gate — is now the most decision-relevant unknow
 and phase 0 is the first evidence that its answer might be no.
 
 Spend for phase 0: **2 folds, ~$0.22.**
+
+---
+
+# Phase 0b: the patch worked, the prediction was wrong, and the arm stops
+
+Amendment A3 predicted, in writing and before the number existed, **marginal ≈ 70 s** and **all-in
+≈ 84 s** against the unchanged 120 s gate. Measured, same two complexes, one container:
+
+| quantity | predicted (A3) | measured | gate | |
+|---|--:|--:|--:|---|
+| fold 1, load + fold | — | 163.6 s | | |
+| **marginal per-fold** | **~70 s** | **157.7 s** | 120 s | 🔴 **fails** |
+| **all-in at 8 folds/container** | **~84 s** | **157.7 s** | 120 s | 🔴 **fails** |
+| container total, n=2 | — | 321.4 s | | |
+
+**The prediction was wrong, and that is why it was written down.** Batching saved **26.8 s/fold**
+(184.5 → 157.7) — container start and image pull, nothing more. The diffusion is ~69 s, so roughly
+**89 s per call is model load that happens INSIDE `run_inference`**, on every invocation, whether or
+not the container is reused. That is the difference from ESMFold2, whose patch loads the model once
+*outside* its fold loop; `chai_lab.chai1.run_inference` is a single entry point that loads on entry,
+so batching cannot reach it. Hoisting that load would mean reimplementing the library's internals,
+and A3 foreclosed it in advance: **"no further re-measurement, no third framing."**
+
+🔴 **The corrective arm therefore STOPS, under the rule as frozen.** Per the body and A3, the
+affected findings are relabelled **exploratory** in the submission. The arm got as far as: a
+pre-registration with two amendments, a working two-oracle pipeline, a 7/7 selftest on the selection
+rule, and four folds.
+
+**Said plainly, so no reader has to reconstruct it: the blocker is not money.** At ~$0.092/fold
+(157.7 s × $0.000583/s) the full 64-fold Chai-1 side is **~$5.90** and the whole arm **~$9**, under
+an hour of wall clock, with six days to the deadline. What stopped it is a per-fold time threshold
+I set and then failed twice — once on a measurement that mixed in model load, once after a patch
+that removed the wrong 27 seconds. A reader who concludes the threshold was the wrong instrument is
+reading it correctly. It was still the instrument that was frozen, and the point of freezing one is
+that it binds on the occasions when it costs something.
+
+## The L1 disagreement, re-scored on the second container
+
+Both checkpoints were folded again in the batched run. **Same seed (42), so this measures
+determinism, not independent sampling:**
+
+| checkpoint | Chai-1 unbatched | Chai-1 batched | ESMFold2 |
+|---|--:|--:|--:|
+| `3_L0r3k2` (L0) | 0.5813 / 2.044 Å | 0.5808 / 2.040 Å | 0.6037 / 2.576 Å |
+| `40_L1r3k5` (L1) | **0.0214 / 34.135 Å** | **0.0214 / 34.108 Å** | 0.6148 / 1.789 Å |
+
+This rules out a one-off glitch in a single container. It does **not** address the real caveat:
+one diffusion sample at one seed. A different seed could place that binder differently, and nothing
+here tests that. So the finding stands exactly where phase 0 left it — **n = 2 complexes, one seed,
+one sample, no MSA, suggestive and not conclusive** — and it is reported as exploratory, which is
+also what the arm's stop requires of it.
+
+Phase 0 total spend: **4 Chai-1 folds, ~$0.45.**
