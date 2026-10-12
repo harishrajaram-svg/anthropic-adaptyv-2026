@@ -1,12 +1,12 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-12 9:30 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-12 9:55 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
 
 ---
 
-## 🔴 AS OF 2026-10-12 9:30 AM: SIX DESIGNS SHIP, THREE OF THEM FAIL THE SECOND ORACLE. D8 RUNNING.
+## 🔴 AS OF 2026-10-12 9:55 AM: SIX DESIGNS SHIP. THE SECOND-ORACLE FAILURE WAS WITHDRAWN BY D8.
 
 **Supersedes every status block below, including the 2:55 AM three-design one.** The deadline moved:
 problem 2 now closes **Mon Oct 19, 7:59 AM EDT**. Nothing is uploaded yet.
@@ -31,8 +31,16 @@ problem 2 now closes **Mon Oct 19, 7:59 AM EDT**. Nothing is uploaded yet.
    157.7 s/fold against a frozen 120 s ceiling — not money, the arm was ~$9.
    `analysis/02-tnf/CORR_phase0_readout.md`.
 
-3. 🔴 **C4 rescored the six on Chai-1 and three FAIL, including the top two ranked.**
-   `analysis/02-tnf/C4_readout_2026-10-11.md`:
+3. 🔴 **C4 rescored the six on Chai-1 and three looked like failures — then D8 WITHDREW that.**
+   `analysis/02-tnf/C4_readout_2026-10-11.md`, then
+   `analysis/02-tnf/D8_readout_2026-10-12.md`, which is the one that matters. Five samples per
+   design, with the three C4 *passes* as a matched control: **every design throws a sample 20–42 Å
+   out, controls included** (42.1 / 23.2 / 40.5 / 41.7 Å). A single Chai-1 draw is not a usable pose
+   check on this system, so C4 measured the predictor. In-gate counts over 5 samples:
+   **0/5 · 0/5 · 4/5 · 3/5 · 4/5 · 2/5**. What survives descriptively, with no test attached: Chai-1
+   never places rows 1–2 on target and usually places rows 3–5 there. **The missing-oracle
+   disclosure and the exploratory-not-confirmatory label are unchanged — D8 removed our own
+   evidence, not the admission.** C4's single-draw table, for the record:
 
    | row | design | Chai-1 lrms | ESMFold2 median (n folds) | gate |
    |--:|---|--:|--:|---|
@@ -43,15 +51,18 @@ problem 2 now closes **Mon Oct 19, 7:59 AM EDT**. Nothing is uploaded yet.
    | 5 | `3_L0r4k0` | 2.92 Å | 3.06 (22) | pass |
    | 6 | `quadH_E3Q_k12` | 36.66 Å | 4.71 (6) | **FAIL** |
 
-   Split is by lineage and it propagated from the round-3 parents. **Ranking NOT changed** — frozen
-   before folding, because the margin is the calibrated instrument and one Chai sample is too thin
-   to reorder on.
+   **Ranking NOT changed** under either result — the margin is the calibrated instrument and pose
+   agreement was never the ranking basis.
 
-**RUNNING RIGHT NOW: D8** (`PREREG-D8-CHAI-CONSENSUS-2026-10-12.md`, launched 9:27 AM, ~19 min,
-~$1.60). Five Chai-1 diffusion samples on **all six** designs — the three that passed C4 are the
-matched control, without which a failure cannot be told apart from the predictor scattering.
-Score with `python3 bin/d8_score.py`; all three outcomes are mapped to submission consequences in
-the prereg. **Read the prereg before interpreting the numbers.**
+**D8 IS DONE: outcome 3 of the three pre-registered outcomes** — the control scattered. $0.83, 30
+structures. Two incidental measurements worth keeping: 5 Chai-1 samples cost **1.5×** one sample
+(225–251 s/design), not 5×, because the diffusion batches them; and both D8 containers first died on
+a transient `ConnectionError` at the `.remote()` call with nothing billed (failed logs kept as
+`runs/depth_logs/corr_d8_b*.FAILED-connerr.log`).
+
+**RUNNING RIGHT NOW:** four parallel verifications of the 18 benchmark pH labels — the reviewer's one
+untouched ask. Each is briefed to return NOT FOUND rather than reconstruct a number, to quote the
+source for every value, and not to adjust toward our recorded figure.
 
 **OPEN, and all of them are Harish's:** D1 ship six or swap the 7-His design (rec: ship six) · D2
 send the drafted PK email at `outbox/02-pk-corrective-arm-and-c4.txt` (rec: after D8) · D3 re-check
