@@ -27,11 +27,15 @@ for f in "$IN"/*.faa; do
   echo "[p0] fold $i/2  $did  -> $lg"
   t0=$(date +%s)
   set +e
+  # One diffusion sample, seed 42 -- prereg amendment A1. The wrapper default is FIVE
+  # samples, which would force a which-model-index rule and make score_round refuse the
+  # directory outright. One sample mirrors the ESMFold2 arm's --num-diffusion-samples 1.
   GPU="${GPU:-A100}" TIMEOUT="${TIMEOUT:-30}" \
     modal run modal_chai1.py \
       --input-faa "$f" \
       --out-dir "$OUT" \
-      --run-name "p0_$did" > "$lg" 2>&1
+      --run-name "p0_$did" \
+      --chai1-kwargs "{'num_diffn_samples': 1}" > "$lg" 2>&1
   rc=$?
   set -e
   t1=$(date +%s)
