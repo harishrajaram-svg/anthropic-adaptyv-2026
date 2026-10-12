@@ -1,0 +1,112 @@
+---
+type: preregistration
+project: anthropic-adaptyv-2026
+problem: 02-tnf-alpha
+arm: CORR — the corrective two-oracle re-run of rounds 4 and 5
+status: PRE-REGISTERED — written 2026-10-11 7:30 PM EDT. Everything below is frozen BEFORE any
+        corrective fold exists and BEFORE any new result is inspected.
+---
+
+# CORR — re-running rounds 4–5 under the two-oracle rule the original arm did not honour
+
+## Why this exists
+
+`PREREG-DEPTH-ARM-2026-10-08.md` required, from **round 4 onward**, that a design be carried forward
+only if **both ESMFold2 and Chai-1** place it within `POSE_GATE_LRMS` of the designed backbone, with
+the selector becoming the **minimum CA sc_DockQ across the two arms**. It fixed the fallback in
+advance: *"If Chai-1's per-fold cost has not been measured by the time round 3 ends … then the arm
+**stops at round 3** rather than continuing single-arm. Spending rounds 4 through 10 on one oracle is
+the thing this stage exists to prevent, so the fallback is to stop, not to proceed unguarded."*
+
+**Chai-1 was never wired into the loop.** Rounds 4 onward ran on ESMFold2 alone and all six shipped
+designs descend from round 4. The reviewer's position, 2026-10-11: disclosure is necessary but does
+not restore confirmatory status, and the remedy is a bounded corrective run from the last compliant
+round-3 checkpoints, with both predictors participating in selection as originally specified.
+
+🔴 **This run cannot erase the deviation.** The original results are preserved untouched. Whatever
+this produces is reported as a **prospective correction informed by exploratory work** — not as the
+original arm's result, and not as evidence that the shipped designs were correctly selected.
+🔴 **Agreement between two predictors still does not establish binding.** Both are structure
+predictors. Concordance bounds one failure mode (one oracle agreeing with itself) and nothing else.
+
+## FROZEN: the starting checkpoints
+
+The last compliant state is the end of round 3. Checkpoints are the round-3 winner per lineage by
+CA sc_DockQ, which is what `depth_loop.select_parent` does, computed from the committed
+`analysis/02-tnf/depth_rounds/round3.tsv`:
+
+| lineage | checkpoint | round-3 CA sc_DockQ | lrms |
+|---|---|--:|--:|
+| backbone 3, L0 | `tnfa_corrected_3_L0r3k2` | 0.6037 | 2.576 |
+| backbone 40, L1 | `tnfa_corrected_40_L1r3k5` | 0.6148 | 1.789 |
+| backbone 40, L2 | `tnfa_corrected_40_L2r3k2` | 0.4464 | 4.513 |
+| backbone 9, L3 | `tnfa_corrected_9_L3r3k5` | 0.0311 | 27.245 |
+
+**L0 and L1 are the lineages that produced the shipped designs** (`3_L0r4k0`; `40_L1r4k1`,
+`40_L1r4k6`). L2 and L3 are carried for comparability and are expected to fail the pose gate, as
+they did originally.
+
+## FROZEN: the selection rule, as originally specified
+
+1. Each round: SolubleMPNN redesign on the **predicted complex**, chain D designed, A/B/C fixed,
+   cysteine banned, `force_his=False`, `omit_acids=False` — byte-identical settings to the original.
+2. Each design folded by **ESMFold2 AND Chai-1**, both against the human trimer.
+3. **Pose gate: a design advances only if BOTH predictors place it within `POSE_GATE_LRMS`** of its
+   designed Genie-3 backbone.
+4. **Selector = `min(CA sc_DockQ_ESMFold2, CA sc_DockQ_Chai-1)`** per design. Not the mean, not
+   either alone.
+5. One parent per lineage, best by that minimum. Lineage depth tracked on root backbone id.
+6. Rounds 4 and 5 only. **The run stops at round 5** regardless of outcome: the original arm's
+   shipped designs are round-4 children and round 5 is the first round the original arm also ran, so
+   two rounds is the bounded scope. No extension without a new pre-registration.
+
+## FROZEN: seeds, budget, stopping rule
+
+| | |
+|---|---|
+| seeds | ESMFold2 screening **seed 42**, matching the original arm exactly; Chai-1 default seed |
+| MPNN seed | **37**, as in `redesign()` — unchanged |
+| designs/round | 8 per lineage × 4 lineages = **32** |
+| folds/round | 32 ESMFold2 + 32 Chai-1 = **64** |
+| **hard fold fuse** | **160 folds total** across both rounds and both oracles |
+| **wall stop** | **2026-10-12 06:00 EDT**, checked before each round |
+| cost ceiling | ~$8 if Chai-1 costs what ESMFold2 does; **see the precondition below** |
+
+## 🔴 FROZEN PRECONDITION: Chai-1's per-fold cost, measured before round 4 runs
+
+The original pre-registration made the corrective action conditional on this and we are honouring
+the condition rather than waiving it. **Phase 0: fold exactly 2 complexes with Chai-1 and record
+wall-clock seconds per fold and peak memory.** Then:
+
+- **If measured cost ≤ 120 s/fold:** proceed to rounds 4–5 under the rule above.
+- **If > 120 s/fold:** the 160-fold fuse would be exceeded on cost rather than count. **Do not
+  proceed single-arm.** Report the corrective arm as **infeasible**, and per the reviewer, present
+  the affected findings as **exploratory** in the submission. That is the fallback and it is chosen
+  now, not after seeing a number.
+
+Chai-1 has run in this project before (`runs/chai1/`, 70 structures, problem 1) so the wrapper works;
+its cost has never been measured, which is exactly the gap the original fallback anticipated.
+
+## Bars
+
+| bar | threshold | meaning |
+|---|---|---|
+| **C1** | both oracles place ≥1 round-4 design within the pose gate | the two-oracle gate is passable at all |
+| **C2** | ≥1 design reaches `min(both) ≥ 0.60` | and reaches the pose quality the original arm claimed on one oracle |
+| **C3** | per-design ESMFold2-vs-Chai-1 CA sc_DockQ correlation, reported with n | how much the second oracle was actually adding |
+| **C4** | do any of the three shipped round-4 designs survive the two-oracle gate when re-folded | the question the breach actually raises |
+
+**C4 is the one that matters.** C1–C3 describe the corrective arm; C4 asks whether what we are
+shipping would have survived the rule we broke. A C4 failure does not disqualify the designs — the
+margin, not the pose score, is the binding evidence — but it would have to be disclosed in those
+terms.
+
+## 🔴 What this cannot do
+
+It cannot un-run the original arm, make the shipped designs confirmatory, or establish binding.
+Rescoring only the six finalists with Chai-1 would be a robustness check and would **not** reproduce
+the intended selection process, which is why this re-runs the rounds instead. If phase 0 fails its
+precondition, the honest outcome is to say the correction was infeasible and relabel the affected
+findings exploratory.
+
+Deadline: **Mon Oct 19, 7:59 AM EDT.**
