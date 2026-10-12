@@ -2,7 +2,7 @@
 
 *Companion to the methodology box and to `02-tnf-METHODS.md`. The live submission form provides a
 single methodology field, so this reproducibility detail is attached rather than pasted. Written
-2026-10-12.*
+2026-10-12; revised at upload, when the submitted set went from six designs to five.*
 
 ---
 

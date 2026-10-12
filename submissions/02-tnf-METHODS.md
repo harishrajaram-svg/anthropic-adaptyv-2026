@@ -8,10 +8,10 @@ generation, and describes the **35-design Mosaic campaign**. The submission now 
 different designs** from a later depth arm. Three limitations below are **historical and no longer
 describe what is submitted** — each is annotated in place:
 
-| limitation | what it says | what is true of the six shipped designs |
+| limitation | what it says | what is true of the shipped designs |
 |---|---|---|
-| **50** | no design clears the 0.70 monomer floor (0 of 35, best 68.8) | **all six clear it**, monomer confidence **0.885–0.910** |
-| **54** | every interface number is a single-seed draw | human margins are **pooled 15-seed** for four of six, 5-seed for two; mouse is **5-seed for all six** |
+| **50** | no design clears the 0.70 monomer floor (0 of 35, best 68.8) | **all of them clear it**, monomer confidence **0.885–0.910** |
+| **54** | every interface number is a single-seed draw | human margins are **pooled 15-seed** for three of five, 5-seed for two; mouse is **5-seed for all of them** |
 | **57** | no mouse margin has seed replication; mouse used a **dimer** | mouse is **5-seed replicated** and scored against a **trimer** |
 
 Two findings that post-date this document and are **not** in it, both negative, both in FIELD 2:
@@ -2062,33 +2062,41 @@ riding on target dissociation does not.
 
 ## 10. The submission
 
-### 10.0 The submitted set, and the one experimental dependency in it — added 2026-10-12
+### 10.0 The submitted set, and the one experimental dependency in it — added 2026-10-12, revised at upload
 
 🟡 **Everything from "*Pending generation*" onward in this section describes the 35-design Mosaic
-allocation and is historical.** The submission ships **six** designs from a later depth arm. The
+allocation and is historical.** The submission ships **five** designs from a later depth arm. The
 ranked set, the margins and the full reasoning are in the methodology box; this subsection records
 the one structural dependency between the submitted rows, because it is the thing most easily lost
 if the designs are considered one at a time.
 
-**Rows 3, 4 and 5 are a single matched experiment on one scaffold**, carrying **1, 4 and 0** buried
-histidines respectively:
+**Rows 3 and 4 are a single matched experiment on one scaffold**, carrying **4 and 0** buried
+histidines:
 
-| row | design | buried His | role in the series |
+| row | design | buried His | role |
 |--:|---|--:|---|
-| 3 | `tnfa_corrected_3_L0r4k0_L49H` | 1 | one-site arm |
-| 4 | `tnfa_corrected_3_L0r4k0_quadH` | 4 | four-site arm, the largest predicted fold destabilisation |
-| 5 | `tnfa_corrected_3_L0r4k0` | **0** | **the matched control** |
+| 3 | `tnfa_corrected_3_L0r4k0_quadH` | 4 | four-site arm, the largest predicted fold destabilisation |
+| 4 | `tnfa_corrected_3_L0r4k0` | **0** | **the matched parent** |
 
-Row 5 is the parent scaffold of the other two and differs from row 3 at a **single position**. It
-supplies the matched comparison required to attribute any pH-dependent difference observed in rows 3
-or 4 to the **engineered substitutions** rather than to the scaffold, the epitope or the expression
-behaviour. Without row 5, a pH-dependent result on rows 3 or 4 has no matched comparator and cannot
-be attributed to the substitutions — the mechanism under test would remain unresolved whichever way
-the measurement came out.
+Row 4 is the parent scaffold of row 3. It supplies the matched comparison required to attribute any
+pH-dependent difference observed in row 3 to the **engineered substitutions** rather than to the
+scaffold, the epitope or the expression behaviour. Without row 4, a pH-dependent result on row 3 has
+no matched comparator and the mechanism under test would remain unresolved whichever way the
+measurement came out.
 
-The single-residue difference between rows 3 and 5 is also why a sequence-identity screen groups
-them: our run of the pre-submission screen returns `batch_duplicate` on exactly that pair. The
-grouping is a consequence of the experiment's design, not an accident of generation.
+🔴 **A third member existed and was withdrawn at upload, 2026-10-12.**
+`tnfa_corrected_3_L0r4k0_L49H`, a **one**-histidine arm on the same scaffold, would have made this a
+0/1/4 dose-response. It differs from the zero-histidine parent at a **single position**, and the
+competition's automatic novelty check rejected **both** of them for intra-batch similarity —
+"Similar designs in this upload". The property that made them a matched pair is the property that
+disqualified them. We withdrew the one-histidine arm rather than the parent, because an arm with no
+comparator answers nothing, and the four-site arm is the stronger test of the mechanism. The
+four-site variant, differing at four positions, passed the same check.
+
+Recorded because it is a reusable constraint rather than an accident of ours: **a matched
+single-substitution control and an intra-batch novelty filter are in direct tension**, and a design
+of experiments that depends on near-identical pairs has to be planned against that filter from the
+start.
 
 🔴 **Stated as a fact, deliberately, and not as a request.** An earlier draft of the methodology box
 and the submission CSV both ended this passage with an instruction addressed to the selection step.
@@ -2673,7 +2681,7 @@ those are marked.
     ranking instruments and validated none of our generation path.
 
 50. 🟡 **HISTORICAL, corrected 2026-10-12 — this describes the 35 Mosaic designs, not the six
-    submitted.** All six shipped designs clear the 0.70 floor, at monomer confidence 0.885–0.910,
+    submitted.** All shipped designs clear the 0.70 floor, at monomer confidence 0.885–0.910,
     measured on 12 of 12 candidates. The sentence below that calls this "the strongest single reason
     to expect these designs not to bind" does **not** apply to the submitted set. Original text:
     **No design in this submission clears the monomer-foldability floor in the organisers' own
@@ -2706,8 +2714,8 @@ those are marked.
     project has had to correct in most often.
 
 54. 🟡 **HISTORICAL, corrected 2026-10-12 — no longer true of the submitted set.** Human margins
-    for the six shipped designs are **pooled 15-seed** for four of them and 5-seed for the other
-    two; mouse is **5-seed for all six**. The seed-noise analysis below remains valid for the Mosaic
+    for the shipped designs are **pooled 15-seed** for four of them and 5-seed for the other
+    two; mouse is **5-seed for all of them**. The seed-noise analysis below remains valid for the Mosaic
     numbers it was computed on, and the replication is what deflated our own headline from +8.031 to
     a pooled +7.706. Original text: **Every interface number in this work is a single-seed draw, and
     the scorer's seed noise is large relative to our margins.** Their data uses five seeds per complex; we used one, for cost.
@@ -2743,9 +2751,9 @@ those are marked.
     been replicated across seeds.
 
     🟡 **HISTORICAL, corrected 2026-10-12 — the last clause and the construct are both superseded
-    for the submitted set.** Mouse margins for the six shipped designs are **5-seed replicated** and
+    for the submitted set.** Mouse margins for the shipped designs are **5-seed replicated** and
     scored against a mouse **trimer**, not a dimer; the dimer construct was measured to inflate
-    margins and was replaced. All six clear the non-binder median on mouse. The near-chance transfer
+    margins and was replaced. All of them clear the non-binder median on mouse. The near-chance transfer
     result below stands as a statement about the Mosaic set it was measured on.**
 
 58. **Our designs fall below the typical NON-binder on a margin validated against measured

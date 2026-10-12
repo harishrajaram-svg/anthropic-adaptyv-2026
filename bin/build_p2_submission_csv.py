@@ -30,28 +30,34 @@ OUT = "submissions/02-tnf.csv"
 
 # rank -> (id, human, mouse, seed_basis_human, seed_basis_mouse). From the committed FIELD 2 ship
 # table in projects/anthropic-adaptyv-2026/outbox/02-proteinbase-methodology-box.md.
+# tnfa_corrected_3_L0r4k0_L49H (the 1-histidine arm) was DROPPED 2026-10-12 after the live
+# novelty gate rejected it AND its own control for being "similar designs in this upload" -- they
+# differ at one position, which is what made them a matched pair. Dropping the 1-His arm clears the
+# control, preserving a 0-vs-4 comparison; dropping the control instead would have left an arm with
+# nothing to compare against. Ranks below are re-numbered; the ordering rule is unchanged.
 MARGINS = {
     1: ("tnfa_corrected_40_L1r4k6", 7.600, 7.365, 15, 5),
     2: ("tnfa_corrected_40_L1r4k1", 7.706, 7.207, 15, 5),
-    3: ("tnfa_corrected_3_L0r4k0_L49H", 7.167, 7.437, 15, 5),
-    4: ("tnfa_corrected_3_L0r4k0_quadH", 7.131, 7.185, 5, 5),
-    5: ("tnfa_corrected_3_L0r4k0", 6.971, 7.581, 15, 5),
-    6: ("tnfa_H_quadH_E3Q_k12", 7.197, 6.747, 5, 5),
+    3: ("tnfa_corrected_3_L0r4k0_quadH", 7.131, 7.185, 5, 5),
+    4: ("tnfa_corrected_3_L0r4k0", 6.971, 7.581, 15, 5),
+    5: ("tnfa_H_quadH_E3Q_k12", 7.197, 6.747, 5, 5),
 }
-WORSE = {1: 7.365, 2: 7.207, 3: 7.167, 4: 7.131, 5: 6.971, 6: 6.747}
+WORSE = {1: 7.365, 2: 7.207, 3: 7.131, 4: 6.971, 5: 6.747}
 
-SERIES = {3, 4, 5}      # the 0/1/4 buried-histidine series on one scaffold
+SERIES = {3, 4}         # the 4-vs-0 buried-histidine comparison on one scaffold
 # REWRITTEN 2026-10-12. The previous text ended "Please test all three or none", which is an
 # instruction addressed to the selection step. FAQ 5: "any use of embedded instructions or prompt
 # injection may be deemed grounds for disqualification." This states the experimental dependency as
 # a fact and leaves the inference to the reader.
 NOTE_SERIES = (
-    "EXPERIMENTAL DEPENDENCY: rows 3, 4 and 5 are a matched series on one scaffold carrying 1, 4 "
-    "and 0 buried histidines respectively. Row 5 is the zero-histidine member and supplies the "
-    "matched comparison required to attribute any pH-dependent difference in rows 3 or 4 to the "
-    "engineered substitutions rather than to the scaffold. Rows 3 and 5 differ at a single "
-    "position, which is why a sequence-identity screen groups them. Without row 5, a pH-dependent "
-    "result on rows 3 or 4 has no matched comparator and cannot be attributed to the substitutions. "
+    "EXPERIMENTAL DEPENDENCY: rows 3 and 4 are a matched pair on one scaffold, carrying 4 and 0 "
+    "buried histidines respectively. Row 4 is the zero-histidine parent and supplies the matched "
+    "comparison required to attribute any pH-dependent difference in row 3 to the engineered "
+    "substitutions rather than to the scaffold. Without row 4, a pH-dependent result on row 3 has "
+    "no matched comparator and cannot be attributed to the substitutions. A third member carrying "
+    "ONE buried histidine was prepared and withdrawn before submission: it differed from the "
+    "zero-histidine parent at a single position, and the novelty check rejected both for "
+    "intra-batch similarity, so the one-histidine arm was dropped to keep the control. "
 )
 # Conclusion wording set 2026-10-12 to the reviewer's: "no demonstrated predictive discrimination
 # on this small, heterogeneous dataset". The earlier phrasing leaned on a constant-predictor
