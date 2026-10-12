@@ -86,6 +86,25 @@ Running the wrapper as shipped gives a **weaker instrument than the published on
 - `use_msa` defaults to **true**. Partially resolved 2026-09-18: **the wrapper itself contains no hardcoded MSA endpoint** and simply passes `--use_msa` through to the Protenix CLI, so any server call happens inside the upstream package, not here. Still worth confirming against Protenix's own docs before a scaled run, since a public MMseqs2 backend would risk an IP ban under heavy use. Safest default either way: stage target MSAs once per target and reuse them. The binder chain is single-sequence regardless.
 - First call JIT-compiles a CUDA kernel, 4–6 minutes on an H100. Point `TORCH_EXTENSIONS_DIR` at a persistent Modal Volume or every container pays it again.
 
+## Chai-1 had the SAME one-complex-per-container defect, patched 2026-10-11
+
+Measured for a pre-registered cost gate (`PREREG-CORR-TWO-ORACLE-2026-10-11.md`): two 554-residue
+complexes, one diffusion sample, A100, **184 s and 185 s per fold with no cold/warm spread**. The
+flat profile is the tell -- `modal_chai1.py` took one FASTA per remote call, so ~110 s of container
+start and model load was paid again on every fold while the diffusion itself is ~70 s (199 steps at
+2.87 it/s).
+
+This is exactly what the ESMFold2 wrapper did before the batching patch above, and the same fix
+applies: **`--input-faa` now accepts a DIRECTORY** and folds every `.faa` in it inside one
+container via a new `chai1_many` remote function, per-complex output subdirectories, the
+single-file path left byte-for-byte unchanged. It also returns a **`timing.tsv`** separating the
+one-time load from the marginal per-fold cost, because a number that mixes the two is what made the
+cost gate unreadable the first time.
+
+⚠️ **This wrapper returns output only at the END of the container**, like ESMFold2 -- a timeout
+loses every completed fold and bills for all of them. So batch in CHUNKS (the CORR arm uses 4
+containers x 8 folds, not one of 32) and size `TIMEOUT` from the measured rate.
+
 ## Logging
 
 **Do not pipe `modal run` through `tail`.** It buffers until the process exits, so the log stays empty for the whole run and any monitor watching it is blind. Stream `modal app logs <app-id>` instead, and note that stream can drop on its own without the job failing.

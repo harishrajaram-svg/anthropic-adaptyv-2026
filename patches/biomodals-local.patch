@@ -197,7 +197,7 @@ index 67949c9..d133b28 100644
      today = datetime.now().strftime("%Y%m%d%H%M")[2:]
      out_dir_full = Path(out_dir) / (run_name or today)
 diff --git a/modal_boltzgen.py b/modal_boltzgen.py
-index 635eca6..d211294 100644
+index 635eca6..0b202a3 100644
 --- a/modal_boltzgen.py
 +++ b/modal_boltzgen.py
 @@ -51,7 +51,7 @@ def download_boltzgen_models():
@@ -209,8 +209,103 @@ index 635eca6..d211294 100644
      .apt_install("git", "wget", "build-essential")
      .uv_pip_install("torch>=2.4.1")
      .run_commands(
+@@ -79,6 +79,7 @@ def boltzgen_run(
+     cache: str | None = None,
+     devices: int | None = None,
+     extra_args: str | None = None,
++    seed_designs: dict[str, bytes] | None = None,
+ ) -> list:
+     """Run BoltzGen on a yaml specification.
+ 
+@@ -92,6 +93,11 @@ def boltzgen_run(
+         cache: Custom cache directory path
+         devices: Number of GPUs to use
+         extra_args: Additional CLI arguments as string
++        seed_designs: name -> bytes for .cif/.npz backbones placed in
++            out_dir/intermediate_designs, so `--steps inverse_folding ...` can
++            resequence a backbone we already have instead of generating one.
++            out_dir is a fresh TemporaryDirectory in the container, so there is
++            no other way to hand the pipeline an existing backbone.
+ 
+     Returns:
+         List of (path, content) tuples for all output files
+@@ -104,6 +110,14 @@ def boltzgen_run(
+         yaml_path = Path(in_dir) / yaml_name
+         yaml_path.write_text(yaml_str)
+ 
++        # Seed pre-made backbones so inverse_folding can start from them.
++        if seed_designs:
++            seed_dir = Path(out_dir) / "intermediate_designs"
++            seed_dir.mkdir(parents=True, exist_ok=True)
++            for nm, content in seed_designs.items():
++                (seed_dir / nm).write_bytes(content)
++            print(f"Seeded {len(seed_designs)} files into {seed_dir}")
++
+         # Write any additional files (e.g., .cif files referenced in yaml)
+         for rel_path, content in additional_files.items():
+             file_path = Path(in_dir) / rel_path
+@@ -123,14 +137,16 @@ def boltzgen_run(
+             str(num_designs),
+         ]
+ 
+-        if steps:
+-            cmd.extend(["--steps"] + steps.split())
++        # extra_args MUST precede --steps: --steps is nargs='+', so anything after it
++        # is swallowed as another step name and argparse rejects it.
++        if extra_args:
++            cmd.extend(extra_args.split())
+         if cache:
+             cmd.extend(["--cache", cache])
+         if devices:
+             cmd.extend(["--devices", str(devices)])
+-        if extra_args:
+-            cmd.extend(extra_args.split())
++        if steps:
++            cmd.extend(["--steps"] + steps.split())
+ 
+         print(f"Running: {' '.join(cmd)}")
+         run(cmd, check=True)
+@@ -154,6 +170,7 @@ def main(
+     extra_args: str | None = None,
+     out_dir: str = "./out/boltzgen",
+     run_name: str | None = None,
++    seed_dir: str | None = None,
+ ):
+     """Run BoltzGen locally with results saved to out_dir.
+ 
+@@ -167,6 +184,8 @@ def main(
+         extra_args: Additional CLI arguments as string
+         out_dir: Local output directory
+         run_name: Optional run name (defaults to timestamp)
++        seed_dir: Local dir of .cif/.npz backbone pairs to resequence. Use with
++            --steps "inverse_folding folding design_folding analysis filtering".
+     """
+     import re
+     from datetime import datetime
+@@ -185,6 +204,13 @@ def main(
+             additional_files[ref_file] = ref_path.read_bytes()
+             print(f"Including referenced file: {ref_file}")
+ 
++    seed_designs = {}
++    if seed_dir:
++        for f in sorted(Path(seed_dir).iterdir()):
++            if f.suffix in (".cif", ".npz"):
++                seed_designs[f.name] = f.read_bytes()
++        print(f"Seeding {len(seed_designs)} backbone files from {seed_dir}")
++
+     outputs = boltzgen_run.remote(
+         yaml_str=yaml_str,
+         yaml_name=yaml_path.name,
+@@ -195,6 +221,7 @@ def main(
+         cache=cache,
+         devices=devices,
+         extra_args=extra_args,
++        seed_designs=seed_designs or None,
+     )
+ 
+     today = datetime.now().strftime("%Y%m%d%H%M")[2:]
 diff --git a/modal_chai1.py b/modal_chai1.py
-index 6d1d50e..c0d0527 100644
+index 6d1d50e..b721a4d 100644
 --- a/modal_chai1.py
 +++ b/modal_chai1.py
 @@ -61,7 +61,7 @@ def download_models():
@@ -222,11 +317,122 @@ index 6d1d50e..c0d0527 100644
      .apt_install("wget")
      .uv_pip_install("chai_lab==0.6.1")
      .run_function(download_models, gpu="a100")
+@@ -123,6 +123,72 @@ def chai1(
+         ]
+ 
+ 
++@app.function(timeout=TIMEOUT * 60, gpu=GPU)
++def chai1_many(
++    inputs: list,
++    num_trunk_recycles: int = 3,
++    num_diffn_timesteps: int = 200,
++    seed: int = 42,
++    use_esm_embeddings: bool = True,
++    chai1_kwargs: dict = {},
++) -> list:
++    """Folds MANY fastas inside ONE container, reusing the loaded model.
++
++    THE SAME PATCH modal_esmfold2.py ALREADY CARRIES, for the same reason. reference/
++    wrapper-notes.md, "Batching: one complex per container was the real bottleneck": that wrapper
++    folded one complex per container, so 100 designs meant 100 model loads at ~137 s each, about
++    4 GPU-hours of pure loading before any useful work. Chai-1 was still in that state: measured
++    2026-10-11, two 554-residue complexes at 184 s and 185 s per fold with NO cold/warm spread,
++    because ~110 s of container start and model load is paid again on every single call while the
++    diffusion itself is ~70 s.
++
++    Timing is returned as `timing.tsv`, load and folds separately, because the per-fold cost is a
++    pre-registered gate in PREREG-CORR-TWO-ORACLE-2026-10-11.md and a number that mixes load into
++    fold is the thing that made that gate unreadable the first time.
++
++    Args:
++        inputs (list): [(name, faa_str)] -- `name` becomes the output subdirectory.
++        ... remaining args as `chai1`.
++
++    Returns:
++        list[tuple[Path, bytes]]: (relative path, content), each complex under `name/`.
++    """
++    import time
++    import torch
++    from tempfile import TemporaryDirectory
++    from chai_lab.chai1 import run_inference
++
++    out, timing = [], ["name\tphase\tseconds"]
++    t0 = time.time()
++    loaded = False
++    for name, faa_str in inputs:
++        with TemporaryDirectory() as td_in, TemporaryDirectory() as td_out:
++            fasta_path = Path(td_in) / f"{name}.faa"
++            fasta_path.write_text(faa_str)
++            t1 = time.time()
++            _ = run_inference(
++                fasta_file=Path(fasta_path),
++                output_dir=Path(td_out),
++                num_trunk_recycles=num_trunk_recycles,
++                num_diffn_timesteps=num_diffn_timesteps,
++                seed=seed,
++                device=torch.device("cuda:0"),
++                use_esm_embeddings=use_esm_embeddings,
++                **chai1_kwargs,
++            )
++            t2 = time.time()
++            # The FIRST call pays model load inside run_inference, so it is recorded as
++            # load+fold and excluded from the marginal rate. Every later call is marginal.
++            timing.append(f"{name}\t{'load_and_fold' if not loaded else 'fold'}\t{t2 - t1:.1f}")
++            loaded = True
++            for f in Path(td_out).glob("**/*"):
++                if f.is_file():
++                    out.append((Path(name) / f.relative_to(td_out), open(f, "rb").read()))
++    timing.append(f"ALL\ttotal_container\t{time.time() - t0:.1f}")
++    out.append((Path("timing.tsv"), ("\n".join(timing) + "\n").encode()))
++    return out
++
++
+ @app.local_entrypoint()
+ def main(
+     input_faa: str,
+@@ -144,13 +210,24 @@ def main(
+     """
+     from datetime import datetime
+ 
+-    input_faa_str = open(input_faa).read()
+-
+-    outputs = chai1.remote(
+-        input_faa_str,
+-        input_faa_name=Path(input_faa).name,
+-        chai1_kwargs=dict(eval(chai1_kwargs)) if chai1_kwargs else {},
+-    )
++    kw = dict(eval(chai1_kwargs)) if chai1_kwargs else {}
++
++    # PATCHED 2026-10-11: --input-faa accepts a DIRECTORY and folds every .faa in it inside one
++    # container, reusing the loaded model. Mirrors the modal_esmfold2.py patch. A single file
++    # still takes the original one-complex path, byte-for-byte unchanged.
++    if Path(input_faa).is_dir():
++        faas = sorted(Path(input_faa).glob("*.faa"))
++        if not faas:
++            raise SystemExit(f"no .faa files in {input_faa}")
++        print(f"[chai1] batching {len(faas)} complex(es) into one container")
++        outputs = chai1_many.remote(
++            [(f.stem, f.read_text()) for f in faas], chai1_kwargs=kw)
++    else:
++        outputs = chai1.remote(
++            open(input_faa).read(),
++            input_faa_name=Path(input_faa).name,
++            chai1_kwargs=kw,
++        )
+ 
+     today = datetime.now().strftime("%Y%m%d%H%M")[2:]
+     out_dir_full = Path(out_dir) / (run_name or today)
 diff --git a/modal_esmfold2.py b/modal_esmfold2.py
-index e3ea6da..8f82771 100644
+index e3ea6da..ddf8b5e 100644
 --- a/modal_esmfold2.py
 +++ b/modal_esmfold2.py
-@@ -33,9 +33,16 @@ from modal import App, Image
+@@ -28,14 +28,21 @@ modal run modal_esmfold2.py --input-faa complex.faa --num-diffusion-samples 3
+ import os
+ from pathlib import Path
+ 
+-from modal import App, Image
++from modal import App, Image, Volume
+ 
  GPU = os.environ.get("MODAL_GPU", "A100-40GB")
  TIMEOUT = int(os.environ.get("MODAL_TIMEOUT", 30))
  
@@ -246,9 +452,38 @@ index e3ea6da..8f82771 100644
  ESMFOLD2_CACHE_DIR = "/root/.cache/huggingface"
  
  
-@@ -117,9 +124,8 @@ def _fasta_to_input(fasta_str: str):
+@@ -68,6 +75,25 @@ image = (
+     .run_function(_download_models)
+ )
  
- @app.function(timeout=TIMEOUT * 60, gpu=GPU)
++# DURABILITY. Output used to exist only as the remote function's RETURN VALUE, shipped back
++# after the last fold, so a timeout, a crash or a DEAD LOCAL PROCESS wrote nothing: 13 of 20
++# folds lost 2026-10-02 and billed in full, and 2 of 10 lost again 2026-10-06 when a local
++# DNS blip killed the non-detached client. Note that --detach does NOT fix that -- the files
++# are written by the LOCAL entrypoint, which dies with the client either way.
++#
++# Each fold's files are now written to this Volume and committed AS THAT FOLD FINISHES, so
++# partial work survives any of the three triggers. The return value is unchanged, so the
++# local path and every caller behave exactly as before; the Volume is a parallel durable copy.
++#
++# Recover a run that lost its client:
++#     modal volume ls  esmfold2-runs
++#     mkdir -p runs/<dest> && cd runs/<dest> && \
++#         modal volume get esmfold2-runs <run_name>
++#     (the destination must be the CWD -- passing it as an argument
++#      raises Errno 21; a trailing slash and a glob both fail too.
++#      Verified 2026-10-06 voltest01: 6/6 files byte-identical.)
++runs_vol = Volume.from_name("esmfold2-runs", create_if_missing=True)
++
+ app = App("esmfold2", image=image)
+ 
+ 
+@@ -115,21 +141,28 @@ def _fasta_to_input(fasta_str: str):
+     return StructurePredictionInput(sequences=sequences)
+ 
+ 
+-@app.function(timeout=TIMEOUT * 60, gpu=GPU)
++@app.function(timeout=TIMEOUT * 60, gpu=GPU, volumes={"/runs": runs_vol})
  def esmfold2(
 -    fasta_name: str,
 -    fasta_str: str,
@@ -258,7 +493,15 @@ index e3ea6da..8f82771 100644
      num_diffusion_samples: int = 1,
      num_sampling_steps: int = 50,
      num_loops: int = 3,
-@@ -129,7 +135,10 @@ def esmfold2(
++    run_name: str = "",     # names the Volume directory; "" disables the durable copy
+ ) -> list[tuple[Path, bytes]]:
+-    """Fold a FASTA with ESMFold2; return per-sample CIF + scores JSON."""
++    """Fold a FASTA with ESMFold2; return per-sample CIF + scores JSON.
++
++    Files are ALSO written to the `esmfold2-runs` Volume as each fold finishes, so partial
++    work survives a timeout, a crash or a dead local client. See the note by the Volume.
++    """
+     import json
      import time
  
      from esm.models.esmfold2 import ESMFold2InputBuilder
@@ -270,7 +513,7 @@ index e3ea6da..8f82771 100644
  
      t0 = time.time()
      model = ESMFold2Model.from_pretrained(
-@@ -139,21 +148,33 @@ def esmfold2(
+@@ -139,21 +172,21 @@ def esmfold2(
      ).cuda().eval()
      print(f"[esmfold2] Model loaded in {time.time() - t0:.1f}s")
  
@@ -299,6 +542,59 @@ index e3ea6da..8f82771 100644
 +                 if isinstance(seed, str) else [int(seed)])
 +    builder = ESMFold2InputBuilder()
 +    samples, sample_seeds, sample_names = [], [], []
++    outputs_so_far: list[tuple[Path, bytes]] = []
++    # An EXPLICIT counter, not len(outputs)//3. Deriving the sample index from the file count
++    # silently assumes every sample yields exactly three files, so adding a fourth output
++    # would renumber every sample and orphan each *_ipsae.json from its *.cif.
++    sample_idx = 0
+ 
+     def _to_py(v):
+         if v is None:
+@@ -166,8 +199,10 @@ def esmfold2(
+             return [_to_py(x) for x in v]
+         return v
+ 
+-    outputs: list[tuple[Path, bytes]] = []
+-    for idx, sample in enumerate(samples):
++    def _serialize_sample(sample, _sd, fasta_name, idx):
++        """The three files one sample produces. Extracted from the old post-loop block so it
++        can run per fold; byte-for-byte the same output, same names, same order."""
++        out: list[tuple[Path, bytes]] = []
+         complex_obj = getattr(sample, "complex", sample)
+         cif_str = complex_obj.to_mmcif()
+         plddt_list = _to_py(complex_obj.plddt) or []
+@@ -181,17 +216,74 @@ def esmfold2(
+             "iptm": _to_py(getattr(sample, "iptm", None)),
+             "chain_pair_iptm": _to_py(getattr(sample, "pair_chains_iptm", None)),
+         }
+-        outputs.append((Path(f"{fasta_name}_sample_{idx}.cif"), cif_str.encode()))
+-        outputs.append((Path(f"{fasta_name}_sample_{idx}_scores.json"),
+-                        json.dumps(scores, indent=2).encode()))
+-
+-    return outputs
++        base = f"{fasta_name}/{fasta_name}_seed{_sd}_sample_{idx}"
++        out.append((Path(f"{base}.cif"), cif_str.encode()))
++        out.append((Path(f"{base}_scores.json"), json.dumps(scores, indent=2).encode()))
++
++        # ipsae.py reads data['pae'] (or 'predicted_aligned_error'), and expects
++        # data['plddt'] to be the PER-TOKEN array, not a scalar mean.
++        pae = None
++        for _obj in (sample, complex_obj):
++            for _attr in ("pae", "predicted_aligned_error", "aligned_error", "pae_matrix"):
++                _v = getattr(_obj, _attr, None)
++                if _v is not None:
++                    pae = _to_py(_v)
++                    break
++            if pae is not None:
++                break
++        if pae is None:
++            print(f"[esmfold2] WARNING: no PAE matrix exposed on sample {idx}; "
++                  f"ipSAE cannot score this output.")
++        out.append((Path(f"{base}_ipsae.json"), json.dumps({
++            "pae": pae, "plddt": plddt_list,
++            "ptm": scores["ptm"], "iptm": scores["iptm"],
++        }).encode()))
++        return out
 +    for cname, cfasta in complexes:
 +        spi = _fasta_to_input(cfasta)
 +        for sd in seed_list:
@@ -316,54 +612,28 @@ index e3ea6da..8f82771 100644
 +            samples.extend(got)
 +            sample_seeds.extend([sd] * len(got))
 +            sample_names.extend([cname] * len(got))
- 
-     def _to_py(v):
-         if v is None:
-@@ -168,6 +189,9 @@ def esmfold2(
- 
-     outputs: list[tuple[Path, bytes]] = []
-     for idx, sample in enumerate(samples):
-+        # PATCHED: tag with seed so seeds don't collide in the output dir
-+        _sd = sample_seeds[idx]
-+        fasta_name = sample_names[idx]
-         complex_obj = getattr(sample, "complex", sample)
-         cif_str = complex_obj.to_mmcif()
-         plddt_list = _to_py(complex_obj.plddt) or []
-@@ -181,17 +205,41 @@ def esmfold2(
-             "iptm": _to_py(getattr(sample, "iptm", None)),
-             "chain_pair_iptm": _to_py(getattr(sample, "pair_chains_iptm", None)),
-         }
--        outputs.append((Path(f"{fasta_name}_sample_{idx}.cif"), cif_str.encode()))
--        outputs.append((Path(f"{fasta_name}_sample_{idx}_scores.json"),
-+        outputs.append((Path(f"{fasta_name}/{fasta_name}_seed{_sd}_sample_{idx}.cif"), cif_str.encode()))
-+        outputs.append((Path(f"{fasta_name}/{fasta_name}_seed{_sd}_sample_{idx}_scores.json"),
-                         json.dumps(scores, indent=2).encode()))
- 
-+        # PATCHED: emit an ipSAE-compatible sidecar.
-+        # ipsae.py reads data['pae'] (or 'predicted_aligned_error'), and expects
-+        # data['plddt'] to be the PER-TOKEN array, not a scalar mean.
-+        pae = None
-+        for _obj in (sample, complex_obj):
-+            for _attr in ("pae", "predicted_aligned_error", "aligned_error", "pae_matrix"):
-+                _v = getattr(_obj, _attr, None)
-+                if _v is not None:
-+                    pae = _to_py(_v)
-+                    break
-+            if pae is not None:
-+                break
-+        if pae is None:
-+            print(f"[esmfold2] WARNING: no PAE matrix exposed on sample {idx}; "
-+                  f"ipSAE cannot score this output. Attrs: {sorted(a for a in dir(sample) if not a.startswith('_'))}")
-+        ipsae_scores = {
-+            "pae": pae,
-+            "plddt": plddt_list,
-+            "ptm": scores["ptm"],
-+            "iptm": scores["iptm"],
-+        }
-+        outputs.append((Path(f"{fasta_name}/{fasta_name}_seed{_sd}_sample_{idx}_ipsae.json"),
-+                        json.dumps(ipsae_scores).encode()))
++            # Persist THIS fold before starting the next one. `idx` must stay the GLOBAL
++            # flattened sample index, because the filenames downstream readers glob for
++            # carry it (..._seed{sd}_sample_{idx}.cif) and renumbering would orphan every
++            # *_ipsae.json from its *.cif.
++            for g in got:
++                files = _serialize_sample(g, sd, cname, sample_idx)
++                sample_idx += 1
++                outputs_so_far.extend(files)
++                if run_name:
++                    for rel, content in files:
++                        dest = Path("/runs") / run_name / rel
++                        dest.parent.mkdir(parents=True, exist_ok=True)
++                        dest.write_bytes(content)
++            if run_name:
++                runs_vol.commit()      # survives a dead client from here on
++                print(f"[esmfold2]   persisted {cname} seed {sd} to the Volume "
++                      f"({len(outputs_so_far)} files so far)")
 +
-     return outputs
++    # The post-loop serialization block that used to live here is gone: it ran only AFTER
++    # every fold, which is what made the output all-or-nothing. _serialize_sample now runs
++    # inside the fold loop and `outputs_so_far` is the same list it used to build.
++    return outputs_so_far
  
  
  @app.local_entrypoint()
@@ -374,7 +644,7 @@ index e3ea6da..8f82771 100644
      num_diffusion_samples: int = 1,
      num_sampling_steps: int = 50,
      num_loops: int = 3,
-@@ -200,12 +248,21 @@ def main(
+@@ -200,19 +292,52 @@ def main(
  ):
      from datetime import datetime
  
@@ -392,6 +662,9 @@ index e3ea6da..8f82771 100644
 +        files = [_p]
 +    complexes = [(f.stem, f.read_text()) for f in files]
 +    print(f"[esmfold2] batching {len(complexes)} complex(es) into one container")
++
++    today = datetime.now().strftime("%Y%m%d%H%M")[2:]
++    vol_tag = run_name or today          # resolved HERE so the Volume dir matches out_dir
  
      outputs = esmfold2.remote(
 -        fasta_name=fasta_name,
@@ -400,19 +673,33 @@ index e3ea6da..8f82771 100644
          seed=seed,
          num_diffusion_samples=num_diffusion_samples,
          num_sampling_steps=num_sampling_steps,
-@@ -213,6 +270,15 @@ def main(
+         num_loops=num_loops,
++        run_name=vol_tag,
      )
- 
-     today = datetime.now().strftime("%Y%m%d%H%M")[2:]
-+    # ALL-OR-NOTHING OUTPUT (cost real money 2026-10-02): every file is shipped
-+    # back as one return value AFTER the last fold. A function timeout, a crash,
-+    # or a dead local process writes NOTHING -- 13 of 20 completed folds were lost
-+    # this way and billed in full. bin/score-esmfold2.sh now sizes the timeout from
-+    # the workload and refuses to launch under its own estimate, which prevents the
-+    # trigger. The durable fix is a modal.Volume written per-fold inside the remote
-+    # function, so partial work survives; not done yet because it cannot be tested
-+    # without a paid GPU run. Until then: do not grow a batch without raising
-+    # MODAL_TIMEOUT to match.
+-
+-    today = datetime.now().strftime("%Y%m%d%H%M")[2:]
++    # ALL-OR-NOTHING OUTPUT -- FIXED 2026-10-06. This local write still happens only after
++    # the remote call returns, so it is still all-or-nothing BY ITSELF. What changed is that
++    # it is no longer the only copy: esmfold2() now writes each fold's three files to the
++    # `esmfold2-runs` Volume and commits as that fold finishes.
++    #
++    # History, because the failure recurred twice before the fix: 13 of 20 folds lost
++    # 2026-10-02 to a function timeout and billed in full, then 2 of 10 lost 2026-10-06 when a
++    # local DNS blip killed the client of a non-detached run. The timeout-sizing guard in
++    # bin/score-esmfold2.sh only ever covered the first trigger; "dead local process" was
++    # named in this comment and left uncovered, and that is the one that fired. --detach is
++    # NOT a fix either: these files are written by the LOCAL entrypoint, which dies with the
++    # client regardless.
++    #
++    # Recover a run whose client died:
++    #     modal volume ls  esmfold2-runs
++    #     mkdir -p runs/<dest> && cd runs/<dest> && \
++    #         modal volume get esmfold2-runs <run_name>
++    #     (the destination must be the CWD -- passing it as an argument
++    #      raises Errno 21; a trailing slash and a glob both fail too.
++    #      Verified 2026-10-06 voltest01: 6/6 files byte-identical.)
++    # Still size MODAL_TIMEOUT to the batch -- the Volume saves completed folds, it does not
++    # make an undersized timeout stop truncating the run.
      out_dir_full = Path(out_dir) / (run_name or today)
      for out_file, out_content in outputs:
          target = out_dir_full / out_file
@@ -510,3 +797,1688 @@ index 021b7bf..70b7d58 100644
  
      # Validate required fields
      missing_fields = [
+diff --git a/modal_mosaic.py b/modal_mosaic.py
+new file mode 100644
+index 0000000..51a8aa6
+--- /dev/null
++++ b/modal_mosaic.py
+@@ -0,0 +1,1679 @@
++# /// script
++# requires-python = ">=3.12"
++# dependencies = ["modal>=1.0"]
++# ///
++"""Mosaic (escalante-bio) on Modal. Steps 1-3 probe the environment; step 4 designs.
++
++Why a bespoke wrapper: Mosaic has no CLI. It is driven by its Python API, so the Modal
++function must EMBED the design script rather than shell out, unlike every other wrapper
++in biomodals/.
++
++  step 1  probe          JAX sees a CUDA GPU                          PASSED 2026-10-02
++  step 2  probe_mosaic   mosaic imports, loss terms compose           PASSED 2026-10-02
++  step 3  fetch_weights  8.03 GB of Boltz-2 cached on the Volume      PASSED 2026-10-02
++  step 4  design         gradient design against the H433 patch       <- written 2026-10-03
++
++Step 4's non-GPU logic (target prep, the numbering arithmetic, the geometry check) has a
++local self-test that needs no GPU and no Modal account: bin/mosaic_selftest.py. Run it
++before paying for a GPU; a wrong index here is a wasted run.
++
++Scope and constraints: projects/anthropic-adaptyv-2026/mosaic-wrapper-scope.md
++C1 (BLOCKING): the design loss may NOT contain ipSAE and may NOT run on ESMFold2 — that is
++our frozen ranking instrument, and designing against it makes December's analysis
++unanswerable. Design on Boltz-2 or Protenix. ESMFold2 is permitted for plumbing smoke
++tests only, and those designs are discarded, never submitted.
++
++Run:  GPU=L40S modal run modal_mosaic.py
++"""
++import os
++
++from modal import App, Image, Volume
++
++GPU = os.environ.get("GPU", "L40S")          # 48 GB; scope says 24 GB min, 48 GB+ recommended
++TIMEOUT = int(os.environ.get("TIMEOUT", 30))
++
++# Weights live in a Volume, not the image: they are large, shared across runs, and change
++# independently of the code. Same pattern as modal_germinal.py.
++weights = Volume.from_name("mosaic-weights", create_if_missing=True)
++
++image = (
++    Image.debian_slim(python_version="3.12")   # Mosaic needs >=3.11
++    .apt_install("git")
++    # Germinal's image proved jax[cuda12] installs cleanly on Modal this morning; this is the
++    # modern spelling of the same thing. If it ever fails, Germinal's fallback is
++    # pip install 'jax[cuda12_pip]==0.5.3' -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
++    .uv_pip_install("jax[cuda12]")
++    # STEP 2: Mosaic itself. It has no release on PyPI, so install from the repo. Its own
++    # README warns it "may require substantial hand-holding (tuning learning rates, etc)"
++    # and "often produces proteins that fail simple in-silico tests" -- downstream
++    # protein-qc filtering is mandatory, not optional (constraint C4).
++    # PINNED 2026-10-07. Unpinned, a fresh clone resolved Mosaic to whatever HEAD was that
++    # day, so the reproducibility claim in METHODS 13 was wider than the evidence. b94b9d4
++    # (2026-09-24) is the commit the wrapper was read against and the code every run in
++    # this project executed: b94b9d4..1eb4af6 is +21/-0 across CITATION.cff and README.md,
++    # measured against the GitHub compare API, so no Python changed under us mid-campaign.
++    .uv_pip_install("git+https://github.com/escalante-bio/mosaic@b94b9d4eb9907a700a6d78ed2d29d3704c5df46c")
++)
++
++app = App("mosaic", image=image)
++
++
++@app.function(image=image, gpu=GPU, timeout=TIMEOUT * 60,
++              volumes={"/weights": weights})
++def probe():
++    """Step 1 success criterion: jax.devices() lists a GPU and a real matmul runs on it."""
++    import jax
++    import jax.numpy as jnp
++
++    print(f"[mosaic] jax {jax.__version__}")
++    print(f"[mosaic] backend: {jax.default_backend()}")
++    devs = jax.devices()
++    print(f"[mosaic] jax.devices(): {devs}")
++    gpus = [d for d in devs if d.platform == "gpu"]
++    if not gpus:
++        raise SystemExit("STEP 1 FAILED: no GPU in jax.devices()")
++    x = jnp.ones((2048, 2048))
++    y = float((x @ x).sum())
++    print(f"[mosaic] matmul on {gpus[0]}: sum={y:.0f} (expect 8589934592)")
++    print(f"[mosaic] weights volume writable: {os.access('/weights', os.W_OK)}")
++    print("[mosaic] STEP 1 PASSED")
++    return {"jax": jax.__version__, "devices": [str(d) for d in devs]}
++
++
++@app.function(image=image, gpu=GPU, timeout=TIMEOUT * 60,
++              volumes={"/weights": weights})
++def probe_mosaic():
++    """Step 2 success criterion: mosaic imports and a composable loss can be constructed.
++
++    Deliberately does NOT build the published Nipah loss. That loss contains ipSAE and runs
++    on ESMFold2, which is our frozen ranking instrument (constraint C1) -- using it would
++    make December's question "did our ranking predict binding?" unanswerable. This only
++    checks that the loss algebra works; the real objective gets composed on Boltz-2.
++    """
++    import jax
++    print(f"[mosaic] jax {jax.__version__}  devices {jax.devices()}")
++    import mosaic
++    print(f"[mosaic] mosaic imported from {mosaic.__file__}")
++    import mosaic.losses.structure_prediction as sp
++    print("[mosaic] structure_prediction loss terms available:")
++    terms = [n for n in dir(sp) if n[0].isupper()]
++    print("   " + ", ".join(terms))
++    # the loss algebra: terms compose with + and scale with *
++    loss = sp.BinderTargetContact() + sp.WithinBinderContact() + 0.1 * sp.PLDDTLoss()
++    print(f"[mosaic] composed a 3-term loss OK: {type(loss).__name__}")
++    print("[mosaic] STEP 2 PASSED")
++    return {"terms": terms}
++
++
++@app.function(image=image, gpu=GPU, timeout=TIMEOUT * 60,
++              volumes={"/weights": weights})
++def fetch_weights():
++    """Step 3: pull the design-model weights into the Volume so runs do not re-download.
++
++    Boltz-2, not ESMFold2: constraint C1 reserves ESMFold2 for ranking. Caching matters
++    because JIT plus a cold weight fetch dominates the first call, and Mosaic needs many
++    calls while a learning rate is being tuned.
++    """
++    # Env vars must be set BEFORE importing anything that reads them at import time.
++    import os
++    os.environ["HF_HOME"] = "/weights/hf"
++    os.environ["HUGGINGFACE_HUB_CACHE"] = "/weights/hf/hub"
++    os.environ["TORCH_HOME"] = "/weights/torch"
++    os.environ["XDG_CACHE_HOME"] = "/weights/xdg"
++    for d in ("/weights/hf/hub", "/weights/torch", "/weights/xdg", "/weights/mosaic"):
++        os.makedirs(d, exist_ok=True)
++    # Mosaic ignores HF_HOME/TORCH_HOME: it keeps its OWN cache at ~/.cache/mosaic and the
++    # only documented override is a --cache CLI flag, which does not exist when driving the
++    # Python API. Symlink the path it actually uses onto the Volume instead.
++    import shutil
++    real = "/root/.cache/mosaic"
++    os.makedirs("/root/.cache", exist_ok=True)
++    if os.path.islink(real):
++        pass
++    elif os.path.isdir(real):
++        shutil.rmtree(real)
++    if not os.path.islink(real):
++        os.symlink("/weights/mosaic", real)
++    print(f"[mosaic] {real} -> {os.path.realpath(real)}")
++    import jax
++    print(f"[mosaic] jax {jax.__version__} devices {jax.devices()}")
++    import mosaic, mosaic.models
++    print("[mosaic] mosaic.models exposes:", [n for n in dir(mosaic.models) if not n.startswith("_")])
++    got = []
++    try:
++        from mosaic.models.boltz2 import Boltz2
++        print("[mosaic] Boltz2 class imported; instantiating (this pulls weights)...")
++        m = Boltz2()
++        print("[mosaic] Boltz2 constructed; forcing weight download...")
++        for attr in ("load", "load_weights", "_load", "download", "params", "model"):
++            if hasattr(m, attr):
++                a = getattr(m, attr)
++                try:
++                    a() if callable(a) else repr(a)
++                    print(f"[mosaic]   touched .{attr}")
++                except Exception as e:
++                    print(f"[mosaic]   .{attr} raised {type(e).__name__}: {str(e)[:120]}")
++        print("[mosaic] Boltz2 attributes:", [x for x in dir(m) if not x.startswith("_")][:25])
++        got.append("boltz2")
++    except Exception as e:
++        print(f"[mosaic] Boltz2 unavailable: {type(e).__name__}: {str(e)[:300]}")
++    total = 0
++    for sub in ("hf", "torch", "xdg", "mosaic"):
++        d = f"/weights/{sub}"
++        n = sum(len(f) for _, _, f in os.walk(d)) if os.path.isdir(d) else 0
++        sz = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(d) for f in fs) if os.path.isdir(d) else 0
++        total += sz
++        print(f"[mosaic] /weights/{sub}: {n} files, {sz/1e9:.2f} GB")
++    weights.commit()
++    # Success is BYTES ON THE VOLUME, not "the class constructed". Constructing Boltz2 is
++    # lazy and downloads nothing, so the previous criterion passed against an empty Volume.
++    ok = total > 1e8
++    print(f"[mosaic] total cached: {total/1e9:.2f} GB")
++    print("[mosaic] STEP 3 " + ("PASSED" if ok else f"FAILED - only {total/1e9:.2f} GB on the Volume"))
++    return {"cached": got, "bytes": total}
++
++
++# ----------------------------------------------------------------- STEP 4: design
++#
++# WHY MOSAIC IS THE RIGHT TOOL HERE (the reversal, recorded in methods-stack.md):
++# two different problems were being conflated.
++#   supply    -- is a carboxylate present at all?  BoltzGen `sequence:` pinning, 80/80.
++#   placement -- is it within 4.0 A of H433 ND1/NE2 WHILE the binder folds and binds?
++#                2/160 by sampling, and the single hit does not fold.
++# Placement is irreducibly a continuous multi-objective problem, so it belongs in a
++# written objective rather than a post-hoc filter. Each of the week's three failure
++# modes has a loss term: ipSAE_min 0.0000 -> IPTM/PAE, binder pLDDT 37 -> PLDDTLoss +
++# globularity, salt-bridge geometry 2/160 -> BinderTargetContact + the custom
++# AcidNearHis term below.
++#
++# NUMBERING -- READ THIS BEFORE CHANGING AN INDEX.
++# Four schemes are live in this project and mixing them has cost real money. Everything
++# below speaks exactly one: POSITIONAL in egfr_ecd_6aru_renum.pdb, contiguous 1..609,
++# where positional = canonical - 27. So canonical H433 -> 406, and the declared patch
++# 403..409 == canonical 430..436 == motif TKQHGQF (bin/make_tight_specs.py carries the
++# same patch and the same independent motif check). BoltzGen's OUTPUT files use yet
++# another offset -- H433 -> 409, which is what bin/ph_gate_target_his.py CANON encodes --
++# so for the files THIS function writes that gate needs CANON = {406: "H433"}. Every run
++# ships a numbering.json saying so, so nobody re-derives it.
++#
++# C1 (BLOCKING, frozen-decisions.md): no ipSAE term and no ESMFold2 anywhere in the
++# design loss -- that is the frozen ranking instrument. Design runs on Boltz-2 and
++# ipSAE_min is held back for ranking. ESMFoldGlobularity is NOT an ESMFold2 model: it is
++# a model-agnostic radius-of-gyration term on whatever distogram it is handed (see
++# mosaic/losses/structure_prediction.py), here Boltz-2's. Permitted.
++#
++# WHAT MOSAIC STILL CANNOT DO: there is no pKa term and PROPKA is not differentiable.
++# The pH switch stays a post-hoc selector. Division of labour: Mosaic holds fold + bind +
++# contact geometry, then bin/ph_gate_target_his.py gates, then bin/knockout_control.py.
++
++TOKENS = "ARNDCQEGHILKMFPSTWYV"              # mosaic.common.TOKENS, mirrored for local use
++A37 = {"CA": 1, "ND1": 14, "NE2": 25,         # mosaic.losses.atom37.ATOM37_NAMES order
++       "OD1": 16, "OD2": 17, "OE1": 26, "OE2": 27,
++       # --- problem 2 (TNF) adds the CATION nitrogens. The mechanism is MIRRORED:
++       # problem 1 put a binder ACID against a TARGET histidine (EGFR H433); problem 2
++       # puts a binder HISTIDINE against a TARGET cation (TNF R108 / K166). Indices
++       # verified against the standard atom37 ordering, in which the seven above also
++       # land exactly where this dict already says they do.
++       "NE": 23, "NH1": 29, "NH2": 30, "NZ": 35}
++ARG_CATION_N = ("NE", "NH1", "NH2")
++LYS_CATION_N = ("NZ",)
++DEFAULT_CROP = (284, 453)                     # domain III, positional (== canonical 311..480)
++DEFAULT_EPITOPE = "403,404,405,406,407,408,409"
++ANCHOR = 406                                  # H433, positional
++
++
++def _cache_env():
++    """Point every cache mosaic uses at the Volume. Must run before importing mosaic.
++
++    Same trick as fetch_weights(): mosaic ignores HF_HOME/TORCH_HOME and keeps its own
++    cache at ~/.cache/mosaic, whose only documented override is a --cache CLI flag that
++    does not exist when driving the Python API. Symlink instead. 8.03 GB is already on
++    the Volume, so this is the difference between a 30-second start and a 10-minute one.
++    """
++    import os
++    import shutil
++
++    os.environ["HF_HOME"] = "/weights/hf"
++    os.environ["HUGGINGFACE_HUB_CACHE"] = "/weights/hf/hub"
++    os.environ["TORCH_HOME"] = "/weights/torch"
++    os.environ["XDG_CACHE_HOME"] = "/weights/xdg"
++    for d in ("/weights/hf/hub", "/weights/torch", "/weights/xdg", "/weights/mosaic"):
++        os.makedirs(d, exist_ok=True)
++    real = "/root/.cache/mosaic"
++    os.makedirs("/root/.cache", exist_ok=True)
++    if os.path.isdir(real) and not os.path.islink(real):
++        shutil.rmtree(real)
++    if not os.path.islink(real):
++        os.symlink("/weights/mosaic", real)
++
++
++def _prepare_target(pdb_path, chain_id: str, crop):
++    """Polymer chain + sequence + positional residue numbers, from a PDB on disk.
++
++    Boltz "wants perfect cifs" (mosaic/models/boltz2.py:build_template_yaml), and the
++    template's declared full_sequence is read straight off the chain's residue names, so
++    waters, ligands, altlocs and hydrogens have to go or the template silently mismatches
++    the sequence we pass alongside it.
++    """
++    import gemmi
++
++    st = gemmi.read_structure(str(pdb_path))
++    st.setup_entities()
++    st.remove_alternative_conformations()
++    st.remove_hydrogens()
++    st.remove_ligands_and_waters()
++    residues = [
++        r for r in st[0][chain_id]
++        if (info := gemmi.find_tabulated_residue(r.name)) and info.is_amino_acid()
++    ]
++    if crop is not None:
++        lo, hi = crop
++        residues = [r for r in residues if lo <= r.seqid.num <= hi]
++    chain = gemmi.Chain(chain_id)
++    for r in residues:
++        chain.add_residue(r)
++    resnums = [r.seqid.num for r in residues]
++    sequence = gemmi.one_letter_code([r.name for r in residues]).upper()
++    if len(sequence) != len(resnums) or "X" in sequence:
++        raise SystemExit(f"STEP 4 FAILED: non-standard residue in target: {sequence}")
++    return chain, sequence, resnums
++
++
++def parse_epitope(spec):
++    """Positions from an epitope spec. '', 'none' and 'free' all mean a FREE FOOTPRINT.
++
++    Module level, and used by BOTH legs, for the reason his_reduce is module level: when
++    only the human leg understood 'none', the free-footprint family was unreachable with
++    the species leg on. --epitope none freed the human leg, then the species validation
++    rejected an empty --target2-epitope as a MISSING FLAG rather than a deliberate free
++    footprint, so there was no way to express "both legs free" -- the only configuration
++    the symmetry check below will accept once the human leg is free.
++    """
++    if spec is None or str(spec).strip().lower() in ("", "none", "free"):
++        return []
++    return [int(v) for v in str(spec).split(",")]
++
++
++def fmt_epitope(epitope_idx):
++    """Render the footprint for the run banner, tolerating the free-footprint None.
++
++    epitope_idx is None (not []) on the free path, because upstream BinderTargetContact
++    reads None as "no restriction". A bare len() here raised TypeError AFTER the container
++    had paid for cold start and the Boltz-2 weight load.
++    """
++    return "free" if epitope_idx is None else str(len(epitope_idx))
++
++
++def _prepare_target_set(label, target_path, chain_csv, crop_t, epitope_pos,
++                        anchor, anchor_chain, mechanism):
++    """Prepare one TARGET SPECIES: chains, per-chain offsets, epitope indices, anchor.
++
++    Factored out so the human and mouse legs run the SAME index arithmetic instead of two
++    copies of it. That matters here specifically: both of this file's 2026-10-06 bugs lived
++    in this block (a stale `resnums` after the multi-chain rewrite, and an epitope applied to
++    one protomer instead of all three), and a second hand-written copy for mouse would be a
++    second place for them to come back.
++
++    `label` only tags the log lines, so a reader can tell which species a number belongs to.
++
++    TWO INDEX SPACES, AND THEY ARE NOT THE SAME:
++      epitope_idx  TARGET-relative. BinderTargetContact slices [:L, L:] first, then indexes
++                   columns, so these are offsets into the CONCATENATED target, excluding L.
++      anchor_local TARGET-relative too; the caller adds L, because the loss terms index
++                   output.atom37_coords directly and so carry the binder's length.
++    Both need a per-chain offset; only one needs L. Getting that wrong silently aims the
++    mechanism at whatever residue happens to sit at the stale index.
++
++    MOUSE EPITOPE POSITIONS ARE NOT THE HUMAN ONES. A deletion near human positional 68
++    shifts the register, so the offset is -3 at the anchor and -4 further along. The mapping
++    is computed from a pairwise alignment of the OBSERVED chains and stored in
++    analysis/02-tnf/epitope_conserved.json; it is passed in, never inferred here.
++    """
++    chain_ids = [c.strip() for c in chain_csv.split(",") if c.strip()]
++    chains_prepared, target_seqs, offsets, off = [], [], {}, 0
++    for cid in chain_ids:
++        ch_i, seq_i, resnums_i = _prepare_target(target_path, cid, crop_t)
++        idx_i = {num: j for j, num in enumerate(resnums_i)}
++        missing = [p for p in epitope_pos + ([anchor] if cid == anchor_chain else [])
++                   if p not in idx_i]
++        if missing:
++            raise SystemExit(f"STEP 4 FAILED [{label}]: positions {missing} are not in "
++                             f"chain {cid} crop {crop_t}")
++        chains_prepared.append((cid, ch_i, seq_i, idx_i, resnums_i))
++        target_seqs.append(seq_i)
++        offsets[cid] = off
++        off += len(seq_i)
++    if anchor_chain not in offsets:
++        raise SystemExit(f"STEP 4 FAILED [{label}]: anchor_chain {anchor_chain!r} is not in "
++                         f"chains {chain_ids}")
++
++    # epitope on EVERY protomer: the trimer is a homotrimer, the same positional residues are
++    # the epitope on each copy, and the binder sits in a seam between two of them. Rewarding
++    # contact with any copy is the honest statement of that; restricting to one would re-impose
++    # the single-protomer assumption the multi-chain change exists to remove.
++    epitope_idx = [offsets[cid] + idx_i[p]
++                   for cid, _ch, _s, idx_i, _rn in chains_prepared for p in epitope_pos]
++    _ac, _ach, a_seq, a_idx, _arn = next(c for c in chains_prepared if c[0] == anchor_chain)
++    anchor_local = offsets[anchor_chain] + a_idx[anchor]
++    anchor_aa = a_seq[a_idx[anchor]]
++    target_seq = "".join(target_seqs)
++
++    print(f"[mosaic] [{label}] chains {chain_ids} crop={crop_t} "
++          f"lens={[len(s) for s in target_seqs]} total={len(target_seq)}")
++    print(f"[mosaic] [{label}] chain offsets (target-relative) {offsets}")
++    if epitope_pos:
++        print(f"[mosaic] [{label}] epitope {len(epitope_pos)} positions x {len(chain_ids)} "
++              f"chains -> {len(epitope_idx)} target idx")
++    else:
++        print(f"[mosaic] [{label}] FREE FOOTPRINT: no epitope restriction -- contact is "
++              f"rewarded against any of {len(target_seq)} target residues (s41 family B). "
++              f"The anchor is still pinned.")
++    print(f"[mosaic] [{label}] anchor positional {anchor} on chain {anchor_chain} "
++          f"-> target idx {anchor_local} = {anchor_aa}")
++
++    MECHANISMS = ("acid_near_his", "his_near_cation")
++    if mechanism not in MECHANISMS:
++        raise SystemExit(f"STEP 4 FAILED: mechanism {mechanism!r} not in {MECHANISMS}")
++    want = "H" if mechanism == "acid_near_his" else "RK"
++    if anchor_aa not in want:
++        raise SystemExit(
++            f"STEP 4 FAILED [{label}]: anchor {anchor} is {anchor_aa}, not one of {want!r} "
++            f"for mechanism {mechanism!r} -- numbering or mechanism is wrong")
++    print(f"[mosaic] [{label}] mechanism {mechanism}: anchor {anchor_aa}{anchor} on the TARGET")
++    return {"chain_ids": chain_ids, "chains_prepared": chains_prepared,
++            "offsets": offsets, "epitope_idx": epitope_idx,
++            "anchor_local": anchor_local, "anchor_aa": anchor_aa,
++            "target_seq": target_seq, "target_seqs": target_seqs}
++
++
++def check_cation_atoms(anchor_aa: str, cation_atoms: tuple, label: str) -> None:
++    """Assert the cation atom set matches the anchor residue, BEFORE any GPU work.
++
++    An unmodelled atom37 slot is (0,0,0), not absent -- scatter_atom37 zero-initialises the
++    grid -- so asking for NZ on an arginine, or any ARG/LYS atom on a histidine, makes
++    HisNearCation measure every binder CA to the coordinate ORIGIN. It then returns a
++    gradient-free constant that logs as `his_cation: 6.91`, indistinguishable from an honest
++    "no histidine placed yet". That is how the species leg silently contributed nothing.
++
++    This check lives HERE, not inside the loss. The first version asserted on
++    `output.atom37_mask` inside `__call__`, which raised ConcretizationTypeError: you cannot
++    call float() on a traced array under jit, and you cannot branch on one. The values needed
++    are known before the GPU is touched, so the check belongs at construction.
++    """
++    want = {"R": ARG_CATION_N, "K": LYS_CATION_N}.get(anchor_aa)
++    if want is None:
++        raise SystemExit(
++            f"STEP 4 FAILED [{label}]: HisNearCation needs an R or K anchor; got {anchor_aa!r}. "
++            f"A histidine anchor means the mechanism is acid_near_his, not his_near_cation."
++        )
++    if tuple(cation_atoms) != tuple(want):
++        raise SystemExit(
++            f"STEP 4 FAILED [{label}]: anchor is {anchor_aa} but cation_atoms={cation_atoms}, "
++            f"expected {want}. Those atoms are unmodelled on a {anchor_aa}, so the term would "
++            f"measure to the coordinate origin and return a constant."
++        )
++
++
++def his_reduce(score, topk, xp):
++    """The reduction HisNearCation applies to its per-position scores.
++
++    Module level, and taking its array module as an argument, so that the loss term running
++    on jnp inside Modal and bin/mosaic_selftest.py running on numpy on a laptop exercise ONE
++    definition. Writing the formula twice would make the test agree with a copy of the code
++    rather than with the code. `xp.sort` is differentiable under jax -- it is a permutation,
++    so gradient routes to whichever positions are currently best -- which a hard
++    index-select would not be.
++    """
++    # [-0:] is the WHOLE array, so topk=0 reproduces exactly the score.sum() formulation this
++    # function exists to replace -- and the mutation test would not catch it, since it only
++    # ever passes 2. Fail loudly instead.
++    if topk < 1:
++        raise ValueError(f"topk must be >= 1; topk=0 silently restores the summed form")
++    return xp.sort(score)[-topk:].sum()
++
++
++def _geometry_p2(st, anchor_resnum: int, anchor_chain_idx: int = 0):
++    """Problem 2's mirror: shortest binder-HISTIDINE ring-N to target CATION-N distance.
++
++    Same role as _geometry() and the same discipline: this runs BEFORE any pKa, because a
++    histidine that is not actually near the cation cannot switch whatever a pKa predictor
++    says. Problem 1's version caught a 3.59x "switch" whose binder sat 27 A away; the failure
++    mode is identical here with the chemistries swapped.
++
++    s9 measured the cation's effect at an ND1-to-N distance of 3.0 A, and s6d measured that
++    geometry as reachable, so 4.0 A is the same generous bar problem 1 used.
++    """
++    # MULTI-CHAIN: chain 0 is the binder and EVERY chain after it is a target protomer. The
++    # first version read st[0][1] alone, which on a trimer silently measured against protomer A
++    # no matter which chain the anchor was actually declared on -- a wrong number, not an error.
++    # THE ANCHOR IS ON ONE SPECIFIC PROTOMER. This searched `for t in targets` and took the
++    # FIRST ARG/LYS at that residue number, with no idea which chain the loss was aimed at.
++    # TNF is a HOMOTRIMER: after renumbering, chains B, C and D all carry ARG 27. So with
++    # --anchor-chain B the loss pulled toward protomer B's R108 while this measured protomer
++    # A's, and a perfectly placed histidine was reported at ~30 A with geometry_pass False.
++    # Every geometry number produced before 2026-10-06 19:40 has that defect.
++    #
++    # The earlier comment claimed this was fixed by searching all chains instead of st[0][1].
++    # It was not: searching all chains is the bug, because the matches are indistinguishable.
++    # bin/mosaic_selftest.py could not catch it because its decoy protomers were ALA, so the
++    # ("ARG","LYS") filter made the search unambiguous -- a property the real trimer lacks.
++    binder, targets = st[0][0], list(st[0])[1:]
++    if not 0 <= anchor_chain_idx < len(targets):
++        return {}
++    cat = next((r for r in targets[anchor_chain_idx]
++                if r.seqid.num == anchor_resnum and r.name in ("ARG", "LYS")), None)
++    if cat is None:
++        return {}
++    names = ARG_CATION_N if cat.name == "ARG" else LYS_CATION_N
++    pts = [a.pos for a in cat if a.name in names]
++    if not pts:
++        return {}
++    best_n, best_ca, best_res = 1e9, 1e9, None
++    for r in binder:
++        if r.name != "HIS":
++            continue
++        for a in r:
++            if a.name not in ("ND1", "NE2", "CA"):
++                continue
++            d = min(a.pos.dist(p) for p in pts)
++            if a.name == "CA":
++                best_ca = min(best_ca, d)
++            elif d < best_n:
++                best_n, best_res = d, f"{r.name}{r.seqid.num}"
++    if best_res is None:
++        return {"his_N_to_cation_N": None, "geometry_pass": False,
++                "note": "no histidine in the binder"}
++    return {"his_N_to_cation_N": round(best_n, 2),
++            "his_CA_to_cation_N": round(best_ca, 2),
++            "closest_his": best_res,
++            "geometry_pass": bool(best_n <= 4.0)}
++
++
++def _geometry(st, anchor_resnum: int, anchor_chain_idx: int = 0):
++    """Shortest binder-carboxylate-O to anchor-His-N distance in a written complex.
++
++    This is verification step 1 and it runs BEFORE any pKa: >4.0 A cannot be a switch
++    whatever PROPKA says. The check that caught a 3.59x "switch" whose binder sat 27 A
++    from the histidine was exactly this one.
++    """
++    # Same defect as _geometry_p2 had: this read st[0][1] unconditionally. Harmless while
++    # problem 1's EGFR target is a monomer, wrong the first time acid_near_his is run
++    # multi-chain, so it is parameterised rather than left as a latent trap.
++    binder = st[0][0]
++    _targets = list(st[0])[1:]
++    if not 0 <= anchor_chain_idx < len(_targets):
++        return {}
++    target = _targets[anchor_chain_idx]
++    his = next((r for r in target if r.seqid.num == anchor_resnum), None)
++    if his is None:
++        return {}
++    ring = [a.pos for a in his if a.name in ("ND1", "NE2")]
++    if not ring:
++        return {}
++    best_o, best_ca, best_res = 1e9, 1e9, None
++    for r in binder:
++        if r.name not in ("ASP", "GLU"):
++            continue
++        for a in r:
++            if a.name not in ("OD1", "OD2", "OE1", "OE2", "CA"):
++                continue
++            d = min(a.pos.dist(p) for p in ring)
++            if a.name == "CA":
++                best_ca = min(best_ca, d)
++            elif d < best_o:
++                best_o, best_res = d, f"{r.name}{r.seqid.num}"
++    return {
++        "acid_O_to_his_N": None if best_o > 1e8 else round(best_o, 2),
++        "acid_CA_to_his_N": None if best_ca > 1e8 else round(best_ca, 2),
++        "closest_acid": best_res,
++        "geometry_pass": None if best_o > 1e8 else bool(best_o <= 4.0),
++    }
++
++
++# Both bugs found in this file on 2026-10-03 were caught by looking at ONE number and
++# knowing what it had to be, not by reading the code: `iptm_repred` pinned at exactly
++# 0.0 (IPTMLoss handed a zero-length sequence) and `acid_dmin_CA` reported as -39.59 A
++# (APGM evaluates the loss at an extrapolated point off the simplex, so `1 - acid` goes
++# negative). Both printed as plausible numbers next to a clean exit code. These two
++# functions turn "a reviewer might notice" into "the run refuses to lie".
++
++# (column, low, high, closed_low, closed_high) -- None means unbounded on that side.
++METRIC_BOUNDS = (
++    ("iptm_design", 0.0, 1.0, False, True),        # exactly 0.0 is the IPTMLoss artifact
++    ("iptm_repred", 0.0, 1.0, False, True),
++    ("iptm_repred_best_pair", 0.0, 1.0, False, True),
++    ("plddt_binder_design", 0.0, 1.0, False, True),
++    ("plddt_binder_repred", 0.0, 1.0, False, True),
++    ("frac_V", 0.0, 1.0, True, True),
++    ("frac_G", 0.0, 1.0, True, True),
++    ("frac_H", 0.0, 1.0, True, True),
++    # The problem-2 distance columns. Their absence meant the bounds and NaN checks never
++    # applied to a his_near_cation row -- the same mirrored-for-one-mechanism-only gap that
++    # GEOMETRY_KEYS had, found in the same review.
++    ("his_N_to_cation_N", 0.0, 200.0, True, True),
++    ("his_CA_to_cation_N", 0.0, 200.0, True, True),
++    ("acid_O_to_his_N", 0.0, 200.0, True, True),   # a distance is never negative
++    ("acid_CA_to_his_N", 0.0, 200.0, True, True),
++)
++GEOMETRY_BAR = 4.0
++
++
++# D-P2-1: geometry is UNINFORMATIVE BELOW BINDING, so it is not reported below this iptm.
++# Set from the negative side, where the measurements are: the voided LT-alpha dead fold read
++# 0.408-0.417 over 5 seeds and the 5-step non-binders read 0.11-0.31, while the measured G1
++# binders (adalimumab + Schroter PSV#1/2/3, KD 4.6-112 pM) read 0.77-0.86 over 20. It is a
++# NECESSARY condition only -- deliberately NOT set at 0.77, because those are Fabs, s16 found
++# no transferable thresholds between formats, and a correctly folded NON-binder (the corrected
++# G4) reads 0.46. Above this bar means "geometry is worth reading", never "this binds".
++GEOMETRY_IPTM_BAR = 0.45
++
++# The geometry keys differ by mechanism, and reading only problem 1's left BOTH geometry guards
++# inert on every his_near_cation row -- a guard passing while blind, s25's pattern, found
++# 2026-10-06 while implementing D-P2-1.
++GEOMETRY_KEYS = (("acid_O_to_his_N", "closest_acid"),       # acid_near_his  (problem 1)
++                 ("his_N_to_cation_N", "closest_his"))      # his_near_cation (problem 2)
++
++
++def gate_geometry(row: dict, bar: float = GEOMETRY_IPTM_BAR) -> dict:
++    """D-P2-1. Below `bar`, geometry_pass becomes None ("n/a"), never False.
++
++    False asserts the titratable residue WAS measured and found misplaced. Below the bar the
++    binder is not bound, so nothing about placement was measured and False is a false claim --
++    p2trimer02 "passed" at 3.15 A while carrying 12 histidines, and p2species02 "failed" at
++    20.36 A with iptm 0.178; neither number was about histidine placement.
++
++    The DISTANCE is kept. It is a real measurement of the re-predicted pose; only the verdict
++    is withdrawn. Gating uses `iptm_repred`, because geometry is measured on the RE-PREDICTION
++    and gating on design-time iptm would gate on a different structure.
++    """
++    iptm = row.get("iptm_repred")
++    if iptm is None or iptm != iptm:                 # absent or NaN -> cannot gate, fail closed
++        row["geometry_read"] = False
++        row["geometry_gate"] = "n/a: iptm_repred missing or NaN"
++        row["geometry_pass"] = None
++    elif iptm < bar:
++        row["geometry_read"] = False
++        row["geometry_gate"] = f"n/a: iptm_repred {iptm} < {bar} (D-P2-1)"
++        row["geometry_pass"] = None
++    else:
++        row["geometry_read"] = True
++        row["geometry_gate"] = f"read: iptm_repred {iptm} >= {bar}"
++    return row
++
++
++def check_row(row: dict, binder_length: int) -> list[str]:
++    """Impossible-value audit of one emitted design row. Returns a list of violations.
++
++    Checks what the quantity IS, not what it should ideally be: a distance cannot be
++    negative, a probability cannot exceed 1, NoCys means zero cysteine, and
++    geometry_pass must agree with the distance it was derived from. A bad DESIGN passes
++    every check here; only a bad MEASUREMENT fails.
++    """
++    bad = []
++    for col, lo, hi, closed_lo, closed_hi in METRIC_BOUNDS:
++        v = row.get(col)
++        if v is None:
++            continue                      # legitimately absent, e.g. no acid in the binder
++        if v != v:
++            bad.append(f"{col} is NaN")
++            continue
++        if v < lo or (v == lo and not closed_lo):
++            bad.append(f"{col}={v} violates lower bound {'[' if closed_lo else '('}{lo}")
++        if v > hi or (v == hi and not closed_hi):
++            bad.append(f"{col}={v} violates upper bound {hi}{']' if closed_hi else ')'}")
++    if row.get("n_C") not in (0, None):
++        bad.append(f"n_C={row['n_C']} but NoCys should make cysteine impossible")
++    if len(row.get("sequence", "")) != binder_length:
++        bad.append(f"sequence is {len(row.get('sequence', ''))} aa, expected {binder_length}")
++    passed = row.get("geometry_pass")
++    for dkey, rkey in GEOMETRY_KEYS:
++        if dkey not in row and rkey not in row:
++            continue                      # this mechanism's keys are simply not on this row
++        d = row.get(dkey)
++        if d is not None and passed is not None and passed != (d <= GEOMETRY_BAR):
++            bad.append(f"geometry_pass={passed} disagrees with {dkey}={d} "
++                       f"at the {GEOMETRY_BAR} A bar")
++        if (d is None) != (row.get(rkey) is None):
++            bad.append(f"{dkey} and {rkey} must be present or absent together")
++    # A withdrawn verdict must say so. geometry_pass=None with no gate recorded would be
++    # indistinguishable from a measurement that never ran.
++    # Distinguish "verdict PRESENT and withdrawn" from "geometry never computed". When
++    # _geometry* returns {} above the iptm bar, geometry_pass is ABSENT, not None -- and
++    # row.get() collapsed both to None, so a design whose metrics were fine got flagged
++    # METRICS SUSPECT and dropped from ranking by its own audit.
++    if ("geometry_pass" in row and row["geometry_pass"] is None
++            and "geometry_gate" in row and row.get("geometry_read") is not False):
++        bad.append("geometry_pass is None but geometry_read is not False")
++    return bad
++
++
++def loss_term_names(loss) -> list[str]:
++    """Every LossTerm class name in a composed loss, flattened, in order.
++
++    `LinearCombination` holds its members in `.l`, and model losses hold the inner loss
++    in `.loss`, so the whole tree walks. This is what makes C1 checkable: the previous
++    `no_ipsae_no_esmfold2: True` in config.json was a hardcoded literal that would have
++    printed True with IPSAE_min sitting in the objective. A claim, not evidence.
++    """
++    names = []
++    seen = set()
++
++    def walk(node, depth=0):
++        if node is None or depth > 12 or id(node) in seen:
++            return
++        seen.add(id(node))
++        members = getattr(node, "l", None)
++        if isinstance(members, (list, tuple)):
++            for m in members:
++                walk(m, depth + 1)
++            return
++        names.append(type(node).__name__)
++        walk(getattr(node, "loss", None), depth + 1)
++
++    walk(loss)
++    return names
++
++
++def audit_c1(term_names: list[str], model_names: list[str]) -> list[str]:
++    """C1: the design objective may not contain ipSAE and may not run on ESMFold2.
++
++    Derived from the actual composed loss, never asserted. ESMFoldGlobularity and
++    ESMFoldInterContact are NOT ESMFold2 models -- they are model-agnostic terms on
++    whatever distogram they are handed -- so they are matched exactly and allowed, while
++    anything else carrying the name is a violation.
++    """
++    allowed_esmfold_terms = {"ESMFoldGlobularity", "ESMFoldInterContact"}
++    bad = []
++    for name in term_names:
++        if "IPSAE" in name.upper():
++            bad.append(f"C1: loss term {name} contains ipSAE, the frozen ranking instrument")
++        if "ESMFOLD" in name.upper() and name not in allowed_esmfold_terms:
++            bad.append(f"C1: loss term {name} looks like an ESMFold2 term")
++    for name in model_names:
++        if "ESMFOLD" in name.upper():
++            bad.append(f"C1: design ran on model {name}; ESMFold2 is reserved for ranking")
++    return bad
++
++
++@app.function(image=image, gpu=GPU, timeout=TIMEOUT * 60,
++              volumes={"/weights": weights})
++def design(
++    target_pdb: bytes,
++    run_name: str,
++    target_chain: str = "A",          # comma-separated for a multi-chain target, e.g. "A,B,C"
++    anchor_chain: str = "A",          # which of those chains carries the anchor residue
++    # --- SPECIES LEG (objective 2). Off unless --target2 is given, so every existing
++    # command reproduces exactly. See analysis/02-tnf/epitope_conserved.json for the
++    # mapping; mouse epitope positions are NOT the human ones.
++    target_name: str = "",            # provenance only: bytes carry no filename
++    target2_name: str = "",
++    target2_pdb: bytes = b"",         # BYTES, not a path: the container cannot see local files
++    # DIMER, and it is FORCED, not preferred. A mouse trimer here is 976 tokens and it
++    # OOMs on an L40S: RESOURCE_EXHAUSTED trying to allocate 34.24 GiB inside
++    # jit______eval_loss_and_grad, against 48 GB total (p2species03, 2026-10-06 6:39 PM).
++    # 828 -> 976 tokens is only +18% tokens but ~1.39x on the quadratic attention terms,
++    # which is the cliff. The dimer at 828 runs at a measured 25.9 s/step.
++    #
++    # A trimer needs an H100 (80 GB) at $3.95/hr against the L40S at $1.95 -- roughly 1.5-2.3x
++    # the wave cost, on an untested configuration. Not worth it, because the reason for
++    # wanting a trimer is weak: s36's 1-in-5 non-assembly was measured on UNTEMPLATED
++    # ESMFold2, while this leg hands Boltz-2 the crystal chain as a template_chain, so the
++    # rate probably does not transfer at all. Pass --target2-chain "A,B,C" with GPU=H100 to
++    # revisit.
++    target2_chain: str = "A,B",
++    target2_epitope: str = "",
++    target2_anchor: int = 0,
++    target2_anchor_chain: str = "A",
++    w_species: float = 1.0,
++    crop: str = "284:453",
++    epitope: str = DEFAULT_EPITOPE,
++    anchor: int = ANCHOR,
++    mechanism: str = "acid_near_his",
++    lengths: str = "76",
++    n_seeds: int = 2,
++    seed0: int = 0,
++    steps_soft: int = 60,
++    steps_sharp: int = 40,
++    recycling_steps: int = 1,
++    sampling_steps: int = 10,
++    stepsize: float = 0.0,
++    sharpen: float = 1.3,
++    # THE GRADIENT ESTIMATOR. Defaults reproduce every run before 2026-10-07 exactly:
++    # one sample per gradient evaluation, momentum 0.9 soft / 0.5 sharp. All sixteen
++    # trajectories shared that configuration -- weights, steps and footprint were the three
++    # axes varied, and this was never one of them. Per-step interface SD is 0.0345 against a
++    # signal of ~0.13, so momentum 0.9 integrating one noisy sample can random-walk instead of
++    # descending. grad_samples > 1 switches the interface legs to mosaic's own
++    # build_multisample_loss, which re-runs structure+confidence from ONE trunk output and
++    # averages -- four samples halve the noise SD for well under 4x the cost.
++    grad_samples: int = 1,
++    momentum_soft: float = 0.9,
++    momentum_sharp: float = 0.5,
++    use_mpnn: bool = True,
++    w_iptm: float = 1.0,
++    w_pae: float = 0.05,
++    w_contact: float = 1.0,
++    w_within: float = 1.0,
++    w_plddt: float = 1.0,
++    w_glob: float = 0.3,
++    w_acid: float = 2.0,
++    w_mpnn: float = 3.0,
++    w_comp: float = 10.0,
++    w_monomer: float = 0.5,
++    cap_val: float = 0.12,
++    cap_gly: float = 0.08,
++    cap_his: float = 0.08,
++    acid_d0: float = 8.0,
++    his_d0: float = 6.5,
++    acid_width: float = 1.5,
++    acid_eps: float = 1e-3,
++    smoke: bool = False,
++):
++    """Step 4: gradient design of an acid-presenting binder against the H433 patch.
++
++    Returns [(relative_path, bytes)] like modal_boltzgen.py, AND writes the same tree to
++    /weights/runs/<run_name>/ before returning -- a detached run whose local client dies
++    on a DNS blip (four times on 2026-10-03) otherwise produces nothing recoverable.
++
++    Defaults chosen from what has actually been measured, not from taste:
++      crop 284:453  Domain III only, 170 residues. H433 is in domain III and every prior
++                    BoltzGen d3 arm already targeted it alone, so this is not a new
++                    choice -- but it IS a deviation from "chain A, contiguous 1..609" in
++                    the spec, made because 609 target tokens plus a binder is ~700 tokens
++                    of Boltz-2 WITH a backward pass, which will not fit 48 GB. Pass
++                    --crop none to run the full ECD and find out. The crop is expressed in
++                    the same positional numbering as everything else, and epitope indices
++                    are recomputed from it, so no second numbering scheme appears.
++      lengths 76    One length per run by default: each distinct binder length is a fresh
++                    JAX compile (minutes, not seconds). 56..90 is the only band that ever
++                    produced a switch -- 123..160 and 31..49 both produced zero.
++      stepsize 0    means 0.1*sqrt(L), mosaic's own recommended first guess.
++      no Cys        The 2026-10-03 winner was 24% Val / 12 Gly / 5 Cys and ESMFold2 could
++                    not fold it. Cys is removed from the alphabet outright (NoCys), Val
++                    and Gly are capped by a hinge penalty. This is what killed the winner.
++    """
++    import json
++    import os
++    from pathlib import Path
++    from tempfile import TemporaryDirectory
++
++    _cache_env()
++
++    import gemmi
++    import jax
++    import jax.numpy as jnp
++    import numpy as np
++
++    import mosaic.losses.structure_prediction as sp
++    from mosaic.common import LossTerm
++    from mosaic.losses.transformations import NoCys
++    from mosaic.models.boltz2 import Boltz2
++    from mosaic.optimizers import simplex_APGM
++    from mosaic.structure_prediction import TargetChain
++
++    print(f"[mosaic] jax {jax.__version__} devices {jax.devices()}")
++    if smoke:
++        steps_soft, steps_sharp, n_seeds = 3, 2, 1
++        print("[mosaic] SMOKE MODE: 3+2 steps, 1 seed -- proves the path, not the design")
++
++    crop_t = None if crop.lower() in ("none", "", "full") else tuple(
++        int(v) for v in crop.split(":")
++    )
++    # --epitope none is the FREE-FOOTPRINT family. Upstream BinderTargetContact does
++    # `if self.epitope_idx is not None: log_contact_inter = log_contact_inter[:, idx]`, so
++    # None means "reward contact with ANY target residue" rather than a chosen patch. That is
++    # the setup Mosaic's own author used to win Nipah de novo 9/10 -- he gave the model the
++    # target with no epitope and let the optimizer find the site (s41).
++    #
++    # The ANCHOR is still required: the pH mechanism needs a histidine against a specific
++    # cation, so the footprint is free but the one functional contact is not. That is the
++    # difference between this and Boyd's unconstrained affinity problem.
++    epitope_pos = parse_epitope(epitope)
++    _free_epitope = not epitope_pos
++    length_list = [int(v) for v in lengths.split(",")]
++    for L in length_list:
++        if not 56 <= L <= 90:
++            raise SystemExit(f"STEP 4 FAILED: length {L} outside the 56..90 band")
++
++    tmp = TemporaryDirectory()
++    target_path = Path(tmp.name) / "target.pdb"
++    target_path.write_bytes(target_pdb)
++    # The species target arrives as BYTES for the same reason the human one does: `modal run`
++    # ships this file and its arguments, NOT the working directory, so a path that resolves on
++    # the laptop is FileNotFoundError in the container. The first species smoke died exactly
++    # there, 1 minute in. Note that bin/mosaic_selftest.py cannot catch this class of bug --
++    # it runs locally, where the file does exist.
++    target2_path = Path(tmp.name) / "target2.pdb"
++    if target2_pdb:
++        target2_path.write_bytes(target2_pdb)
++    # --- MULTI-CHAIN TARGET -------------------------------------------------------------
++    # `target_chain` is a COMMA-SEPARATED list. Problem 1's EGFR is a monomer and passed one;
++    # problem 2's TNF-alpha is a HOMOTRIMER whose epitope straddles the seam between two
++    # protomers (s1: "a binder in that groove must straddle the subunit interface; it cannot
++    # sit on one chain"). Designing against a single protomer lets the optimizer place a binder
++    # where the other two subunits actually are.
++    #
++    # Verified against mosaic upstream before writing this:
++    #   * binder_features(binder_length, chains) prepends the binder and delegates to
++    #     target_only_features, which zips `chains` against "ABCDEF..." -- every chain is
++    #     handled, there is no assertion at one, and the only ceiling is 26.
++    #   * BinderTargetIPTM builds asym_id as zeros(binder) + ones(EVERYTHING ELSE), so all
++    #     target residues share one asym_id and target-target protomer pairs are NEVER scored.
++    #     That was the real risk: it is exactly the failure bin/ipsae_min.py refuses on in s7,
++    #     where a flat min across chain pairs let an intra-binder interface be read as binding.
++    #
++    # TWO INDEX SPACES, AND THEY ARE NOT THE SAME:
++    #   epitope_idx  TARGET-relative. BinderTargetContact slices [:L, L:] first, then indexes
++    #                columns, so these are offsets into the CONCATENATED target, excluding L.
++    #   anchor idx   GLOBAL. The loss terms index output.atom37_coords directly, so the anchor
++    #                carries the binder's L as well.
++    # Both need a per-chain offset; only one needs L. Getting that wrong silently aims the
++    # mechanism at whatever residue happens to sit at the stale index.
++    HU = _prepare_target_set("human", target_path, target_chain, crop_t, epitope_pos,
++                             anchor, anchor_chain, mechanism)
++    chain_ids = HU["chain_ids"]
++    chains_prepared = HU["chains_prepared"]
++    offsets = HU["offsets"]
++    # None (not []) when free: an empty list would slice the contact map to zero columns and
++    # silently kill the binding term, which is the quiet-wrong-answer failure mode this file
++    # keeps producing. None is the documented upstream "no restriction" value.
++    epitope_idx = HU["epitope_idx"] or None
++    anchor_local = HU["anchor_local"]
++    anchor_aa = HU["anchor_aa"]
++    target_seq = HU["target_seq"]
++    target_seqs = HU["target_seqs"]
++    # Which prepared target chain carries the anchor. Needed by the step-4 geometry check,
++    # which otherwise measures the first protomer that happens to match (finding #1).
++    anchor_chain_idx = [c[0] for c in chains_prepared].index(anchor_chain)
++
++    # SPECIES LEG. Objective 2 (mouse cross-reactivity) was never in the loss before this:
++    # every run optimised human binding and mouse was CHECKED afterwards. s22 found ipSAE_min
++    # cannot RANK by species, which says nothing about whether it can be DESIGNED for -- the
++    # same filter-vs-objective distinction that applies to the pH terms.
++    #
++    # Why a second target rather than just restricting the epitope to conserved residues:
++    # human positional 68 is a histidine that mouse DOES NOT HAVE AT ALL. A deletion moves the
++    # backbone, and no choice of which sidechains to contact fixes a backbone difference.
++    MO = None
++    if target2_pdb:
++        # The ANCHOR is required on both legs -- the pH mechanism needs its one cation
++        # contact in either species. The EPITOPE is not: 'none' is a deliberate free
++        # footprint, and the symmetry check below is what forces the two legs to agree.
++        if not target2_anchor:
++            raise SystemExit("STEP 4 FAILED: --target2 needs --target2-anchor. It is NOT "
++                             "the human number: a deletion near human positional 68 shifts "
++                             "the register (-3 at the anchor, -4 further along). See "
++                             "analysis/02-tnf/epitope_conserved.json.")
++        epi2 = parse_epitope(target2_epitope)
++        if len(epi2) != len(epitope_pos):
++            raise SystemExit(f"STEP 4 FAILED: species epitope has {len(epi2)} positions, "
++                             f"human has {len(epitope_pos)} -- the two legs must reward the "
++                             f"SAME epitope, mapped, or they are not the same objective. "
++                             f"A free footprint must be free on BOTH: pass --epitope none "
++                             f"AND --target2-epitope none.")
++        MO = _prepare_target_set("species", target2_path, target2_chain, None, epi2,
++                                 target2_anchor, target2_anchor_chain, mechanism)
++        if MO["anchor_aa"] != anchor_aa:
++            raise SystemExit(f"STEP 4 FAILED: anchor is {anchor_aa} on the human target and "
++                             f"{MO['anchor_aa']} on the species target -- one pH mechanism "
++                             f"cannot serve both")
++        print(f"[mosaic] SPECIES LEG ON: w={w_species}, anchor {anchor_aa} conserved, "
++              f"{len(epi2)} mapped epitope positions"
++              if epi2 else
++              f"[mosaic] SPECIES LEG ON: w={w_species}, anchor {anchor_aa} conserved, "
++              f"FREE FOOTPRINT on both legs")
++
++    # --- the one loss term the whole programme has failed to control -----------------
++    class AcidNearHis(LossTerm):
++        """Pull a binder carboxylate to within d0 of the anchor histidine's ring N.
++
++        Measured on CA, not on OD1/OD2: design features give the binder UNK/G reference
++        atoms, so the binder has NO SIDECHAINS during optimization (mosaic README). CA to
++        ring-N is the honest differentiable proxy -- an Asp CA can sit at most ~3.9 A from
++        its own carboxylate O, so d0=8.0 is the CA distance consistent with O within 4.0 A.
++        The real all-atom distance is measured after design by _geometry() on a
++        re-prediction, and that is the number the gate sees.
++
++        Shape is (acid probability at i) x sigmoid((d0 - d_i)/width), summed over i and
++        logged: smooth, rewards one well-placed carboxylate, and does not care which
++        position wins.
++        """
++        his_token: int
++        d_idx: int
++        e_idx: int
++        d0: float = 8.0
++        width: float = 1.5
++        eps: float = 1e-3
++
++        def __call__(self, sequence, output, key):
++            L = sequence.shape[0]
++            ca = output.atom37_coords[:L, A37["CA"]]
++            nd1 = output.atom37_coords[self.his_token, A37["ND1"]]
++            ne2 = output.atom37_coords[self.his_token, A37["NE2"]]
++            d = jnp.minimum(
++                jnp.linalg.norm(ca - nd1, axis=-1), jnp.linalg.norm(ca - ne2, axis=-1)
++            )
++            # CLIP IS LOAD-BEARING, do not remove it. APGM evaluates the loss at the
++            # extrapolated point `x + momentum*(x - x_prev)`, which is OFF the simplex:
++            # entries there can be negative or exceed 1. Unclipped, `score` could go
++            # negative, `total + eps` could reach <= 0, and `log` of a non-positive number
++            # is NaN -- which is exactly what happened on 5 of 180 steps in tune01 (2.8%),
++            # each one discarded by APGM's own NaN guard. The earlier comment here claimed
++            # clipping the loss "would flatten its gradient"; that was wrong in the way
++            # that matters. Clipping to [0,1] only zeroes this term's gradient at points
++            # that are not valid probability vectors. Inside the simplex -- where every
++            # real sequence lives -- the gradient is untouched.
++            acid = jnp.clip(
++                sequence[:, self.d_idx] + sequence[:, self.e_idx], 0.0, 1.0
++            )
++            score = acid * jax.nn.sigmoid((self.d0 - d) / self.width)
++            total = score.sum()
++            # `eps` sets how hard this term pushes when no carboxylate is placed at all:
++            # the loss maxes out at -log(eps), so 1e-3 peaks near 6.9 with a gradient of
++            # ~1000, and 0.1 peaks near 2.3. Left at 1e-3 so tune01 stays the comparable
++            # baseline; it is a parameter now so it can be swept deliberately instead of
++            # being changed by accident.
++            loss = -jnp.log(total + self.eps)
++            return loss, {
++                "acid_his": loss,
++                "acid_best": score.max(),
++                "acid_dmin_CA": jnp.min(d + (1.0 - acid) * 100.0),
++            }
++
++    class HisNearCation(LossTerm):
++        """Problem 2's MIRROR of AcidNearHis: pull a binder HISTIDINE to the target's cation.
++
++        Problem 1 placed a binder carboxylate against a TARGET histidine (EGFR H433). Problem 2
++        inverts the roles -- the titratable group moves to the BINDER and the target supplies a
++        fixed positive charge (TNF R108 or K166). Same shape, same clipping, same eps semantics;
++        only the two chemistries swap sides.
++
++        MEASURED ON CA, for the reason AcidNearHis gives: design features hand the binder UNK/G
++        reference atoms, so it has NO SIDECHAINS during optimization. CA-to-cation-N is the
++        honest differentiable proxy. A histidine CA sits at most ~3.4 A from its own ND1, so
++        d0 = 6.5 is the CA distance consistent with ND1 within ~3.1 A -- which is the geometry
++        s6d measured as reachable and s9 measured as the one the cation actually acts on.
++        The real all-atom distance is measured after design by _geometry() on a re-prediction.
++
++        WHY THIS TERM IS WORTH HAVING EVEN THOUGH THE FILTERS ARE DEAD. s19/s20 retired
++        dddG_elec and his_cation_gate as SELECTORS -- they cannot rank finished molecules. That
++        is a different job from supplying a GRADIENT. Nothing measured says the geometry is
++        unbuildable; s6d says the opposite (17.2% of approach directions are clear at K166).
++        A filter must discriminate among molecules that exist; a loss only has to point
++        downhill. s22 and s20 together mean both conditional objectives must now be DESIGNED
++        IN rather than selected for, and this is the only place in the pipeline where that can
++        happen for the pH mechanism.
++
++        🔴 REDUCTION IS top-k, NOT sum -- and this is a correction, not a preference. The
++        first version wrote `total = score.sum()`, mirroring AcidNearHis. Summing rewards
++        total histidine MASS in the neighbourhood rather than histidine PLACEMENT, and the
++        cheapest way down that gradient is to put histidine everywhere. The 5-step trimer
++        smoke returned 12 histidines in 76 residues -- 15.8% against a ~2.3% natural
++        frequency -- while `his_best` sat at exactly 0.00 every step, i.e. the loss fell the
++        whole way without ONE histidine ever being placed. Arithmetic on the sigmoid confirms
++        the incentive without needing a run: 12 histidines loitering at 9.0 A score -0.646
++        under sum and 1 histidine placed at 3.0 A scores +0.091, so sum strictly PREFERS the
++        spam. Under top-2 the same two cases are +1.143 and +0.091 and the placed histidine
++        wins. k = 2 rather than 1 because s24 measured 0.40 pKa units per site, so the ratio
++        arithmetic needs two sites and a max would pay for only one.
++
++        AcidNearHis still sums, and has the same structural incentive. It is left alone
++        deliberately: problem 1's submitted set came from BoltzGen/MPNN with point mutations,
++        never from a Mosaic trajectory, so nothing shipped is affected -- and problem 1 is
++        another session's. Flagged in challenges/01, not fixed here.
++        """
++        his_idx: int
++        cation_atoms: tuple
++        d0: float = 6.5
++        width: float = 1.5
++        eps: float = 1e-3
++        topk: int = 2
++
++        def __call__(self, sequence, output, key):
++            L = sequence.shape[0]
++            ca = output.atom37_coords[:L, A37["CA"]]
++            ds = [jnp.linalg.norm(ca - output.atom37_coords[self.his_idx, A37[a]], axis=-1)
++                  for a in self.cation_atoms]
++            d = ds[0]
++            for extra in ds[1:]:
++                d = jnp.minimum(d, extra)
++            # Clip for the same reason AcidNearHis clips: APGM evaluates at an extrapolated
++            # point off the simplex, where an entry can be negative or exceed 1, and an
++            # unclipped score can drive log() to NaN. Inside the simplex the gradient is
++            # untouched.
++            his = jnp.clip(sequence[:, TOKENS.index("H")], 0.0, 1.0)
++            score = his * jax.nn.sigmoid((self.d0 - d) / self.width)
++            total = his_reduce(score, self.topk, jnp)   # top-k, not sum -- see the docstring
++            loss = -jnp.log(total + self.eps)
++            return loss, {
++                "his_cation": loss,
++                "his_best": score.max(),
++                "his_topk": total,
++                "frac_H": his.mean(),
++                "his_dmin_CA": jnp.min(d + (1.0 - his) * 100.0),
++            }
++
++    class CompositionCap(LossTerm):
++        """Hinge penalty on over-represented residues. Zero until the cap is crossed."""
++        caps: tuple
++        name: str = "comp"
++
++        def __call__(self, seq, *, key):
++            total, aux = 0.0, {}
++            for token_idx, cap, label in self.caps:
++                frac = seq[:, token_idx].mean()
++                total = total + jax.nn.relu(frac - cap)
++                aux[f"f_{label}"] = frac
++            return total, {self.name: total, **aux}
++
++    model = Boltz2()
++
++    def build_interface_loss(*, loss, features):
++        """Boltz2 loss for a leg that carries the interface/pH terms.
++
++        grad_samples == 1 is byte-for-byte the previous behaviour. Above 1 this averages the
++        loss over several structure+confidence passes from a single trunk output, which is the
++        variance reduction the flat-trajectory question needs. The MONOMER leg deliberately
++        does NOT go through here: it carries pLDDT, within-binder contact and globularity and
++        no interface term, so averaging it costs GPU memory for no bearing on the question.
++        NB: the human trimer alone is NOT the ceiling (456 res / 532 tokens, 21.7 s/step). It is
++        the DUAL-SPECIES graph that OOMs with a mouse trimer (~976 tokens); mouse dimer at 828
++        tokens runs at 25.9 s/step. An earlier comment here overstated this and ruled out options.
++        """
++        if grad_samples > 1:
++            return model.build_multisample_loss(
++                loss=loss, features=features, recycling_steps=recycling_steps,
++                sampling_steps=sampling_steps, num_samples=grad_samples,
++            )
++        return model.build_loss(
++            loss=loss, features=features,
++            recycling_steps=recycling_steps, sampling_steps=sampling_steps,
++        )
++
++    mpnn = None
++    if use_mpnn:
++        # The published Nipah-winning recipe is Boltz-2 + SOLUBLE ProteinMPNN +
++        # simplex_APGM, and InverseFoldingSequenceRecovery is the term mosaic credits with
++        # raising filter pass rates. Optional and non-fatal: if the weights will not load
++        # the run continues without it rather than dying 20 minutes in.
++        try:
++            from mosaic.losses.protein_mpnn import InverseFoldingSequenceRecovery
++            from mosaic.proteinmpnn.mpnn import load_mpnn_sol
++            mpnn = load_mpnn_sol(0.0)
++            print("[mosaic] soluble ProteinMPNN loaded")
++        except Exception as e:
++            print(f"[mosaic] WARNING: ProteinMPNN unavailable ({type(e).__name__}: {e}); "
++                  "continuing without InverseFoldingSequenceRecovery")
++            mpnn = None
++
++    # One TargetChain per protomer, each carrying ITS OWN crystal chain as a template. The
++    # order here must match the order `offsets` was built in, or every index above is wrong.
++    target_chain_specs = [
++        TargetChain(sequence=seq_i, use_msa=False, template_chain=ch_i)
++        for _cid, ch_i, seq_i, _idx, _rn in chains_prepared
++    ]
++    target_chain_spec = target_chain_specs[0]      # kept for the re-prediction path below
++    species_chain_specs = [
++        TargetChain(sequence=seq_i, use_msa=False, template_chain=ch_i)
++        for _cid, ch_i, seq_i, _idx, _rn in (MO["chains_prepared"] if MO else [])
++    ]
++    # use_msa=False -> `msa: empty`, so nothing reaches an MSA server from inside Modal.
++    # The crystal chain goes in as a TEMPLATE instead, which is the stronger constraint
++    # here anyway: the whole design depends on H433's ring sitting where 6ARU puts it.
++
++    caps = tuple(
++        (TOKENS.index(aa), cap, aa)
++        for aa, cap in (("V", cap_val), ("G", cap_gly), ("H", cap_his)) if cap < 1.0
++    )
++    rows, files = [], {}
++
++    # Defined BEFORE the loop: the per-design persistence below writes into it as each
++    # design finishes. It used to be defined after the loop, next to the single bulk write.
++    out = Path("/weights/runs") / run_name
++    for L in length_list:
++        features, writer = model.binder_features(
++            binder_length=L, chains=target_chain_specs
++        )
++        if mechanism == "his_near_cation":
++            check_cation_atoms(anchor_aa,
++                               ARG_CATION_N if anchor_aa == "R" else LYS_CATION_N, "human")
++            if MO is not None:
++                check_cation_atoms(MO["anchor_aa"],
++                                   ARG_CATION_N if MO["anchor_aa"] == "R" else LYS_CATION_N,
++                                   "species")
++        inner = (
++            w_iptm * sp.BinderTargetIPTM()
++            + w_pae * sp.BinderTargetPAE()
++            + w_contact * sp.BinderTargetContact(
++                epitope_idx=epitope_idx, contact_distance=14.0, paratope_size=8
++            )
++            + w_within * sp.WithinBinderContact()
++            + w_plddt * sp.PLDDTLoss()
++            + w_glob * sp.ESMFoldGlobularity()
++            + w_acid * (AcidNearHis(
++                his_token=L + anchor_local,
++                d_idx=TOKENS.index("D"),
++                e_idx=TOKENS.index("E"),
++                d0=acid_d0,
++                width=acid_width,
++                eps=acid_eps,
++            ) if mechanism == "acid_near_his" else HisNearCation(
++                his_idx=L + anchor_local,
++                cation_atoms=(ARG_CATION_N if anchor_aa == "R" else LYS_CATION_N),
++                d0=his_d0,
++                width=acid_width,
++            ))
++        )
++        if mpnn is not None:
++            inner = inner + w_mpnn * InverseFoldingSequenceRecovery(
++                mpnn, temp=jnp.array(0.01)
++            )
++        total_loss = build_interface_loss(loss=inner, features=features)
++        # GATE 0 -- THE MONOMER LOSS. tune01 produced binder pLDDT 0.41-0.52, barely above
++        # the 0.32-0.45 range of the resequencing arms that were written off as not folding.
++        # The likely cause: every term above sees only the COMPLEX, so nothing ever asks
++        # whether the binder folds ON ITS OWN. A binder can borrow structure from the target
++        # in a complex prediction and have no fold of its own. Both the mosaic README's
++        # worked example and the published Nipah recipe predict the binder alone as a second
++        # loss, with `chains=[]`.
++        #
++        # Costs a second Boltz-2 forward+backward per step, but on L residues instead of
++        # L + 170, so the step time should rise by much less than double.
++        #
++        # Set --w-monomer 0 to disable and reproduce tune01 exactly.
++        # SPECIES LEG (objective 2). Mirrors the monomer leg's pattern: a second
++        # build_loss over its own features, added with a weight. It carries the BINDING terms
++        # and the pH term, not the folding terms -- PLDDTLoss/globularity/WithinBinderContact
++        # are properties of the binder alone and the human leg plus the monomer leg already
++        # constrain them, so repeating them here would triple-count folding and quietly
++        # outvote the two objectives this leg exists to add.
++        #
++        # The pH term is included because the anchor is CONSERVED (R in both species, checked
++        # above and asserted), so one histidine can satisfy both; omitting it would let the
++        # optimiser place a histidine that works on human geometry alone.
++        #
++        # Cost: a third Boltz-2 forward+backward per step. Measured human-only is 21.7 s/step
++        # at 532 tokens; this leg is ~312 tokens more, so expect roughly 2.5x, not 2x.
++        if MO is not None and w_species > 0:
++            species_features, _ = model.binder_features(
++                binder_length=L, chains=species_chain_specs
++            )
++            species_inner = (
++                w_iptm * sp.BinderTargetIPTM()
++                + w_pae * sp.BinderTargetPAE()
++                + w_contact * sp.BinderTargetContact(
++                    epitope_idx=MO["epitope_idx"] or None, contact_distance=14.0,
++                    paratope_size=8
++                )
++                # BRANCH ON MECHANISM, like the human leg. This hardcoded HisNearCation, so
++                # under --mechanism acid_near_his the species anchor is validated as H, the
++                # R/K ternary fell through to LYS_CATION_N, and the term read the NZ slot of a
++                # histidine. scatter_atom37 zero-initialises the grid, so that slot is
++                # (0,0,0): the term measured every CA to the coordinate origin, returned a
++                # constant ~6.9 with NO GRADIENT, and logged as an honest "nothing placed yet".
++                + w_acid * (AcidNearHis(
++                    his_token=L + MO["anchor_local"],
++                    d_idx=TOKENS.index("D"),
++                    e_idx=TOKENS.index("E"),
++                    d0=acid_d0,
++                    width=acid_width,
++                    eps=acid_eps,
++                ) if mechanism == "acid_near_his" else HisNearCation(
++                    his_idx=L + MO["anchor_local"],
++                    cation_atoms=(ARG_CATION_N if MO["anchor_aa"] == "R" else LYS_CATION_N),
++                    d0=his_d0,
++                    width=acid_width,
++                ))
++            )
++            total_loss = total_loss + w_species * build_interface_loss(
++                loss=species_inner, features=species_features,
++            )
++        if w_monomer > 0:
++            mono_features, _ = model.binder_features(binder_length=L, chains=[])
++            total_loss = total_loss + w_monomer * model.build_loss(
++                # WEIGHTED, like the human leg. These were bare, so --w-plddt applied to the
++                # complex leg only while the monomer leg -- the one that actually asks whether
++                # the binder folds alone -- stayed at 1.0. At defaults that made globularity
++                # 1.67x STRONGER in the "down-weighted" leg (0.5 x 1.0) than in the main one
++                # (0.3), and a pLDDT sweep would read as "weight barely moves monomer pLDDT".
++                loss=w_plddt * sp.PLDDTLoss()
++                + w_within * sp.WithinBinderContact()
++                + w_glob * sp.ESMFoldGlobularity(),
++                features=mono_features,
++                recycling_steps=recycling_steps,
++                sampling_steps=sampling_steps,
++            )
++        if caps:
++            total_loss = total_loss + w_comp * CompositionCap(caps=caps)
++        loss_fn = NoCys(loss=total_loss)      # Cys removed from the alphabet entirely
++        term_names = loss_term_names(loss_fn)
++        model_names = ["Boltz2"] + (["ProteinMPNN_soluble"] if mpnn is not None else [])
++        c1_violations = audit_c1(term_names, model_names)
++        if c1_violations:
++            raise SystemExit("STEP 4 FAILED on C1:\n  " + "\n  ".join(c1_violations))
++        print(f"[mosaic] C1 audit clean. loss terms: {', '.join(term_names)}")
++        step = stepsize if stepsize > 0 else 0.1 * float(np.sqrt(L))
++        est = (f"{grad_samples}x-avg" if grad_samples > 1 else "1-sample")
++        print(f"[mosaic] grad={est} momentum={momentum_soft}/{momentum_sharp} "
++              f"({'DEFAULT estimator' if grad_samples == 1 and momentum_soft == 0.9 else 'ESTIMATOR VARIED'})")
++        print(f"[mosaic] L={L} stepsize={step:.3f} epitope={fmt_epitope(epitope_idx)} "
++              f"terms={'+mpnn' if mpnn else 'no-mpnn'}")
++
++        for s in range(n_seeds):
++            seed = seed0 + s
++            tag = f"{run_name}_L{L}_s{seed}"
++            key = jax.random.key(seed)
++            x = jax.nn.softmax(
++                0.5 * jax.random.gumbel(key=key, shape=(L, len(TOKENS) - 1))
++            )
++            # Two stages: soft to find a basin, then scale>1 to drive it discrete. One
++            # stage at scale>1 commits to a bad basin early; one at scale=1 never
++            # discretizes and the argmax then has little to do with what was optimized.
++            _, x = simplex_APGM(loss_function=loss_fn, x=x, n_steps=steps_soft,
++                                stepsize=step, momentum=momentum_soft, scale=1.0,
++                                key=jax.random.fold_in(key, 1))
++            _, x = simplex_APGM(loss_function=loss_fn, x=x, n_steps=steps_sharp,
++                                stepsize=step, momentum=momentum_sharp, scale=sharpen,
++                                key=jax.random.fold_in(key, 2))
++            pssm = NoCys.sequence(x)                     # reinsert the zeroed Cys column
++            tokens = np.asarray(pssm).argmax(-1)
++            seq = "".join(TOKENS[int(i)] for i in tokens)
++            comp = {aa: seq.count(aa) / L for aa in set(seq)}
++            print(f"[mosaic] {tag} {seq}")
++
++            onehot = jax.nn.one_hot(jnp.array(tokens), len(TOKENS))
++            pred = model.predict(
++                PSSM=onehot, features=features, writer=writer,
++                recycling_steps=max(recycling_steps, 3), sampling_steps=25,
++                key=jax.random.key(seed),
++            )
++            # Re-predict with target-only features for BOTH chains: design features give
++            # the binder no sidechains, so the real carboxylate-O geometry and anything
++            # PROPKA touches can only be measured on an all-atom re-prediction.
++            re_features, re_writer = model.target_only_features(
++                [TargetChain(sequence=seq, use_msa=False)] + target_chain_specs
++            )
++            repred = model.predict(
++                features=re_features, writer=re_writer,
++                recycling_steps=3, sampling_steps=25, key=jax.random.key(seed),
++            )
++            # repred was predicted WITHOUT a PSSM, so mosaic's predict() hands IPTMLoss a
++            # zero-length sequence: asym_id becomes all-ones, every pair is masked out, and
++            # `repred.iptm` is exactly 0.0 for ANY design. That is an artifact of the call,
++            # not a property of the binder -- the same class of error as reading a pH switch
++            # off an apo reference. Read the interface off chain_pair_iptm() instead, which
++            # takes asym_id from the output and needs no binder sequence passed in.
++            # chain_pair_iptm() keys are per unordered chain pair, so (0,1) is the binder
++            # against the FIRST PROTOMER ONLY -- it threw away two of three interfaces. Worse,
++            # D-P2-1's 0.45 bar was calibrated on the LUMPED binder-vs-whole-target iptm, so
++            # the gate was comparing a pair-restricted number against a global threshold. The
++            # two are not even on the same scale: predicted_tm_score normalises each row by
++            # the masked column count, so a pair mask averages over 152 columns where the
++            # lumped mask averages over 456.
++            #
++            # IPTMLoss derives asym_id from `sequence.shape[0]` alone (verified upstream:
++            # losses/structure_prediction.py:532-535), so a dummy zeros((L, 20)) gives exactly
++            # the binder-vs-everything-else split without passing a real sequence -- which is
++            # what the original zero-length artifact was about. Both numbers are recorded: the
++            # lumped one gates, the best pair is kept as a diagnostic so a future reader can
++            # see when they diverge.
++            pair_iptm = repred.model_output.chain_pair_iptm()
++            _bt = [v for (a, b), v in pair_iptm.items() if a == 0]
++            iptm_repred_best_pair = float(max(_bt)) if _bt else float("nan")
++            iptm_repred = float(
++                -sp.IPTMLoss()(jnp.zeros((L, 20)), repred.model_output,
++                               key=jax.random.key(seed))[0]
++            )
++            st = repred.model_output.to_structure()
++            # Renumber into POSITIONAL so the gates and the pose-check motif line up:
++            # binder chain A 1..L, target chain B carrying its positional numbers.
++            # MULTI-CHAIN renumbering. Chain 0 is the binder; chains 1..n are the protomers in
++            # the SAME ORDER as chains_prepared, which is the order target_chain_specs was built
++            # in. This block previously assumed exactly two chains and referenced a `resnums`
++            # that the multi-chain rewrite had deleted -- a NameError that only fired after the
++            # design finished and the re-prediction began, i.e. after the GPU time was spent.
++            m = st[0]
++            want = [L] + [len(rn) for *_rest, rn in chains_prepared]
++            got = [len(c) for c in m]
++            if got != want:
++                raise SystemExit(
++                    f"STEP 4 FAILED: re-prediction chains are {got}, expected {want} "
++                    f"-- do not renumber blind"
++                )
++            names = ["A"] + [chr(ord("B") + i) for i in range(len(chains_prepared))]
++            for c, nm in zip(m, names):
++                c.name = nm
++            for i, r in enumerate(m[0]):
++                r.seqid = gemmi.SeqId(i + 1, " ")
++            for chain_obj, (*_rest, rn) in zip(list(m)[1:], chains_prepared):
++                for r, num in zip(chain_obj, rn):
++                    r.seqid = gemmi.SeqId(num, " ")
++            st.setup_entities()
++            # The re-predicted chain order is [binder] + chains_prepared, so the anchor
++            # chain's POSITION in chains_prepared is its index among the targets.
++            geom = (_geometry(st, anchor, anchor_chain_idx)
++                    if mechanism == "acid_near_his"
++                    else _geometry_p2(st, anchor, anchor_chain_idx))
++            row = {
++                "design": tag, "length": L, "seed": seed, "sequence": seq,
++                "iptm_design": round(float(pred.iptm), 4),
++                "plddt_binder_design": round(float(np.asarray(pred.plddt)[:L].mean()), 4),
++                "iptm_repred": round(iptm_repred, 4),
++                "iptm_repred_best_pair": round(iptm_repred_best_pair, 4),
++                "plddt_binder_repred": round(float(np.asarray(repred.plddt)[:L].mean()), 4),
++                "frac_V": round(comp.get("V", 0.0), 3),
++                "frac_G": round(comp.get("G", 0.0), 3),
++                # frac_H belongs in the ROW, not only in the per-step loss aux. CompositionCap
++                # is a soft HINGE, so a cap does not guarantee compliance in the shipped
++                # sequence -- p2smoke01 ended at frac_G 0.105 against a 0.08 cap. Without this
++                # column a design could ship at 12% histidine with cap_his "on" and nothing in
++                # designs.tsv would say so, which is the exact failure the sum->top-2 fix
++                # existed to stop. Found by reading designs.tsv rather than the log, 2026-10-06.
++                "frac_H": round(comp.get("H", 0.0), 3),
++                "n_C": seq.count("C"),
++                **geom,
++            }
++            gate_geometry(row)        # D-P2-1, before the audit so the audit sees the verdict
++            # The audit must never be the thing that destroys a design it was added to
++            # protect. By this point the GPU work for this design is already paid for, so
++            # a bug in ~40 lines of pure Python cannot be allowed to take it down. The C1
++            # audit above stays fatal on purpose: that one runs BEFORE any compute.
++            try:
++                violations = check_row(row, L)
++            except Exception as e:
++                violations = [f"the metric audit itself raised {type(e).__name__}: {e}"]
++            row["metrics_ok"] = not violations
++            rows.append(row)
++            print(f"[mosaic] {tag} {json.dumps(geom)} iptm={row['iptm_repred']}")
++            if violations:
++                # Loud, and recorded in the row, but NOT fatal: the designs and the
++                # structures are still worth keeping. What must never happen is a bad
++                # number travelling downstream looking like a good one.
++                print(f"[mosaic] 🔴 {tag} METRICS SUSPECT -- do not rank on this row:")
++                for v in violations:
++                    print(f"[mosaic]      {v}")
++            files[f"complex/{tag}.pdb"] = st.make_pdb_string().encode()
++            files[f"pssm/{tag}.npy"] = np.asarray(pssm).astype(np.float32).tobytes()
++
++            # PERSIST THIS DESIGN NOW, before the next one starts. `files` used to accumulate
++            # in memory with a single write + commit after the loop, so ANY later failure --
++            # a timeout, a crash, or the designs.tsv KeyError that heterogeneous rows used to
++            # raise -- destroyed every completed design in the run and billed for all of them.
++            #
++            # The handoff note claiming this wrapper "writes each design to the Volume as it
++            # goes" was FALSE when written (2026-10-06, found in a cold review). It is true now.
++            # Recover a run whose client died: the directory is already on the Volume.
++            try:
++                for rel, content in ((f"complex/{tag}.pdb", files[f"complex/{tag}.pdb"]),
++                                     (f"pssm/{tag}.npy", files[f"pssm/{tag}.npy"])):
++                    dest = out / rel
++                    dest.parent.mkdir(parents=True, exist_ok=True)
++                    dest.write_bytes(content)
++                # the row as a single-line JSON sidecar, so a lost run still yields its
++                # metrics without needing the post-loop designs.tsv to have been built
++                rdest = out / "rows" / f"{tag}.json"
++                rdest.parent.mkdir(parents=True, exist_ok=True)
++                rdest.write_bytes(json.dumps(row).encode())
++                weights.commit()
++                print(f"[mosaic]   persisted {tag} to the Volume")
++            except Exception as e:
++                # Never let persistence kill a design whose GPU time is already paid for.
++                print(f"[mosaic] 🔴 WARNING: could not persist {tag}: "
++                      f"{type(e).__name__}: {e} -- it survives only in the return value")
++
++    files["designs.faa"] = "".join(
++        f">{r['design']}\n{r['sequence']}\n" for r in rows
++    ).encode()
++    # UNION the keys, and use .get(). Row key sets are NOT uniform: _geometry* returns three
++    # different shapes (full dict / a `note` form with two keys missing when the binder has no
++    # histidine / {} when the anchor is absent). Taking columns from rows[0] and indexing with
++    # r[c] raised KeyError on the first heterogeneous pair -- and because that happens BEFORE
++    # the Volume write, it destroyed every design in the run, not just the odd one out.
++    cols = list(dict.fromkeys(k for r in rows for k in r))
++    files["designs.tsv"] = (
++        "\t".join(cols) + "\n"
++        + "".join("\t".join("" if r.get(c) is None else str(r.get(c)) for c in cols) + "\n"
++                  for r in rows)
++    ).encode()
++    # MECHANISM-AWARE. Every field here was a problem-1 literal, so a problem-2 run wrote
++    # `canonical: 54, label: "H433"` for what is actually R108, in the one file whose job is to
++    # stop anyone re-deriving the numbering. The log line was fixed for this exact reason
++    # ("a log line that names the wrong anchor is how a number gets believed about the wrong
++    # molecule later") and these two shipped files were missed.
++    _p2 = mechanism == "his_near_cation"
++    _canon_off = 81 if _p2 else -27          # positional + off = canonical
++    _tgt_name = target_name or "target"
++    files["numbering.json"] = json.dumps({
++        "scheme": (f"positional in {_tgt_name}, contiguous per chain, "
++                   f"positional {'+' if _canon_off >= 0 else '-'} {abs(_canon_off)} "
++                   f"= canonical"),
++        "written_pdbs": ("binder = chain A, 1..L; targets = chains "
++                         + ",".join(chr(ord("B") + i) for i in range(len(chains_prepared)))
++                         + ", positional numbering"),
++        "anchor": {"positional": anchor, "canonical": anchor + _canon_off,
++                   "label": f"{anchor_aa}{anchor + _canon_off}",
++                   "chain": anchor_chain, "chain_index_among_targets": anchor_chain_idx},
++        "species_leg": (None if MO is None else {
++            "target": target2_name or None,
++            "anchor_positional": target2_anchor,
++            "anchor_chain": target2_anchor_chain,
++            "epitope_positional": target2_epitope,
++            "note": "species indices are NOT the human ones -- a deletion shifts the register",
++        }),
++        "epitope_positional": epitope_pos,
++        "crop": list(crop_t) if crop_t else None,
++        "ph_gate_note": "bin/ph_gate_target_his.py CANON is BoltzGen-output numbering "
++                        f"(H433 -> 409). For these files it must be {{{anchor}: 'H433'}}.",
++    }, indent=2).encode()
++    files["config.json"] = json.dumps({
++        "crop": crop, "epitope": epitope, "anchor": anchor, "lengths": lengths,
++        "n_seeds": n_seeds, "seed0": seed0, "steps_soft": steps_soft,
++        "steps_sharp": steps_sharp, "recycling_steps": recycling_steps,
++        "sampling_steps": sampling_steps, "stepsize": stepsize, "sharpen": sharpen,
++        "use_mpnn": mpnn is not None, "smoke": smoke,
++        # The estimator, recorded because the whole point of the probe that introduced it is a
++        # matched comparison against runs that did not have it. Absent from a config, a run is
++        # indistinguishable from the sixteen before it.
++        "optimizer": {"grad_samples": grad_samples, "momentum_soft": momentum_soft,
++                      "momentum_sharp": momentum_sharp,
++                      "multisample_loss": grad_samples > 1},
++        "weights": {"iptm": w_iptm, "pae": w_pae, "contact": w_contact,
++                    "within": w_within, "plddt": w_plddt, "glob": w_glob,
++                    "acid": w_acid, "mpnn": w_mpnn, "comp": w_comp,
++                    "monomer": w_monomer},
++        "caps": {"V": cap_val, "G": cap_gly, "H": cap_his},
++        # mechanism and its parameters -- config.json recorded acid_d0 unconditionally, a
++        # parameter a his_near_cation run never uses, and omitted mechanism, his_d0,
++        # target_chain, anchor_chain and every species argument. A reader reconstructing the
++        # run from this file got a different run, with no record that a species leg existed.
++        "mechanism": mechanism,
++        "acid_d0": acid_d0 if mechanism == "acid_near_his" else None,
++        "his_d0": his_d0 if mechanism == "his_near_cation" else None,
++        "target": _tgt_name, "target_chain": target_chain, "anchor_chain": anchor_chain,
++        "species_leg": (None if MO is None else {
++            "target": target2_name or None,
++            "target2_chain": target2_chain, "w_species": w_species,
++            "target2_anchor": target2_anchor, "target2_epitope": target2_epitope,
++        }),
++        "acid_width": acid_width, "acid_eps": acid_eps,
++        # Derived from the composed loss object, not asserted. The previous value here
++        # was a hardcoded `True` that would have printed True with ipSAE in the loss.
++        "loss_terms": term_names, "design_models": model_names,
++        "c1_audit": "clean" if not audit_c1(term_names, model_names) else "VIOLATION",
++    }, indent=2).encode()
++
++    for rel, content in files.items():
++        p = out / rel
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_bytes(content)
++    weights.commit()
++    print(f"[mosaic] {len(rows)} designs; also written to {out} on the Volume")
++    passed = [r for r in rows if r.get("geometry_pass")]
++    suspect = [r["design"] for r in rows if not r.get("metrics_ok", True)]
++    anchor_label = f"{anchor_aa}{anchor} on chain {anchor_chain}"
++    # Name the anchor that was actually used. This line read "of H433" unconditionally --
++    # problem 1's EGFR histidine -- so the first passing problem 2 trimer run reported a
++    # correct distance against the wrong residue name. A log line that names the wrong
++    # anchor is how a number gets believed about the wrong molecule later.
++    # Two DIFFERENT questions, and this line used to blur them: did step 4 produce rows, and
++    # did any design place its titratable residue? It printed "STEP 4 PASSED: 0/1", which a
++    # reader scanning for PASSED takes as success when in fact no design passed geometry.
++    # Completion is reported as RAN/FAILED; geometry gets its own verdict line.
++    print(f"[mosaic] STEP 4 {'RAN' if rows else 'FAILED - no designs'}: {len(rows)} designs")
++    if rows:
++        read = [r for r in rows if r.get("geometry_read")]
++        if not read:
++            # D-P2-1: every design is below the iptm bar, so "0 passed" would be a false
++            # negative -- nothing was measured. Say that instead.
++            print(f"[mosaic] ⬛ GEOMETRY n/a on all {len(rows)} designs: none reached "
++                  f"iptm_repred {GEOMETRY_IPTM_BAR} (D-P2-1), so placement was never "
++                  f"measurable. This is NOT a geometry failure.")
++        else:
++            print(f"[mosaic] {'✅' if passed else '🔴'} GEOMETRY {len(passed)}/{len(read)} "
++                  f"within 4.0 A of {anchor_label}"
++                  + ("" if passed else " -- NO design placed its histidine")
++                  + (f"; {len(rows) - len(read)} more n/a below the iptm bar"
++                     if len(read) != len(rows) else ""))
++    if suspect:
++        print(f"[mosaic] 🔴 {len(suspect)}/{len(rows)} rows have SUSPECT METRICS: "
++              f"{', '.join(suspect)} -- see metrics_ok in designs.tsv")
++    else:
++        print(f"[mosaic] metrics audit clean on all {len(rows)} rows")
++    return [(rel, content) for rel, content in files.items()]
++
++
++@app.local_entrypoint()
++def main(
++    step: int = 1,
++    target: str = "../targets/egfr/egfr_ecd_6aru_renum.pdb",
++    target_chain: str = "A",
++    anchor_chain: str = "A",
++    target2: str = "",
++    target2_chain: str = "A,B",
++    target2_epitope: str = "",
++    target2_anchor: int = 0,
++    target2_anchor_chain: str = "A",
++    w_species: float = 1.0,
++    run_name: str = "",
++    out_dir: str = "../runs/mosaic",
++    crop: str = "284:453",
++    epitope: str = DEFAULT_EPITOPE,
++    anchor: int = ANCHOR,
++    lengths: str = "76",
++    n_seeds: int = 2,
++    seed0: int = 0,
++    steps_soft: int = 60,
++    steps_sharp: int = 40,
++    recycling_steps: int = 1,
++    sampling_steps: int = 10,
++    stepsize: float = 0.0,
++    sharpen: float = 1.3,
++    grad_samples: int = 1,
++    momentum_soft: float = 0.9,
++    momentum_sharp: float = 0.5,
++    use_mpnn: bool = True,
++    w_acid: float = 2.0,
++    w_mpnn: float = 3.0,
++    w_plddt: float = 1.0,
++    w_monomer: float = 0.5,
++    # The BINDING weights. These existed on design() but not here, so the only way to retune
++    # the balance between "get onto the target" and "place the histidine" was to edit the file
++    # -- or to move w_acid, which changes the same ratio from the other side. Found while
++    # probing a run where w_acid 2.0 outweighed w_iptm 1.0 and w_contact 1.0 on designs that
++    # were not binding at all. Defaults are identical to design()'s, so nothing changes
++    # unless a flag is passed.
++    w_iptm: float = 1.0,
++    w_contact: float = 1.0,
++    w_pae: float = 0.05,
++    w_within: float = 1.0,
++    w_glob: float = 0.3,
++    w_comp: float = 10.0,
++    cap_val: float = 0.12,
++    cap_gly: float = 0.08,
++    cap_his: float = 0.08,
++    acid_d0: float = 8.0,
++    his_d0: float = 6.5,
++    mechanism: str = "acid_near_his",
++    acid_eps: float = 1e-3,
++    smoke: bool = False,
++):
++    """Steps 1-3 are probes and take no arguments. Step 4 designs.
++
++    GPU=L40S modal run --detach modal_mosaic.py --step 4 --smoke --run-name smoke01
++    """
++    from datetime import datetime
++    from pathlib import Path
++
++    if step != 4:
++        print({1: probe, 2: probe_mosaic, 3: fetch_weights}[step].remote())
++        return
++
++    pdb = Path(target)
++    if not pdb.is_file():
++        raise SystemExit(f"target not found: {pdb.resolve()}  (paths resolve from biomodals/)")
++    # SIZE THE TIMEOUT FROM THE WORKLOAD, and refuse to launch under it. The default
++    # TIMEOUT=30 (and the 90 that design-mosaic.sh passes) is below the measured wall clock
++    # for the three-leg defaults: steps_soft 60 + steps_sharp 40 = 100 steps x n_seeds 2 x
++    # len(lengths), at a MEASURED 25.9 s/step for human-trimer + mouse-dimer (s37), is 86+
++    # minutes before three JAX compiles and the step-4 re-predictions.
++    #
++    # The rate is measured, not extrapolated -- s33 records a step-time extrapolation missing
++    # by 2.1x, and s37 records one that was infeasible on memory and not just slow. A NEW
++    # configuration should be smoke-tested for its own rate rather than trusted to this one.
++    # Same pattern as bin/score-esmfold2.sh, for the same reason: output is worth nothing if
++    # the run is cut off, and the GPU time is billed either way.
++    _n_traj = max(1, int(n_seeds)) * max(1, len([v for v in lengths.split(",") if v.strip()]))
++    _steps = (3 + 2) if smoke else (int(steps_soft) + int(steps_sharp))
++    # Measured rates, with a SAFETY FACTOR, because the same configuration does not
++    # reproduce to better than ~20%: the species leg measured 25.9 s/step on p2species02 and
++    # 30.6 s/step on p2dry03 -- identical tokens, legs and length, +18% apart. The ESMFold
++    # estimator missed in the other direction by a similar margin (239s actual vs 335s
++    # predicted). A point estimate is not safe here, so the factor is explicit rather than
++    # hidden in a rounded constant.
++    _s_per_step = (30.6 if target2 else 25.0) * 1.15
++    _est_min = (3 * 420 + _n_traj * (_steps * _s_per_step + 300)) / 60 + 1
++    print(f"[mosaic] {_n_traj} trajectories x {_steps} steps at ~{_s_per_step}s "
++          f"-> estimate ~{_est_min:.0f} min; TIMEOUT={TIMEOUT} min")
++    if TIMEOUT < _est_min:
++        raise SystemExit(
++            f"REFUSING TO LAUNCH: TIMEOUT={TIMEOUT} min is below the ~{_est_min:.0f} min\n"
++            f"  estimate. Designs are persisted per-design to the Volume, so a timeout no\n"
++            f"  longer loses everything -- but it still truncates the run and bills for the\n"
++            f"  GPU time. Raise TIMEOUT (minutes), or cut n_seeds/lengths/steps."
++        )
++
++    # Read the species target HERE, on the laptop, and fail before paying for a container.
++    target2_bytes = b""
++    if target2:
++        p2 = Path(target2)
++        if not p2.is_file():
++            raise SystemExit(f"--target2 not found: {p2.resolve()}  "
++                             f"(paths resolve from biomodals/)")
++        target2_bytes = p2.read_bytes()
++    run = run_name or datetime.now().strftime("%y%m%d%H%M")
++    results = design.remote(
++        target_pdb=pdb.read_bytes(), run_name=run, crop=crop, epitope=epitope,
++        target_chain=target_chain, anchor_chain=anchor_chain,
++        target_name=pdb.name, target2_name=(Path(target2).name if target2 else ""),
++        target2_pdb=target2_bytes, target2_chain=target2_chain,
++        target2_epitope=target2_epitope, target2_anchor=target2_anchor,
++        target2_anchor_chain=target2_anchor_chain, w_species=w_species,
++        anchor=anchor, lengths=lengths, n_seeds=n_seeds, seed0=seed0,
++        steps_soft=steps_soft, steps_sharp=steps_sharp,
++        recycling_steps=recycling_steps, sampling_steps=sampling_steps,
++        stepsize=stepsize, sharpen=sharpen, use_mpnn=use_mpnn, w_acid=w_acid,
++        grad_samples=grad_samples, momentum_soft=momentum_soft,
++        momentum_sharp=momentum_sharp,
++        w_mpnn=w_mpnn, w_plddt=w_plddt, w_monomer=w_monomer,
++        w_iptm=w_iptm, w_contact=w_contact, w_pae=w_pae, w_within=w_within,
++        w_glob=w_glob, w_comp=w_comp,
++        cap_val=cap_val, cap_gly=cap_gly, cap_his=cap_his, acid_d0=acid_d0, acid_eps=acid_eps,
++        his_d0=his_d0, mechanism=mechanism,
++        smoke=smoke,
++    )
++    dest = Path(out_dir) / run
++    for rel, content in results:
++        p = dest / rel
++        p.parent.mkdir(parents=True, exist_ok=True)
++        p.write_bytes(content)
++    print(f"\nResults saved to: {dest}")
