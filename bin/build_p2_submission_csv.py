@@ -35,29 +35,39 @@ OUT = "submissions/02-tnf.csv"
 # differ at one position, which is what made them a matched pair. Dropping the 1-His arm clears the
 # control, preserving a 0-vs-4 comparison; dropping the control instead would have left an arm with
 # nothing to compare against. Ranks below are re-numbered; the ordering rule is unchanged.
+# TWO designs were withdrawn at upload, both to the same cause. The competition's novelty check
+# rejects designs for intra-batch similarity, and ANY matched pair on one scaffold trips it:
+#   run 1 (L49H, quadH, parent)  -> L49H and parent rejected, quadH passed
+#   run 2 (quadH, parent)        -> BOTH rejected
+# The clustering is representative-based, so removing one member re-forms the cluster around the
+# next. A matched control and its variant cannot co-exist in one submission, which means the
+# zero-histidine parent could not be submitted alongside the arm it controls for. We kept the
+# mechanism arm, because a control with nothing to control for tests nothing.
 MARGINS = {
     1: ("tnfa_corrected_40_L1r4k6", 7.600, 7.365, 15, 5),
     2: ("tnfa_corrected_40_L1r4k1", 7.706, 7.207, 15, 5),
     3: ("tnfa_corrected_3_L0r4k0_quadH", 7.131, 7.185, 5, 5),
-    4: ("tnfa_corrected_3_L0r4k0", 6.971, 7.581, 15, 5),
-    5: ("tnfa_H_quadH_E3Q_k12", 7.197, 6.747, 5, 5),
+    4: ("tnfa_H_quadH_E3Q_k12", 7.197, 6.747, 5, 5),
 }
-WORSE = {1: 7.365, 2: 7.207, 3: 7.131, 4: 6.971, 5: 6.747}
+WORSE = {1: 7.365, 2: 7.207, 3: 7.131, 4: 6.747}
 
-SERIES = {3, 4}         # the 4-vs-0 buried-histidine comparison on one scaffold
+SERIES = {3}            # the mechanism arm, whose matched control could not be co-submitted
 # REWRITTEN 2026-10-12. The previous text ended "Please test all three or none", which is an
 # instruction addressed to the selection step. FAQ 5: "any use of embedded instructions or prompt
 # injection may be deemed grounds for disqualification." This states the experimental dependency as
 # a fact and leaves the inference to the reader.
 NOTE_SERIES = (
-    "EXPERIMENTAL DEPENDENCY: rows 3 and 4 are a matched pair on one scaffold, carrying 4 and 0 "
-    "buried histidines respectively. Row 4 is the zero-histidine parent and supplies the matched "
-    "comparison required to attribute any pH-dependent difference in row 3 to the engineered "
-    "substitutions rather than to the scaffold. Without row 4, a pH-dependent result on row 3 has "
-    "no matched comparator and cannot be attributed to the substitutions. A third member carrying "
-    "ONE buried histidine was prepared and withdrawn before submission: it differed from the "
-    "zero-histidine parent at a single position, and the novelty check rejected both for "
-    "intra-batch similarity, so the one-histidine arm was dropped to keep the control. "
+    "MISSING MATCHED CONTROL, AND WHY: this design carries 4 buried histidines engineered into the "
+    "core of a parent scaffold. The zero-histidine parent is the matched control needed to "
+    "attribute any pH-dependent difference to those substitutions rather than to the scaffold, and "
+    "it could NOT be submitted alongside this design: the novelty check rejects designs for "
+    "intra-batch similarity, and the parent differs from this design at 4 positions in 83. We "
+    "tested that twice at upload -- with a third one-substitution variant present the cluster "
+    "formed elsewhere and this design passed; with only the pair present, both were rejected. So a "
+    "matched control and its variant cannot co-exist in one submission. We kept the mechanism arm "
+    "rather than the control, because a control with nothing to control for tests nothing. A "
+    "pH-dependent result on this design therefore cannot be attributed to the engineered "
+    "histidines from this submission alone. "
 )
 # Conclusion wording set 2026-10-12 to the reviewer's: "no demonstrated predictive discrimination
 # on this small, heterogeneous dataset". The earlier phrasing leaned on a constant-predictor

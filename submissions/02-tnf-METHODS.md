@@ -11,7 +11,7 @@ describe what is submitted** — each is annotated in place:
 | limitation | what it says | what is true of the shipped designs |
 |---|---|---|
 | **50** | no design clears the 0.70 monomer floor (0 of 35, best 68.8) | **all of them clear it**, monomer confidence **0.885–0.910** |
-| **54** | every interface number is a single-seed draw | human margins are **pooled 15-seed** for three of five, 5-seed for two; mouse is **5-seed for all of them** |
+| **54** | every interface number is a single-seed draw | human margins are **pooled 15-seed** for two of four, 5-seed for two; mouse is **5-seed for all of them** |
 | **57** | no mouse margin has seed replication; mouse used a **dimer** | mouse is **5-seed replicated** and scored against a **trimer** |
 
 Two findings that post-date this document and are **not** in it, both negative, both in FIELD 2:
@@ -2062,36 +2062,46 @@ riding on target dissociation does not.
 
 ## 10. The submission
 
-### 10.0 The submitted set, and the one experimental dependency in it — added 2026-10-12, revised at upload
+### 10.0 The submitted set, and the control that could not be submitted with it — added 2026-10-12, revised at upload
 
 🟡 **Everything from "*Pending generation*" onward in this section describes the 35-design Mosaic
-allocation and is historical.** The submission ships **five** designs from a later depth arm. The
+allocation and is historical.** The submission ships **four** designs from a later depth arm. The
 ranked set, the margins and the full reasoning are in the methodology box; this subsection records
 the one structural dependency between the submitted rows, because it is the thing most easily lost
 if the designs are considered one at a time.
 
-**Rows 3 and 4 are a single matched experiment on one scaffold**, carrying **4 and 0** buried
-histidines:
+**Row 3 is the only engineered-histidine design in the submission, and its matched control could
+not be submitted with it.**
 
 | row | design | buried His | role |
 |--:|---|--:|---|
-| 3 | `tnfa_corrected_3_L0r4k0_quadH` | 4 | four-site arm, the largest predicted fold destabilisation |
-| 4 | `tnfa_corrected_3_L0r4k0` | **0** | **the matched parent** |
+| 3 | `tnfa_corrected_3_L0r4k0_quadH` | 4 | the mechanism arm — four-site core destabilisation |
+| — | `tnfa_corrected_3_L0r4k0` | 0 | **the matched parent. WITHDRAWN at upload** |
+| — | `tnfa_corrected_3_L0r4k0_L49H` | 1 | one-site arm. **WITHDRAWN at upload** |
 
-Row 4 is the parent scaffold of row 3. It supplies the matched comparison required to attribute any
-pH-dependent difference observed in row 3 to the **engineered substitutions** rather than to the
-scaffold, the epitope or the expression behaviour. Without row 4, a pH-dependent result on row 3 has
-no matched comparator and the mechanism under test would remain unresolved whichever way the
-measurement came out.
+🔴 **What happened, 2026-10-12, established empirically at the submission form rather than assumed.**
+The competition's automatic novelty check rejects designs for intra-batch similarity — "Similar
+designs in this upload". Two successive uploads established the rule:
 
-🔴 **A third member existed and was withdrawn at upload, 2026-10-12.**
-`tnfa_corrected_3_L0r4k0_L49H`, a **one**-histidine arm on the same scaffold, would have made this a
-0/1/4 dose-response. It differs from the zero-histidine parent at a **single position**, and the
-competition's automatic novelty check rejected **both** of them for intra-batch similarity —
-"Similar designs in this upload". The property that made them a matched pair is the property that
-disqualified them. We withdrew the one-histidine arm rather than the parent, because an arm with no
-comparator answers nothing, and the four-site arm is the stronger test of the mechanism. The
-four-site variant, differing at four positions, passed the same check.
+| upload | scaffold-3 designs present | result |
+|---|---|---|
+| 1 | `L49H` (1 His), `quadH` (4 His), parent (0 His) | `L49H` and parent **rejected**; `quadH` passed |
+| 2 | `quadH`, parent | **both rejected** |
+
+The clustering is representative-based: with three variants present the similarity cluster formed
+around the one-substitution pair and the four-substitution variant escaped it; remove that pair's
+first member and the cluster re-forms around the next closest. **A matched control and the variant
+it controls for cannot co-exist in one submission.** The parent is 4 substitutions in 83 from
+`quadH` — 95.2% identity — and 1 substitution from `L49H`.
+
+**What we kept and what it costs.** We kept the mechanism arm and withdrew both the one-histidine
+arm and the zero-histidine parent, because a control with nothing to control for tests nothing. The
+cost is attribution: **a pH-dependent result on row 3 cannot be attributed to the engineered
+histidines from this submission alone.** `tnfa_H_quadH_E3Q_k12` carries zero histidines and is the
+nearest in-batch comparator, but it is a separately redesigned lineage rather than a matched parent,
+so it does not close the gap. The withdrawn designs are named here so the comparison can be
+reconstructed, and either could be submitted in a later batch, since the filter only looks within
+one upload.
 
 Recorded because it is a reusable constraint rather than an accident of ours: **a matched
 single-substitution control and an intra-batch novelty filter are in direct tension**, and a design
