@@ -1,8 +1,8 @@
 ---
 type: readout
 arm: D3 — re-checking the 18 benchmark pH labels (reviewer's ask of 2026-10-11)
-status: IN PROGRESS — 14 of 18 rows reported, 3 claims independently re-verified by me
-date: 2026-10-12, 10:00 AM EDT
+status: COMPLETE — all 18 rows re-checked, 4 claims independently re-verified by me
+date: 2026-10-12, 10:10 AM EDT
 ---
 
 # D3 — the benchmark labels, re-checked. The set is in worse shape than the accuracy figure implied.
@@ -102,5 +102,60 @@ statement and drop the 1.8× as a measurement.
 | 🔴 endpoint method wrong in our record | `9S60` (SPR, not ITC) |
 | pending | `1BRS`, `3SQO`, `3WD5`, `4K71` |
 
-**Five of fourteen are clean.** The arithmetic is deliberately **not** recomputed until all 18 are
-in, so it is recomputed once rather than drifting row by row.
+## Batch 4 — and it hits our marquee example
+
+**3WD5 / adalimumab — the number is right and THE CLASS IS WRONG. I verified this myself.** I
+fetched Schröter et al. 2015 (*mAbs* 7:138, PMC4622719), which is where our 9× actually comes from —
+not 3WD5's structure paper, which has single-pH SPR only. What it says:
+
+- **No K_D at pH 6.0 for adalimumab exists.** Table 1 reports K_D only at pH 7.4; the pH 6.0 column
+  carries a dissociation rate alone. So there is **no affinity ratio for adalimumab at all**, at any
+  pH pair, in this paper.
+- The measurement is **biolayer interferometry (Octet)**, not SPR.
+- **The paper treats adalimumab as the pH-INSENSITIVE baseline.** Its own text: *"adalimumab showed
+  only a moderate 9-fold increased dissociation rate constant"*, against engineered variants at
+  **231×, 785× and 505×**, and *"all engineered variants showed a significantly enhanced
+  pH-dependence"*.
+- The 9 is **statistically fragile**: pH 7.4 k_d is **0.55 ± 0.94** ×10⁻⁵ s⁻¹ — the SD is 1.7× the
+  mean — the pH 6.0 measurement was run **in duplicate**, and the authors themselves flag an
+  *"approximately 10-fold"* discrepancy against previously published data.
+
+🔴 **So our headline example was overstated in three ways at once**: it is a rate ratio and not an
+affinity loss (which the reviewer had already corrected once), it comes from a paper that uses
+adalimumab as its *negative* control, and the number itself has an error bar spanning zero. The
+class is corrected from **switch/release to non-switch/flat**.
+
+| PDB | verdict | what is wrong, and the correct source |
+|---|---|---|
+| **1BRS** | ✅ MATCH | **1231×** verified, but in the **companion** paper (Schreiber & Fersht 1993), abstract only. ⚠️ Carries a confound: K_i rises 1.8× on **salt alone at constant pH**, and the pH 8 arm's ionic strength is unconfirmed, so part of the 1231× may not be protonation. |
+| **3SQO** | ✅ MATCH | 1.3× verified in **Chaparro-Riggers 2012**, not the structure paper. Note J16 is the non-switching **parent**; its engineered sibling J17 is the switch at 9.2×. |
+| **4K71** | 🔴 NOT VERIFIED | Full text behind an active bot wall by every route. **Direction** is confirmed from the abstract — variants were *selected* for higher affinity at endosomal pH — but the **760× is unverified**. Also: 4K71 is **not an antibody**; it is an engineered human serum albumin variant bound to FcRn, which our table did not say. |
+
+## Recomputed, once, with every correction in — `bin/r1_label_recompute.py`
+
+| basis | n | direction correct | ratio > 1.0 | a constant predictor scores |
+|---|--:|--:|--:|--:|
+| as we published it | 18 | 8/18 = 44.4% | 16/18 | 7/18 |
+| rows with a **verifiable direction**, corrected labels | 16 | 8/16 = 50.0% | 14/16 | 6/16 |
+| **one row per independent lineage** | **13** | **5/13 = 38.5%** | 11/13 | **6/13 = 46.2%** |
+
+🔴 **On independent lineages the gate scores BELOW the constant predictor** — 5/13 against 6/13.
+Every earlier framing had it drawing level with chance; corrected for the pseudo-replication we did
+not know about, it loses to it.
+
+**And only 12 of the 18 rows have a measured ratio at all.** The six that do not:
+`3WD5` (rate ratio, no affinity), `4K71` and `8J6F` (papers unreachable), `5HYS` (no measurement
+exists), `7SU1` (a censored bound), `9MI6` (a ratio of two upper bounds).
+
+## 🔴 The verdict did not move. The precision did.
+
+**Not one row's hit/miss flipped on a corrected label.** 3WD5's reclassification keeps it a miss;
+7Q15 at 37× instead of 20× is still a hit; 7SU1's bound is still a hit. Every correction landed on
+a magnitude, a citation, an endpoint descriptor, or the independence count — none on a direction.
+
+So the calibration failure stands, and it is **worse** than we reported, not better. What is gone is
+any right to quote a percentage: a set of 18 rows that is really 13 independent lineages, in which
+six rows carry no measured ratio, one row carries no measurement at all, three numbers belong to
+papers we were not citing, and our own marquee example was the source paper's negative control,
+cannot support "44.4%" to three significant figures. The honest statement is that the instrument
+shows **no evidence of discriminating** and that we cannot put a reliable number on how badly.

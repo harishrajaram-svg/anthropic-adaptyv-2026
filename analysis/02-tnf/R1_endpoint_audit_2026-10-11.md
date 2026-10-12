@@ -22,7 +22,7 @@ measured 9x loss of equilibrium affinity. Both are now stated that way in FIELD 
 | 8J6F | 6.0 / 7.4 | KD and kd | I | H+L | flat |
 | 8TBQ | 5.8 / 7.4 | KD, range endpoints | P | H+L | tighten |
 | 9MI6 | 6.0 / 7.4 | KD, both bounded | A+B | H+L | flat |
-| 9S60 | 6.0 / 7.0 | KD (ITC) | A | B | flat |
+| 9S60 | 6.0 / 7.0 | KD (SPR — **corrected 2026-10-12, I had written ITC**) | A | B | flat |
 | 9X1H | 7.4 / 6.0 | KD | A | H+L | release |
 
 Endpoint mix: {'Ki': 1, 'KD': 16, 'koff': 1}.
@@ -80,3 +80,24 @@ would move the third decimal, not the call.
 table was read off a paper by us, and the reviewer asked for them to be re-checked. They have not
 been. Until they are, no accuracy figure here — pooled or matched — should be treated as final, and
 none is load-bearing for anything in the submission, because the pH claims are withdrawn either way.
+
+
+---
+
+## 🔴 SUPERSEDED IN PART, 2026-10-12: see `R1_label_verification_2026-10-12.md`
+
+All 18 labels were re-checked against their sources on the reviewer's instruction. Four corrections
+land on this table and are recorded here so it is not read as current:
+
+1. **`9S60`'s endpoint was wrong and it was my error** — SPR on a Biacore T200, not ITC. The source
+   paper contains no calorimetry of any kind. Corrected in the row above.
+2. **`5HYS` has no two-pH measurement at all**, so it should never have been in the table. Verified
+   directly: its paper runs SPR in one buffer and contains no pH-dependence analysis.
+3. **`3WD5`'s class is wrong** — its source paper uses adalimumab as the pH-INSENSITIVE baseline,
+   and reports no pH 6.0 affinity at all, only a rate ratio by biolayer interferometry.
+4. **`5TRU`'s "8-point series" descriptor is wrong** — the two-pH comparison is a 2-point table,
+   with a ~13-point series in a figure that carries no tabulated numbers.
+
+The independence column this table lacks is the bigger finding: `5TRU`/`7SU0`/`7SU1` are one
+antibody lineage from one table in one paper, and `4N0U`/`7Q15` are a parent/variant pair. See the
+verification readout for the recomputed arithmetic.

@@ -1,0 +1,94 @@
+================================================================================================
+1. AS PUBLISHED BY US (18 rows, pre-verification labels)
+================================================================================================
+   direction 8/18 = 44.4%   ratio>1 16/18 = 88.9%   constant predictor 7/18
+
+================================================================================================
+2. ROWS WITH A VERIFIABLE DIRECTION (16 of 18) — corrected labels
+================================================================================================
+   dropped, no retrievable measurement: 5HYS, 8J6F
+   class CORRECTED: 3WD5
+   direction 8/16 = 50.0%   ratio>1 14/16 = 87.5%   constant predictor 6/16
+
+================================================================================================
+3. ONE ROW PER LINEAGE — the independence correction
+================================================================================================
+   lineage FcYTE: 4N0U, 7Q15  -> ONE molecule, not 2
+   lineage IPI: 5TRU, 7SU0, 7SU1  -> ONE molecule, not 3
+   13 independent lineages with a verifiable direction
+   direction 5/13 = 38.5%   ratio>1 11/13 = 84.6%   constant predictor 6/13 = 46.2%
+   hits: 4K71, 4N0U, 5B71, 5TRU, 9MI6
+
+================================================================================================
+4. ROWS WITH A MEASURED RATIO AT ALL (not a bound, not a rate-only, not unreachable)
+================================================================================================
+   12 of 18: 1BRS, 3SQO, 4N0U, 5B71, 5I5K, 5TRU, 6FGB, 7Q15, 7SU0, 8TBQ, 9S60, 9X1H
+   NO usable ratio (6): 3WD5, 4K71, 5HYS, 7SU1, 8J6F, 9MI6
+
+================================================================================================
+5. DID RE-CHECKING THE LABELS CHANGE THE VERDICT?
+================================================================================================
+   rows whose HIT/MISS flipped on a corrected label: NONE
+   The gate still never predicts release where release is what problem 2 needs,
+   and its direction accuracy still does not beat answering the commonest label.
+   Every correction hit a magnitude, a citation, an endpoint or the independence
+   count. NOT ONE changed a direction call. The failure verdict is unchanged;
+   the precision around it is gone.
+
+================================================================================================
+6. PER-ROW LEDGER
+================================================================================================
+
+   1BRS  [ratio] gate     3.8334 -> tighten want release
+       1231x verified, but in the COMPANION paper (Schreiber & Fersht 1993), abstract only; Ki rises 1.8x on salt alone at constant pH, so part of the 1231x may be ionic strength
+
+   3SQO  [ratio] gate     8.1101 -> tighten want flat   
+       1.3x verified in Chaparro-Riggers 2012, NOT the structure paper; J16 is the non-switching PARENT, J17 is the switch at 9.2x
+
+   3WD5  [dir  ] gate     3.2715 -> tighten want flat    CLASS-CORRECTED
+       CLASS WRONG. No KD at pH 6.0 exists -- kd ratio only, by BLI. Schroeter 2015 treats adalimumab as the pH-INSENSITIVE baseline ('only a moderate 9-fold') against variants at 231/785/505x. pH 7.4 kd = 0.55 +/- 0.94 (SD 1.7x the mean), pH 6.0 n=2, authors flag a ~10x discrepancy with prior data
+
+   4K71  [dir  ] gate  6873.0912 -> tighten want tighten
+       NOT ACCESSIBLE: full text behind a bot wall. Direction confirmed from the abstract (variants SELECTED for higher affinity at endosomal pH); magnitude 760x UNVERIFIED. Also not an antibody -- engineered HSA + FcRn
+
+   4N0U  [ratio] gate    12.5429 -> tighten want tighten
+       MIS-ATTRIBUTED: structure paper reports NO KD. The 170x is Reusch 2024 (2.84 nM at pH 5.8 -> 494 nM at 7.4), different paper, different technique, different format
+
+   5B71  [ratio] gate     0.0145 -> release want release
+       CLEAN: 1105x in the structure paper itself
+
+   5HYS  [DROP ] gate     2.6084 -> tighten want None   
+       NO DATA EXISTS. Pennington 2016 runs SPR in one buffer, no pH-dependence analysis at all. Verified by me directly. Unmeasured, not measured-and-flat
+
+   5I5K  [ratio] gate     3.2917 -> tighten want release
+       21x verified in Sheridan 2018, NOT the structure paper. That paper frames 21x as the INADEQUATE baseline its programme existed to fix
+
+   5TRU  [ratio] gate     1.1734 -> flat    want flat   
+       1.1x verified in Lee 2022, NOT the structure paper. Our '8-point series' descriptor is wrong: 2-point table plus a ~13-point figure
+
+   6FGB  [ratio] gate     4.5803 -> tighten want flat   
+       CLEAN: 1.34x in the structure paper, Fab' row format-matched to the deposited chains
+
+   7Q15  [ratio] gate     2.7318 -> tighten want tighten
+       MISMATCH: structure paper's own value is ~37x, not 20x. Our 20x is Ulrichts 2018 (22.5x, 'approximately 20-fold'), verified by me directly
+
+   7SU0  [ratio] gate   140.3163 -> tighten want tighten
+       CLEAN on value: 77.1x exact, Lee 2022 Table 1
+
+   7SU1  [dir  ] gate     6.3872 -> tighten want tighten
+       MISMATCH IN KIND: pH 7.4 KD is CENSORED at >5e-7 M, so '>20x' is a lower bound. Our point estimate also puts the Ipi pair's ordering backwards
+
+   8J6F  [DROP ] gate    45.4182 -> tighten want None   
+       NOT FOUND: structure paper unreachable (403, no PMC) and its abstract never mentions pH. 2.2x neither confirmed nor refuted
+
+   8TBQ  [ratio] gate     0.1045 -> release want tighten
+       CLEAN: 1009x in the structure paper. Our 'range not a point' descriptor was wrong in OUR OWN FAVOUR -- they are point values
+
+   9MI6  [dir  ] gate     1.9220 -> flat    want flat   
+       NOT A MEASURED RATIO: both KDs are UPPER BOUNDS (<=31.7 / <=57.8 pM), verified by me directly. Class survives on the authors' own 'pH-independent' statements
+
+   9S60  [ratio] gate     5.4442 -> tighten want flat   
+       MY ERROR on endpoint: SPR on a Biacore T200, not ITC. Ratio 1.65x and class correct
+
+   9X1H  [ratio] gate     1.9088 -> flat    want release
+       CLEANEST: 120.4x printed in the paper's own Table 4
