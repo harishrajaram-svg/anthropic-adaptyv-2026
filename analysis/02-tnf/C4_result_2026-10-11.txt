@@ -1,0 +1,13 @@
+ # design                         chai_dq chai_lrms | esm_dq_med esm_lrms_med   n   esm_lrms_range |  min_dq worse_lrms  C4a
+ 1 tnfa_corrected_40_L1r4k6        0.0344    26.134 |     0.7497        1.991  17        1.01-6.65 |  0.0344     26.134  FAIL
+ 2 tnfa_corrected_40_L1r4k1        0.0194    35.871 |     0.7928        1.737  22        1.13-2.42 |  0.0194     35.871  FAIL
+ 3 tnfa_corrected_3_L0r4k0_L49H    0.5228     2.890 |     0.5996        2.464  15        1.83-3.27 |  0.5228      2.890  PASS
+ 4 tnfa_corrected_3_L0r4k0_quadH   0.5806     2.365 |     0.5549        2.627   5        2.42-3.00 |  0.5549      2.627  PASS
+ 5 tnfa_corrected_3_L0r4k0         0.5181     2.920 |     0.5330        3.064  22        1.51-4.63 |  0.5181      3.064  PASS
+ 6 tnfa_H_quadH_E3Q_k12            0.0343    36.661 |     0.4108        4.709   6        4.04-5.29 |  0.0343     36.661  FAIL
+
+two-oracle gate (10.0 A on the WORSE oracle): 3 of 6 pass
+
+PREDICTION FROM THE PRE-REGISTRATION: rows 1-2 FAIL, rows 3-6 PASS
+scored: 5 of 6 rows went the way the prediction said
+  row 6 tnfa_H_quadH_E3Q_k12: predicted PASS, got FAIL
