@@ -1,8 +1,70 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-11 2:55 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-12 9:30 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
+
+---
+
+## 🔴 AS OF 2026-10-12 9:30 AM: SIX DESIGNS SHIP, THREE OF THEM FAIL THE SECOND ORACLE. D8 RUNNING.
+
+**Supersedes every status block below, including the 2:55 AM three-design one.** The deadline moved:
+problem 2 now closes **Mon Oct 19, 7:59 AM EDT**. Nothing is uploaded yet.
+
+**WHAT SHIPS — six designs, ranked on worse-of-two-species margin.** Full table and the reasoning in
+`projects/anthropic-adaptyv-2026/outbox/02-proteinbase-methodology-box.md` (FIELD 2, the live text,
+2,825 words / 16,863 chars against a known 20,000 cap). Sequences:
+`outbox/prescreen-ship6-2026-10-11/ship6.fasta`.
+
+**THE THREE THINGS A COLD START MUST KNOW:**
+
+1. 🔴 **Objective 2 is unaddressed and the instrument that would have addressed it failed
+   calibration.** On the 12 published complexes with an equilibrium endpoint at 7.4 vs 6.0 — the
+   assay pair Adaptyv runs — the binding-coupled gate returns a ratio above 1.0 in **12 of 12** and
+   its direction accuracy, 6/12, **equals a constant predictor on that subset.** All pH claims are
+   withdrawn. `analysis/02-tnf/R1_endpoint_audit_2026-10-11.md`.
+
+2. 🔴 **A pre-registration was breached and the correction stopped on its own ceiling.** The depth
+   arm required a second pose oracle from round 4 onward; Chai-1 was never wired in, and all six
+   designs are round-4 descendants. The corrective rounds-4–5 re-run was pre-registered
+   (`PREREG-CORR-TWO-ORACLE-2026-10-11.md` + 3 amendments) and **stopped** when Chai-1 measured
+   157.7 s/fold against a frozen 120 s ceiling — not money, the arm was ~$9.
+   `analysis/02-tnf/CORR_phase0_readout.md`.
+
+3. 🔴 **C4 rescored the six on Chai-1 and three FAIL, including the top two ranked.**
+   `analysis/02-tnf/C4_readout_2026-10-11.md`:
+
+   | row | design | Chai-1 lrms | ESMFold2 median (n folds) | gate |
+   |--:|---|--:|--:|---|
+   | 1 | `40_L1r4k6` | 26.13 Å | 1.99 (17) | **FAIL** |
+   | 2 | `40_L1r4k1` | 35.87 Å | 1.74 (22) | **FAIL** |
+   | 3 | `3_L0r4k0_L49H` | 2.89 Å | 2.46 (15) | pass |
+   | 4 | `3_L0r4k0_quadH` | 2.37 Å | 2.63 (5) | pass |
+   | 5 | `3_L0r4k0` | 2.92 Å | 3.06 (22) | pass |
+   | 6 | `quadH_E3Q_k12` | 36.66 Å | 4.71 (6) | **FAIL** |
+
+   Split is by lineage and it propagated from the round-3 parents. **Ranking NOT changed** — frozen
+   before folding, because the margin is the calibrated instrument and one Chai sample is too thin
+   to reorder on.
+
+**RUNNING RIGHT NOW: D8** (`PREREG-D8-CHAI-CONSENSUS-2026-10-12.md`, launched 9:27 AM, ~19 min,
+~$1.60). Five Chai-1 diffusion samples on **all six** designs — the three that passed C4 are the
+matched control, without which a failure cannot be told apart from the predictor scattering.
+Score with `python3 bin/d8_score.py`; all three outcomes are mapped to submission consequences in
+the prereg. **Read the prereg before interpreting the numbers.**
+
+**OPEN, and all of them are Harish's:** D1 ship six or swap the 7-His design (rec: ship six) · D2
+send the drafted PK email at `outbox/02-pk-corrective-arm-and-c4.txt` (rec: after D8) · D3 re-check
+the 18 benchmark labels, bounded 12 rows or full 18 (PK's one untouched ask) · D4 upload timing
+(rec: before Sat night, to keep the 24h retry window) · D6 row-6 id spelling (rec: the full
+`tnfa_H_quadH_E3Q_k12`) · D7 ship all six as ranked or only rows 3/4/5 — **D8 is what decides this**.
+
+**TWO TRAPS, both self-inflicted and both fixed:**
+- Row 6 `quadH_E3Q_k12` carries **ZERO histidines** despite its name (unpinned arm-H branch;
+  SolubleMPNN removed all four). Flagged in FIELD 2's table.
+- Yesterday I wrote **estimated clock times** into four committed files, two of them
+  pre-registrations, and every one landed in the future. All reset from git commit timestamps.
+  **Run `date` before writing any time into any artifact here.**
 
 ---
 
