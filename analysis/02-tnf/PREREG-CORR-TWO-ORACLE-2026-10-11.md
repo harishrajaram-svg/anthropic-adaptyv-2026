@@ -170,3 +170,55 @@ Nothing else changes: the dual-oracle pose gate, the minimum-sc_DockQ selector, 
 parent, seeds, the 160-fold fuse and the wall stop all stand as written. **Human only**, as the
 original untagged rounds 4–5 were (`round4.tsv` and `round5.tsv` carry no mouse column), which is
 what the body's 32-folds-per-oracle-per-round arithmetic already assumed.
+
+## AMENDMENT A3 — 2026-10-11, 9:10 PM EDT: the measurement was wrong, the threshold is not moving
+
+Phase 0 measured **184 and 185 s/fold** against the body's **≤ 120 s/fold** gate. The gate is **left
+at 120 s, unchanged.** What changes is the thing being measured, and the reason is documented in
+this repo independently of today:
+
+**`modal_chai1.py` folds one complex per container, so every fold pays its own model load.** That is
+the exact state `modal_esmfold2.py` was in before the local patch, and `reference/wrapper-notes.md`
+records both the defect and the fix under the heading *"Batching: one complex per container was the
+real bottleneck"*: *"The wrapper folded one complex per container. Scoring 100 designs meant 100
+model loads at ~137 s each — about 4 GPU-hours of pure loading before any useful work."* The fix was
+*"`--input-faa` now accepts a DIRECTORY and folds every `.faa` in it inside one container, reusing
+the loaded model."*
+
+🔴 **So the 120 s threshold was calibrated against a load-EXCLUDED number and applied to a
+load-INCLUDED one.** ESMFold2's quoted 25.8 s/fold is marginal cost: `fold_all_species` accounts
+model load separately — *"the cost is model load, ~137 s per app"* — and the wrapper notes measure
+load at 115.8 s once, then folds at 5.5 / 4.0 / 4.0 / 4.0 / 4.0 s. Chai-1's 184.5 s is one load plus
+one fold, every time. Comparing them was comparing unlike quantities, and that is a defect in my
+measurement, not in the threshold.
+
+**FROZEN: the patch, and how it is measured.**
+
+1. Patch `modal_chai1.py` to accept a **directory** of `.faa` and fold each inside **one**
+   container, per-complex output subdirectories — the same shape as the ESMFold2 patch, exported to
+   `patches/` so a fresh clone can re-apply it. No change to seeds, sample count, or any scoring.
+2. Re-measure on **the same two complexes** from phase 0, in one container, timing each fold and
+   the one-time load separately inside the container.
+3. **Both statistics are reported, and both must clear 120 s:**
+   - **marginal per-fold** = fold wall-clock with load excluded — the like-for-like quantity
+     ESMFold2's 25.8 s is, and the one the threshold was written against;
+   - **all-in per-fold at realistic round size** = (load + 8 × marginal) / 8, since a round runs
+     **4 containers × 8 folds**, not one container of 32. Four containers also bound the loss from a
+     timeout, which matters because this wrapper returns output only at the end.
+
+   Requiring **both** removes the freedom to pick whichever statistic passes. On the phase-0
+   numbers — ~110 s load, ~70 s diffusion — the prediction is marginal ≈ 70 s and all-in ≈ 84 s, so
+   **both clear 120 s or neither does**, and the choice of statistic is not what decides the arm.
+4. **If either statistic exceeds 120 s, the arm stops** and the affected findings are relabelled
+   exploratory, exactly as the body specifies. No further re-measurement, no third framing.
+
+**Stated plainly, because it is the obvious objection:** this is a re-measurement undertaken after a
+gate failed, which is structurally the same move as threshold-shopping. Three things separate it
+from that, and a reader is entitled to weigh them. The defect is in the measurement and is
+documented in this repo from **2026-09-18**, long before today. The threshold keeps its original
+number. And the pass/fail prediction is **written down above, before the number exists**, together
+with a commitment to stop on failure.
+
+Phase 0's substantive finding — Chai-1 putting the L1 checkpoint 34.1 Å from its designed pose —
+is **not** the justification for this amendment and would not change it. The cost measurement was
+wrong whichever way that had come out.
