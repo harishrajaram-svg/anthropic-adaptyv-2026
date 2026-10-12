@@ -22,8 +22,9 @@ Per-seed gate: k14 — 0.772, 0.803, 0.823, 0.856, 0.967. `s3_22k4_k3` — 0.517
 `s3_22k4_k3` had the best screen numbers in R3 (pae 7.759, gate 0.574) and fails every bar on
 confirmation: margin 5.21 with **SD 2.685**, a gate that swings from 0.517 to 38.9 across five
 refolds of one sequence, and a monomer that does not clear the fold floor at 0.6997. The screen's
-single-seed PAE flattered it. Three rounds — arm S, R3, R3b — and the seam epitope never produced a
-design that holds. **Closed.**
+single-seed PAE flattered it. Three rounds — arm S, R3, R3b — and the seam epitope never produced a design that holds.
+
+🔴 **Reframed 2026-10-11 on reviewer feedback: UNRESOLVED, not closed.** Conditioning demonstrably moved the geometry onto the seam (11 of 40 backbones reached ≥2 His73 against 2 of 50 controls, p = 1.9e-3). What failed is a *computational* binding criterion, which does not establish that the seam cannot bind. Revisiting it properly would need a small matched seam-versus-control comparison at the same generation budget and folding criteria, the intended contacts checked with **both** predictors, and a continuation criterion fixed in advance — and it ranks below the corrected depth-arm evaluation.
 
 ## Two designs now pass H1+H2+H3, and they trade against each other
 
