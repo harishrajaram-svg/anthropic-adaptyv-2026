@@ -41,16 +41,26 @@ MARGINS = {
 WORSE = {1: 7.365, 2: 7.207, 3: 7.167, 4: 7.131, 5: 6.971, 6: 6.747}
 
 SERIES = {3, 4, 5}      # the 0/1/4 buried-histidine series on one scaffold
+# REWRITTEN 2026-10-12. The previous text ended "Please test all three or none", which is an
+# instruction addressed to the selection step. FAQ 5: "any use of embedded instructions or prompt
+# injection may be deemed grounds for disqualification." This states the experimental dependency as
+# a fact and leaves the inference to the reader.
 NOTE_SERIES = (
-    "ONE EXPERIMENT WITH ROWS 3,4,5: a matched 0/1/4 buried-histidine series on a single scaffold. "
-    "Rows 3 and 5 differ at one position, which is why they trip batch_duplicate. If the "
-    "0-histidine control (row 5) is not tested, rows 3 and 4 are UNINTERPRETABLE -- a pH-dependent "
-    "signal with nothing matched to compare against. Please test all three or none. "
+    "EXPERIMENTAL DEPENDENCY: rows 3, 4 and 5 are a matched series on one scaffold carrying 1, 4 "
+    "and 0 buried histidines respectively. Row 5 is the zero-histidine member and supplies the "
+    "matched comparison required to attribute any pH-dependent difference in rows 3 or 4 to the "
+    "engineered substitutions rather than to the scaffold. Rows 3 and 5 differ at a single "
+    "position, which is why a sequence-identity screen groups them. Without row 5, a pH-dependent "
+    "result on rows 3 or 4 has no matched comparator and cannot be attributed to the substitutions. "
 )
+# Conclusion wording set 2026-10-12 to the reviewer's: "no demonstrated predictive discrimination
+# on this small, heterogeneous dataset". The earlier phrasing leaned on a constant-predictor
+# comparison that is descriptive and does not establish worse-than-chance performance.
 NOTE_NOPH = (
     "No pH claim. The binding-coupled protonation calculation that would have ranked pH response "
-    "FAILED external calibration (12 of 12 tightening on the 12 published complexes measured at "
-    "7.4 vs 6.0; direction accuracy equal to a constant predictor), so every pH-direction result is "
+    "was calibrated against 18 published complexes and showed NO DEMONSTRATED PREDICTIVE "
+    "DISCRIMINATION on that small, heterogeneous set; it returned a tightening direction in 12 of "
+    "the 12 rows measured at 7.4 vs 6.0, the pH pair assayed here. Every pH-direction result is "
     "withdrawn. Nothing here has been measured for pH response. "
 )
 NOTE_ORACLE = (
@@ -155,7 +165,7 @@ def main():
             a += ("Computational candidate, not shown to bind. 83 aa de novo miniprotein. "
                   f"{nh} histidine(s). Ranked on worse-of-two-species interface-PAE margin, the "
                   "only instrument here with an external calibration.")
-            row = dict(name=did, sequence=s, molecule_class="single_chain", rank=rank,
+            row = dict(name=did, sequence=s, molecule_class="protein", rank=rank,
                        margin_worse_of_two=f"{WORSE[rank]:.3f}",
                        margin_human=f"{hu:.3f}", margin_mouse=f"{mo:.3f}",
                        seed_basis_human=sbh, seed_basis_mouse=sbm,
