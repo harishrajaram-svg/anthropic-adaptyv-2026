@@ -1,5 +1,5 @@
 # HANDOFF — Anthropic × Adaptyv 2026, Track 3 (all challenges)
-# Updated 2026-10-12 9:55 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
+# Updated 2026-10-12 10:20 AM EDT. Covers BOTH challenges; problem 1 is closed and archived below.
 
 **Read order on a cold start:** this file → `projects/anthropic-adaptyv-2026/ROADMAP.md` (the live
 plan) → `challenges/02-tnf-alpha.md` §1–§48. Then nothing else unless a link below says so.
@@ -18,11 +18,15 @@ problem 2 now closes **Mon Oct 19, 7:59 AM EDT**. Nothing is uploaded yet.
 
 **THE THREE THINGS A COLD START MUST KNOW:**
 
-1. 🔴 **Objective 2 is unaddressed and the instrument that would have addressed it failed
-   calibration.** On the 12 published complexes with an equilibrium endpoint at 7.4 vs 6.0 — the
-   assay pair Adaptyv runs — the binding-coupled gate returns a ratio above 1.0 in **12 of 12** and
-   its direction accuracy, 6/12, **equals a constant predictor on that subset.** All pH claims are
-   withdrawn. `analysis/02-tnf/R1_endpoint_audit_2026-10-11.md`.
+1. 🔴 **Objective 2 is unaddressed, and after re-checking all 18 benchmark labels the gate scores
+   BELOW chance.** `analysis/02-tnf/R1_label_verification_2026-10-12.md` +
+   `bin/r1_label_recompute.py`: 8/18 as first reported → 8/16 on rows with a verifiable direction →
+   **5/13 = 38.5% on independent lineages, against a constant predictor's 6/13 = 46.2%.** Only 12
+   of 18 rows have a measured ratio at all; the set is **13 lineages, not 18**. 🔴 **Our headline
+   example was the source paper's negative control** — adalimumab's 9× is a rate ratio by BLI with
+   no acidic-pH affinity in existence, and Schröter 2015 uses it as its pH-insensitive baseline.
+   All pH claims withdrawn, and **no percentage is quotable.** `R1_endpoint_audit_2026-10-11.md` is
+   superseded in part (my ITC error on 9S60 is corrected there).
 
 2. 🔴 **A pre-registration was breached and the correction stopped on its own ceiling.** The depth
    arm required a second pose oracle from round 4 onward; Chai-1 was never wired in, and all six
@@ -60,13 +64,11 @@ structures. Two incidental measurements worth keeping: 5 Chai-1 samples cost **1
 a transient `ConnectionError` at the `.remote()` call with nothing billed (failed logs kept as
 `runs/depth_logs/corr_d8_b*.FAILED-connerr.log`).
 
-**RUNNING RIGHT NOW:** four parallel verifications of the 18 benchmark pH labels — the reviewer's one
-untouched ask. Each is briefed to return NOT FOUND rather than reconstruct a number, to quote the
-source for every value, and not to adjust toward our recorded figure.
+**NOTHING IS RUNNING.** All four reviewer asks are closed. Two rows (`4K71`, `8J6F`) are
+permanently unverified behind publisher bot walls and are marked as such rather than dropped.
 
 **OPEN, and all of them are Harish's:** D1 ship six or swap the 7-His design (rec: ship six) · D2
-send the drafted PK email at `outbox/02-pk-corrective-arm-and-c4.txt` (rec: after D8) · D3 re-check
-the 18 benchmark labels, bounded 12 rows or full 18 (PK's one untouched ask) · D4 upload timing
+send the drafted PK email at `outbox/02-pk-corrective-arm-and-c4.txt` (rec: after D8) · D4 upload timing
 (rec: before Sat night, to keep the 24h retry window) · D6 row-6 id spelling (rec: the full
 `tnfa_H_quadH_E3Q_k12`) · D7 ship all six as ranked or only rows 3/4/5 — **D8 is what decides this**.
 
