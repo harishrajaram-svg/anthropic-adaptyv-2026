@@ -37,7 +37,7 @@ labels themselves still need re-checking before any accuracy figure is treated a
 
 ---
 
-## Completed 2026-10-11 10:30 PM EDT: the split the reviewer asked for, and the variant check
+## Completed 2026-10-11 9:45 PM EDT: the split the reviewer asked for, and the variant check
 
 The audit above named the kinetic rows but **did not recompute accuracy without them**, and omitted
 "related variants" entirely. `bin/r1_endpoint_split.py` does both, selftest 3/3 (it reproduces the

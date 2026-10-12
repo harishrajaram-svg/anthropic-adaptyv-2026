@@ -1,7 +1,7 @@
 ---
 type: preregistration (bar C4 of the CORR arm)
 arm: C4 — rescoring the six shipped designs on the second oracle
-status: PRE-REGISTERED 2026-10-11, 10:05 PM EDT, before any finalist has been folded by Chai-1
+status: PRE-REGISTERED 2026-10-11, 9:40 PM EDT, before any finalist has been folded by Chai-1
 ---
 
 # C4 — do the six designs we are shipping survive the oracle the loop never consulted?

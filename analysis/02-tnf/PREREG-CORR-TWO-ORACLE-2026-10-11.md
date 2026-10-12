@@ -113,7 +113,7 @@ Deadline: **Mon Oct 19, 7:59 AM EDT.**
 
 ---
 
-## AMENDMENT A1 — 2026-10-11, 7:52 PM EDT: the Chai-1 configuration, fixed before any timing was read
+## AMENDMENT A1 — 2026-10-11, 8:43 PM EDT: the Chai-1 configuration, fixed before any timing was read
 
 The body above fixed seeds and the selector but **not Chai-1's sample count**, and the wrapper
 default emits **five** diffusion samples per fold. That would have forced a "which model index"
@@ -136,7 +136,7 @@ match the ESMFold2 arm and to eliminate the model-index freedom, not to clear th
 fixed while no timing existed to shop against. A reader who thinks 120 s was set too loosely should
 discount the gate, not the measurement.
 
-## AMENDMENT A2 — 2026-10-11, 8:05 PM EDT: the round-4 parent set was wrong in the body above
+## AMENDMENT A2 — 2026-10-11, 8:46 PM EDT: the round-4 parent set was wrong in the body above
 
 The body derived the checkpoints **mechanically** — best CA sc_DockQ per lineage in `round3.tsv` —
 which yields L0, L1, L2 and **L3** (backbone 9, 0.0311, lrms 27.245). That is not the parent set the
@@ -171,7 +171,7 @@ parent, seeds, the 160-fold fuse and the wall stop all stand as written. **Human
 original untagged rounds 4–5 were (`round4.tsv` and `round5.tsv` carry no mouse column), which is
 what the body's 32-folds-per-oracle-per-round arithmetic already assumed.
 
-## AMENDMENT A3 — 2026-10-11, 9:10 PM EDT: the measurement was wrong, the threshold is not moving
+## AMENDMENT A3 — 2026-10-11, 9:12 PM EDT: the measurement was wrong, the threshold is not moving
 
 Phase 0 measured **184 and 185 s/fold** against the body's **≤ 120 s/fold** gate. The gate is **left
 at 120 s, unchanged.** What changes is the thing being measured, and the reason is documented in

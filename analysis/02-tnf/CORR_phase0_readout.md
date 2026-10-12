@@ -2,7 +2,7 @@
 type: readout
 arm: CORR phase 0 — Chai-1 cost measurement and wiring check
 prereg: PREREG-CORR-TWO-ORACLE-2026-10-11.md (+ amendments A1, A2)
-date: 2026-10-11, 8:50 PM EDT
+date: 2026-10-11, 8:52 PM EDT
 ---
 
 # CORR phase 0: the cost gate FAILS as written, and the wiring check found something
