@@ -110,3 +110,28 @@ precondition, the honest outcome is to say the correction was infeasible and rel
 findings exploratory.
 
 Deadline: **Mon Oct 19, 7:59 AM EDT.**
+
+---
+
+## AMENDMENT A1 — 2026-10-11, 7:52 PM EDT: the Chai-1 configuration, fixed before any timing was read
+
+The body above fixed seeds and the selector but **not Chai-1's sample count**, and the wrapper
+default emits **five** diffusion samples per fold. That would have forced a "which model index"
+selection rule the original pre-registration never specified, and `depth_loop.score_round` refuses
+a design directory holding more than one `.cif` — correctly, since picking among five
+after the fact is exactly the freedom a prereg exists to remove.
+
+**FROZEN: Chai-1 runs at `num_diffn_samples=1`, seed 42**, with the wrapper's
+`num_trunk_recycles=3` and `num_diffn_timesteps=200`. This mirrors the ESMFold2 arm exactly —
+that arm runs `--num-diffusion-samples 1 --seed 42` — so each oracle contributes **one structure
+per complex**, and no model-index rule is needed because there is only one model.
+
+🔴 **Disclosure, because it bears on the cost gate.** Phase 0 was launched once at the wrapper
+default (5 samples), then aborted ~1 minute in, before any fold returned and **before any
+wall-clock number was recorded or read**: the timing file was verified header-only at the abort and
+the Modal container was stopped (`ap-pJ6HXnjZZCdis9Hw11F95A`). **The 120 s/fold threshold in the
+body is left exactly where it was written.** Note plainly that moving to one sample makes that
+threshold *easier* to pass than the configuration first launched — the sample count was chosen to
+match the ESMFold2 arm and to eliminate the model-index freedom, not to clear the gate, and it was
+fixed while no timing existed to shop against. A reader who thinks 120 s was set too loosely should
+discount the gate, not the measurement.
