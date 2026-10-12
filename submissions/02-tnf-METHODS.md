@@ -3,6 +3,28 @@
 **Objective.** A de novo binder to human TNF-α that binds at pH 7.4, shows no detectable binding
 at pH 6.0, and also binds mouse TNF-α.
 
+🔴 **DATED CORRECTION NOTICE — 2026-10-12.** This document was written on 2026-10-06, before
+generation, and describes the **35-design Mosaic campaign**. The submission now ships **six
+different designs** from a later depth arm. Three limitations below are **historical and no longer
+describe what is submitted** — each is annotated in place:
+
+| limitation | what it says | what is true of the six shipped designs |
+|---|---|---|
+| **50** | no design clears the 0.70 monomer floor (0 of 35, best 68.8) | **all six clear it**, monomer confidence **0.885–0.910** |
+| **54** | every interface number is a single-seed draw | human margins are **pooled 15-seed** for four of six, 5-seed for two; mouse is **5-seed for all six** |
+| **57** | no mouse margin has seed replication; mouse used a **dimer** | mouse is **5-seed replicated** and scored against a **trimer** |
+
+Two findings that post-date this document and are **not** in it, both negative, both in FIELD 2:
+the pH instrument was calibrated against 18 published complexes and showed **no demonstrated
+predictive discrimination** on that small heterogeneous set; and the depth arm's pre-registration
+required a second pose oracle from round 4 onward which **was never wired in**, so every
+pose-quality claim for the shipped designs is **exploratory, not confirmatory**. The corrective
+re-run **stopped during feasibility testing** and the intended corrective selection was never
+completed.
+
+Everything else below stands as written. Sections describing the Mosaic campaign are retained as the
+record of work actually done, not as a description of the submitted set.
+
 **Status of this document.** Written 2026-10-06, before generation. Sections 1–7 and 11–13 are
 complete and rest on work already done. Sections 8–10 and 14 describe methods that are fixed but
 whose results do not exist yet; they are marked accordingly. Nothing below is written as a
@@ -2606,7 +2628,11 @@ those are marked.
     two alternatives, on 150 assayed designs released months before this challenge. We built four
     ranking instruments and validated none of our generation path.
 
-50. **No design in this submission clears the monomer-foldability floor in the organisers' own
+50. 🟡 **HISTORICAL, corrected 2026-10-12 — this describes the 35 Mosaic designs, not the six
+    submitted.** All six shipped designs clear the 0.70 floor, at monomer confidence 0.885–0.910,
+    measured on 12 of 12 candidates. The sentence below that calls this "the strongest single reason
+    to expect these designs not to bind" does **not** apply to the submitted set. Original text:
+    **No design in this submission clears the monomer-foldability floor in the organisers' own
     protocol.** 0 of 35 at 0.70; **our best is 68.8 against their lowest *assayed* value of 68.9** — the two
     figures were printed the wrong way round in an earlier draft of this limitation. We report
     this rather than relaxing the floor, and it is the strongest single reason to expect these designs
@@ -2635,8 +2661,12 @@ those are marked.
     driven by measured outcomes overruling an a priori geometric argument, which is the direction this
     project has had to correct in most often.
 
-54. **Every interface number in this work is a single-seed draw, and the scorer's seed noise is
-    large relative to our margins.** Their data uses five seeds per complex; we used one, for cost.
+54. 🟡 **HISTORICAL, corrected 2026-10-12 — no longer true of the submitted set.** Human margins
+    for the six shipped designs are **pooled 15-seed** for four of them and 5-seed for the other
+    two; mouse is **5-seed for all six**. The seed-noise analysis below remains valid for the Mosaic
+    numbers it was computed on, and the replication is what deflated our own headline from +8.031 to
+    a pooled +7.706. Original text: **Every interface number in this work is a single-seed draw, and
+    the scorer's seed noise is large relative to our margins.** Their data uses five seeds per complex; we used one, for cost.
     The within-design seed SD on `pae_interface_mean` is 0.607, so a margin — a difference of two
     single draws — carries ~0.858 of noise. Our median design's margin is 0.3 SDs of that, and our
     best is 3.5 SDs where pure noise reaches 2.56 at the 95th percentile for a best-of-35. The
@@ -2667,6 +2697,12 @@ those are marked.
     positive in both, so selecting on one objective buys nothing on the other. Mouse used a dimer
     construct against human's trimer, so only margins are comparable, and no mouse margin has
     been replicated across seeds.
+
+    🟡 **HISTORICAL, corrected 2026-10-12 — the last clause and the construct are both superseded
+    for the submitted set.** Mouse margins for the six shipped designs are **5-seed replicated** and
+    scored against a mouse **trimer**, not a dimer; the dimer construct was measured to inflate
+    margins and was replaced. All six clear the non-binder median on mouse. The near-chance transfer
+    result below stands as a statement about the Mosaic set it was measured on.**
 
 58. **Our designs fall below the typical NON-binder on a margin validated against measured
     outcomes.** §6.10e. Twelve measured binders against thirty measured non-binders, through our
